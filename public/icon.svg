@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="rsd-runner-grad" x1="33" y1="22" x2="95" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#98e020" />
+      <stop offset="100%" stop-color="#28a745" />
+    </linearGradient>
+    <linearGradient id="rsd-sun-grad" x1="17" y1="17" x2="45" y2="45" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffd60a" />
+      <stop offset="100%" stop-color="#ff9f0a" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="#ffffff" />
+  <g>
+    <circle cx="31" cy="31" r="7" fill="url(#rsd-sun-grad)" />
+    <path
+      d="M31 16V20M31 42V46M16 31H20M42 31H46M20.4 20.4L23.2 23.2M41.6 20.4L38.8 23.2M20.4 41.6L23.2 38.8M41.6 41.6L38.8 38.8"
+      stroke="url(#rsd-sun-grad)"
+      stroke-width="4.2"
+      stroke-linecap="round"
+    />
+  </g>
+  <circle cx="80" cy="30" r="8.5" fill="url(#rsd-runner-grad)" />
+  <path
+    d="M72 44L61 67"
+    stroke="url(#rsd-runner-grad)"
+    stroke-width="11"
+    stroke-linecap="round"
+  />
+  <path
+    d="M47 60L54 49L72 46L84 56L95 48"
+    stroke="url(#rsd-runner-grad)"
+    stroke-width="8.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M33 86L48 83L61 67L82 69L78 94"
+    stroke="url(#rsd-runner-grad)"
+    stroke-width="9.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M34 102Q66 112 96 96"
+    stroke="url(#rsd-runner-grad)"
+    stroke-opacity="0.35"
+    stroke-width="7"
+    stroke-linecap="round"
+  />
+</svg>
