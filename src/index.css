@@ -59,10 +59,13 @@ html[data-font="xlarge"] {
 }
 
 html,
-body {
+body,
+#root {
+  width: 100%;
   background: var(--bg);
   color: var(--ink);
   margin: 0;
+  padding: 0;
   overflow-x: hidden;
   transition: background .25s ease, color .25s ease;
   -webkit-text-size-adjust: 100%;
@@ -88,6 +91,13 @@ textarea {
   margin: 0;
   padding: 0;
 }
+
+input,
+select,
+textarea {
+  font-size: max(16px, 1em);
+}
+
 
 button {
   cursor: pointer;
@@ -121,8 +131,8 @@ svg {
 }
 
 .app {
-  min-height: 100vh;
-  padding-bottom: calc(115px + env(safe-area-inset-bottom, 0px));
+  min-height: 100dvh;
+  padding-bottom: calc(108px + env(safe-area-inset-bottom, 0px));
 }
 
 .topbar {

@@ -939,7 +939,15 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
   };
 
   return (
-    <div className="screen stagger" style={{ paddingTop: '24px', paddingBottom: '40px' }}>
+
+    <div
+      className="screen stagger"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 18px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 40px)'
+      }}
+    >
+
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
         <button type="button" onClick={onToggleTheme} className="btn-soft tap" style={{ minHeight: '34px', padding: '0 12px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
           {theme === 'dark' ? <><Sun size={14} color="#ffd60a" /> Tema Claro</> : <><Moon size={14} /> Tema Oscuro</>}
