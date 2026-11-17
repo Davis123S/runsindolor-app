@@ -2716,8 +2716,3 @@ function RecoveryView({ doneTasks, setDoneTasks, notify }) {
     </div>
   );
 }
-
-cd /Users/stephen/Desktop/tesis-tibias
-git add .
-git commit -m "Subir cambios de App.jsx"
-git push
