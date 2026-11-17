@@ -978,10 +978,10 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
               color: '#34c759'
             }}
           >
-            RunSinDolor
+            Run
           </span>
           <h1 className="display" style={{ fontSize: '40px', marginTop: '4px' }}>
-            Corre seguro, <span className="grad-text">protege tus tibias</span>
+            Corre seguro, <span className="grad-text">rotege tus tibias</span>
           </h1>
         </div>
       </div>
@@ -2716,3 +2716,8 @@ function RecoveryView({ doneTasks, setDoneTasks, notify }) {
     </div>
   );
 }
+
+cd /Users/stephen/Desktop/tesis-tibias
+git add .
+git commit -m "Subir cambios de App.jsx"
+git push
