@@ -981,7 +981,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
             Run
           </span>
           <h1 className="display" style={{ fontSize: '40px', marginTop: '4px' }}>
-            Corre seguro, <span className="grad-text">rotege tus tibias</span>
+            Corre seguro, <span className="grad-text">Protege tus tibias</span>
           </h1>
         </div>
       </div>
