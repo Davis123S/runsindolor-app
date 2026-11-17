@@ -15,7 +15,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Instalar dependencias y compilar web
         run: |
@@ -24,6 +24,9 @@ jobs:
 
       - name: Crear y sincronizar proyecto Capacitor iOS
         run: |
+          if [ ! -f "capacitor.config.json" ] && [ ! -f "capacitor.config.ts" ]; then
+            npx cap init RunSinDolor com.stephen.runsindolor --web-dir=dist
+          fi
           if [ ! -d "ios" ]; then
             npx cap add ios
           fi
@@ -44,6 +47,7 @@ jobs:
               -scheme App \
               -configuration Release \
               -sdk iphoneos \
+              -destination 'generic/platform=iOS' \
               -derivedDataPath build \
               CODE_SIGN_IDENTITY="" \
               CODE_SIGNING_REQUIRED=NO \
@@ -54,6 +58,7 @@ jobs:
               -scheme App \
               -configuration Release \
               -sdk iphoneos \
+              -destination 'generic/platform=iOS' \
               -derivedDataPath build \
               CODE_SIGN_IDENTITY="" \
               CODE_SIGNING_REQUIRED=NO \
