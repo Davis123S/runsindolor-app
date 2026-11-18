@@ -954,7 +954,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
         </button>
       </div>
 
-      <div className="hero-card" style={{ minHeight: '400px', marginBottom: '20px', justifyContent: 'flex-end' }}>
+      <div className="hero-card" style={{ minHeight: '300px', marginBottom: '20px', justifyContent: 'flex-end' }}>
         <img src="/assets/Inicio.jpg" alt="Running preventivo" className="hero-bg" />
         <div className="hero-overlay" />
         <div
