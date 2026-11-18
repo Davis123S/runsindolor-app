@@ -32,6 +32,24 @@ jobs:
           fi
           npx cap sync ios
 
+      - name: Generar AppIcon iOS desde public/icon.svg
+        run: |
+          mkdir -p /tmp/icon-gen
+          npm install --prefix /tmp/icon-gen @resvg/resvg-js
+          NODE_PATH=/tmp/icon-gen/node_modules node -e '
+            const fs = require("fs");
+            const { Resvg } = require("@resvg/resvg-js");
+            let svg = fs.readFileSync("public/icon.svg", "utf8").replace(/rx="[^"]*"/, "");
+            const resvg = new Resvg(svg, { fitTo: { mode: "width", value: 1024 }, background: "#ffffff" });
+            const dir = "ios/App/App/Assets.xcassets/AppIcon.appiconset";
+            fs.mkdirSync(dir, { recursive: true });
+            fs.writeFileSync(dir + "/AppIcon-512@2x.png", resvg.render().asPng());
+            fs.writeFileSync(dir + "/Contents.json", JSON.stringify({
+              images: [{ filename: "AppIcon-512@2x.png", idiom: "universal", platform: "ios", size: "1024x1024" }],
+              info: { author: "xcode", version: 1 }
+            }, null, 2));
+          '
+
       - name: Instalar CocoaPods si aplica
         run: |
           if [ -f "ios/App/Podfile" ]; then
