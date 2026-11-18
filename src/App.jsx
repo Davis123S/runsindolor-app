@@ -954,6 +954,23 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
         </button>
       </div>
 
+     <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+        <span
+          style={{
+            display: 'inline-block',
+            margin: 0,
+            padding: 0,
+            fontSize: '30px',
+            fontWeight: 800,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            color: '#34c759'
+          }}
+        >
+          RunEase
+        </span>
+      </div>
+
       <div className="hero-card" style={{ minHeight: '200px', marginBottom: '20px', justifyContent: 'flex-end' }}>
         <img src="/assets/Inicio.jpg" alt="Running preventivo" className="hero-bg" />
         <div className="hero-overlay" />
@@ -967,19 +984,6 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
             width: '100%'
           }}
         >
-          <span
-            style={{
-              margin: 0,
-              padding: 0,
-              fontSize: '30px',
-              fontWeight: 800,
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              color: '#34c759'
-            }}
-          >
-            RunEase
-          </span>
           <h1 className="display" style={{ fontSize: '40px', marginTop: '4px' }}>
             Corre seguro, <span className="grad-text">Protege tus tibias</span>
           </h1>
@@ -1006,7 +1010,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
             <input
               type="email"
               required
-              placeholder="persona@ejemplo.com"
+              placeholder="corredor@ejemplo.com"
               className="input-field"
               style={{ paddingLeft: '38px' }}
               value={email}
