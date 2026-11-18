@@ -1271,7 +1271,7 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
 
       <button onClick={onOpenSession} className="btn btn-primary tap">
         <PlusCircle size={20} />
-        <span>Registrar Entrenamiento (Borg + EVA)</span>
+        <span>Registrar Entrenamiento</span>
       </button>
 
       {/* DIAGNÓSTICO ALGORÍTMICO */}
@@ -1872,7 +1872,7 @@ function WatchMetricsView({ watchData, setWatchData, unit, setUnit, notify }) {
     <div className="stack">
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span className="badge">Sensores Externos</span>
+          <span className="badge">Smartwatch</span>
           <button
             className="btn-soft tap tnum"
             style={{ minHeight: '32px', fontSize: '12px', padding: '0 10px' }}
