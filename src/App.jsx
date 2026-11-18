@@ -1231,7 +1231,7 @@ function PatientOnboarding({ initialData, unit, setUnit, theme, onToggleTheme, o
         </div>
 
         <button type="submit" className="btn btn-primary tap">
-          <span>Guardar y Calibrar Algoritmo</span>
+          <span>Guardar</span>
           <ArrowRight size={19} />
         </button>
 
@@ -1278,7 +1278,7 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            
+
             <h2 className="h2" style={{ marginTop: '4px' }}>
               Riesgo Estimado: <span style={{ color: bio.riskColor }}>{bio.riskLevel}</span>
             </h2>
