@@ -1332,7 +1332,7 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
         unit={unit}
       />
 
-      {/* ACCESO A TELEMETRÍA WEARABLE */}
+      {/*WEARABLE */}
       <div
         className="card tap"
         onClick={() => onGoTab('watch')}
