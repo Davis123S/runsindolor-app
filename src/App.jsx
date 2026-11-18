@@ -978,7 +978,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
               color: '#34c759'
             }}
           >
-            Run
+            RunEase
           </span>
           <h1 className="display" style={{ fontSize: '40px', marginTop: '4px' }}>
             Corre seguro, <span className="grad-text">Protege tus tibias</span>
@@ -1872,7 +1872,7 @@ function WatchMetricsView({ watchData, setWatchData, unit, setUnit, notify }) {
     <div className="stack">
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span className="badge">Smartwatch</span>
+          <span className="badge">SmartWatch</span>
           <button
             className="btn-soft tap tnum"
             style={{ minHeight: '32px', fontSize: '12px', padding: '0 10px' }}
