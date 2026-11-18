@@ -1278,7 +1278,7 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div className="eyebrow">Salida del Algoritmo SETM</div>
+            
             <h2 className="h2" style={{ marginTop: '4px' }}>
               Riesgo Estimado: <span style={{ color: bio.riskColor }}>{bio.riskLevel}</span>
             </h2>
