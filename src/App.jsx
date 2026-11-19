@@ -688,7 +688,7 @@ export default function App() {
             <AppIconMark size={28} />
           </div>
           <div>
-            <div className="eyebrow" style={{ fontSize: '9.5px' }}>Corredor Activo</div>
+            <div className="eyebrow" style={{ fontSize: '9.5px' }}>Corredor</div>
             <div className="h3" style={{ fontSize: '14px' }}>{currentUser.profile.name}</div>
           </div>
         </div>
