@@ -2283,7 +2283,7 @@ function PreventionView({ checked, setChecked, notify }) {
           <span className="badge" style={{ marginBottom: '8px' }}>Prevención Primaria</span>
           <h2 className="display" style={{ fontSize: '26px' }}>Hábitos y Calentamiento</h2>
           <p className="small muted" style={{ marginTop: '4px' }}>
-            Estrategias modificables para reducir la exposición al estrés tibial.
+            Estrategias preventivas para reducir la exposición al estrés tibial.
           </p>
         </div>
       </div>
