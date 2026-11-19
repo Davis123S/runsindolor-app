@@ -967,7 +967,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
             color: '#34c759'
           }}
         >
-          Oriana puedes ver
+          Runease
         </span>
       </div>
 
