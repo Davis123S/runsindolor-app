@@ -1,5 +1,3 @@
-@import "tailwindcss";
-
 *,
 :before,
 :after {
@@ -8,71 +6,57 @@
 }
 
 :root {
-  /* Paleta RunEase — Oscuro Deportivo Editorial (sin neón ni brillos artificiales) */
-  --bg: #09090b;
-  --surface: #121215;
-  --surface-2: #1b1b1f;
-  --ink: #f4f4f6;
-  --ink-2: #a1a1aa;
-  --ink-3: #71717a;
-  --line: rgba(255, 255, 255, 0.085);
-  --line-strong: rgba(255, 255, 255, 0.16);
-
-  /* Tus colores de marca, planos y quirúrgicos */
-  --orange: #ff3b5c;
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --ink: #ffffff;
+  --ink-2: #ebebf599;
+  --ink-3: #ebebf566;
+  --line: #38383a;
+  --orange: #ff2e55;
   --pink: #34c759;
-  --pink-ink: #051b0c;
-  --grad: #34c759;
-  --grad-text: #34c759;
+  --grad: linear-gradient(135deg, #a4e123 0%, #34c759 100%);
+  --grad-text: linear-gradient(135deg, #a4e123 0%, #34c759 100%);
   --accent: #32ade6;
   --danger: #ff453a;
-
-  /* Elevación sobria (cero glow neón) */
-  --glow: none;
-  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
-  --shadow-bar: 0 -1px 0 rgba(255, 255, 255, 0.08);
-  --shadow-pill: 0 1px 2px rgba(0, 0, 0, 0.45);
-
-  /* Par tipográfico atlético + clínico */
-  --font-display: "Archivo", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --glow: 0 8px 24px #34c75933;
+  --shadow-card: none;
+  --shadow-bar: 0 16px 40px #000000aa;
+  --shadow-pill: 0 2px 8px #00000066;
+  --font-display: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-
-  /* Transiciones precisas (sin rebotes caricaturescos) */
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
   --text-scale: 1;
   color-scheme: dark;
 }
 
-/* Tema Claro Editorial Clínico-Deportivo */
+/* Tema Claro estilo Apple Salud / iOS Light */
 html[data-theme="light"] {
-  --bg: #f5f5f3;
+  --bg: #f2f2f7;
   --surface: #ffffff;
-  --surface-2: #ecece9;
-  --ink: #111214;
-  --ink-2: #52525b;
-  --ink-3: #71717a;
-  --line: rgba(17, 18, 20, 0.09);
-  --line-strong: rgba(17, 18, 20, 0.16);
-
-  --pink: #1f9d45;
-  --pink-ink: #ffffff;
-  --grad: #1f9d45;
-  --grad-text: #1f9d45;
-  --glow: none;
-  --shadow-card: 0 1px 2px rgba(17, 18, 20, 0.04);
-  --shadow-bar: 0 -1px 0 rgba(17, 18, 20, 0.08);
-  --shadow-pill: 0 1px 3px rgba(17, 18, 20, 0.1);
+  --surface-2: #e5e5ea;
+  --ink: #1c1c1e;
+  --ink-2: #3c3c43b8;
+  --ink-3: #3c3c438a;
+  --line: #d1d1d6;
+  --pink: #28a745;
+  --grad: linear-gradient(135deg, #98d81d 0%, #34c759 100%);
+  --grad-text: linear-gradient(135deg, #1e8e3e 0%, #28a745 100%);
+  --glow: 0 8px 20px #34c75928;
+  --shadow-card: 0 2px 10px #0000000a;
+  --shadow-bar: 0 12px 32px #0000001f;
+  --shadow-pill: 0 2px 6px #00000018;
   color-scheme: light;
 }
 
 html[data-font="large"] {
-  --text-scale: 1.14;
+  --text-scale: 1.15;
 }
 
 html[data-font="xlarge"] {
-  --text-scale: 1.28;
+  --text-scale: 1.3;
 }
 
 html,
@@ -81,11 +65,9 @@ body {
   color: var(--ink);
   margin: 0;
   overflow-x: hidden;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background .25s ease, color .25s ease;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 html,
@@ -103,7 +85,6 @@ body {
   min-width: 320px;
   font-size: calc(15px * var(--text-scale));
   line-height: 1.55;
-  letter-spacing: 0.005em;
 }
 
 button,
@@ -138,7 +119,7 @@ select:focus-visible {
 
 ::selection {
   background: var(--pink);
-  color: var(--pink-ink);
+  color: #000;
 }
 
 img,
@@ -147,31 +128,29 @@ svg {
   display: block;
 }
 
-/* Sin degradado de texto artificial: acento plano y limpio */
 .grad-text {
-  background: none;
-  -webkit-background-clip: initial;
-  background-clip: initial;
-  color: var(--pink);
+  background: var(--grad-text);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 .app {
   min-height: 100dvh;
-  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(108px + env(safe-area-inset-bottom, 0px));
 }
 
-/* Barra superior limpia, fija y discreta */
 .topbar {
   z-index: 40;
   padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid transparent;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color .2s, background .25s;
   display: flex;
   position: sticky;
   top: 0;
@@ -184,19 +163,20 @@ svg {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 .topbar.scrolled {
-  border-bottom-color: var(--line-strong);
+  border-bottom-color: var(--line);
 }
 
 .brand-mark {
   background: #ffffff;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--line-strong);
-  border-radius: 9px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-pill);
+  border-radius: 11px;
   flex-shrink: 0;
   place-items: center;
   display: grid;
@@ -205,19 +185,19 @@ svg {
 .screen {
   max-width: 640px;
   margin: 0 auto;
-  padding: 18px 18px 28px;
+  padding: 12px 18px 24px;
 }
 
 @media (min-width: 900px) {
   .screen {
     max-width: 1080px;
-    padding: 26px 28px 36px;
+    padding: 20px 28px 32px;
   }
 
   .desktop-split {
     display: grid;
-    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-    gap: 20px;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 18px;
     align-items: start;
   }
 
@@ -234,17 +214,16 @@ svg {
   }
 }
 
-.stagger>* {
-  animation: rise 0.24s var(--ease) both;
-  animation-delay: calc(var(--i, 0) * 28ms);
+.stagger > * {
+  animation: rise .35s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 40ms + 20ms);
 }
 
 @keyframes rise {
   0% {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(10px);
   }
-
   to {
     opacity: 1;
     transform: none;
@@ -252,10 +231,9 @@ svg {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stagger>* {
+  .stagger > * {
     animation: none;
   }
-
   .gauge-needle,
   .seg-pill,
   .hero-bg {
@@ -270,26 +248,25 @@ svg {
 }
 
 .block {
-  margin-top: 24px;
+  margin-top: 22px;
 }
 
-/* Jerarquía tipográfica deportiva con autoridad */
 .display {
   font-family: var(--font-display);
   margin: 0;
   font-size: calc(28px * var(--text-scale));
   font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.08;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   text-wrap: balance;
 }
 
 .h2 {
   font-family: var(--font-display);
   margin: 0;
-  font-size: calc(19px * var(--text-scale));
+  font-size: calc(20px * var(--text-scale));
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   line-height: 1.2;
   text-wrap: balance;
 }
@@ -297,18 +274,16 @@ svg {
 .h3 {
   font-family: var(--font-display);
   margin: 0;
-  font-size: calc(15.5px * var(--text-scale));
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  line-height: 1.28;
+  font-size: calc(16px * var(--text-scale));
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .eyebrow {
-  letter-spacing: 0.05em;
+  letter-spacing: .04em;
   color: var(--ink-3);
-  font-size: calc(11px * var(--text-scale));
-  font-weight: 600;
-  text-transform: uppercase;
+  font-size: calc(11.5px * var(--text-scale));
+  font-weight: 700;
 }
 
 .muted {
@@ -322,63 +297,32 @@ svg {
 .tnum {
   font-variant-numeric: tabular-nums;
   font-family: var(--font-mono);
-  letter-spacing: -0.02em;
 }
 
-/* Etiquetas limpias sin apariencia de "pastilla de IA" */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 2px 0;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: calc(11px * var(--text-scale));
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--pink);
-  background: transparent;
-}
-
-.badge.tnum {
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-/* Hero fotográfico editorial — limpio, nítido y sin zoom exagerado */
 .hero-card {
   position: relative;
-  border-radius: 16px;
+  border-radius: 24px;
   overflow: hidden;
-  border: 1px solid var(--line-strong);
-  background: #0b0c0e;
+  border: 1px solid var(--line);
+  background: #0a0c0b;
   color: #ffffff;
-  min-height: 210px;
+  min-height: 220px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding: 22px;
+  box-shadow: var(--shadow-card);
 }
 
 .hero-card .muted {
-  color: rgba(244, 244, 246, 0.82);
+  color: #ebebf5d9;
 }
 
 .hero-card .grad-text {
-  background: none;
-  -webkit-background-clip: initial;
-  background-clip: initial;
-  color: #34c759;
-}
-
-.hero-card .badge {
-  color: #34c759;
+  background: linear-gradient(135deg, #a4e123 0%, #34c759 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .hero-bg {
@@ -387,16 +331,18 @@ svg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.78;
+  opacity: 0.56;
+  transition: transform 0.6s var(--ease);
+}
+
+.hero-card:hover .hero-bg {
+  transform: scale(1.03);
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg,
-      rgba(9, 9, 11, 0.1) 0%,
-      rgba(9, 9, 11, 0.56) 56%,
-      rgba(9, 9, 11, 0.94) 100%);
+  background: linear-gradient(180deg, #00000024 0%, #000000c8 62%, #000000f0 100%);
 }
 
 .hero-content {
@@ -404,84 +350,62 @@ svg {
   z-index: 2;
 }
 
-/* Botones táctiles, sólidos y directos (cero halo neón) */
 .btn {
-  min-height: 46px;
+  min-height: 48px;
   font-family: var(--font-display);
-  transition: transform 0.14s var(--ease), background 0.16s ease, border-color 0.16s ease, opacity 0.16s ease;
+  transition: transform .18s var(--spring), filter .18s;
   -webkit-user-select: none;
   user-select: none;
-  border-radius: 10px;
+  border-radius: 16px;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 0 18px;
-  font-size: calc(14.5px * var(--text-scale));
+  gap: 10px;
+  padding: 0 20px;
+  font-size: calc(15px * var(--text-scale));
   font-weight: 700;
-  letter-spacing: -0.01em;
   display: inline-flex;
   width: 100%;
   white-space: nowrap;
 }
 
 .btn:disabled {
-  opacity: 0.42;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
 .btn:active:not(:disabled),
 .tap:active:not(:disabled) {
-  transform: scale(0.985);
+  transform: scale(.97);
 }
 
 .btn-primary {
-  background: var(--pink);
-  color: var(--pink-ink);
-  box-shadow: none;
-}
-
-.btn-primary:hover:not(:disabled) {
-  filter: brightness(1.06);
+  background: var(--grad);
+  color: #000000;
+  box-shadow: var(--glow);
 }
 
 .btn-soft {
   background: var(--surface-2);
   color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  min-height: 40px;
+  border-radius: 14px;
+  min-height: 42px;
   padding: 0 14px;
   font-size: calc(13.5px * var(--text-scale));
   font-weight: 600;
-  transition: background 0.16s ease, border-color 0.16s ease;
+  transition: background .2s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  white-space: nowrap;
 }
 
-.btn-soft:hover:not(:disabled) {
-  border-color: var(--line-strong);
-}
-
-/* Superficies limpias y precisas (menos "burbuja", más hardware deportivo) */
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 22px;
   padding: 18px;
   box-shadow: var(--shadow-card);
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-/* Evita el efecto pesado de "tarjeta con borde dentro de tarjeta" */
-.card .card {
-  background: var(--surface-2);
-  border-radius: 10px;
-  border-color: transparent;
-  padding: 14px;
-  box-shadow: none;
+  transition: background .25s, border-color .25s;
 }
 
 .input-group {
@@ -494,18 +418,17 @@ svg {
 .input-field {
   background: var(--surface-2);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 11px 13px;
+  border-radius: 14px;
+  padding: 12px 14px;
   color: var(--ink);
   width: 100%;
-  min-height: 44px;
-  transition: border-color 0.16s ease, background 0.16s ease;
+  min-height: 46px;
+  transition: border-color .2s, background .2s;
 }
 
 .input-field:focus {
   outline: none;
   border-color: var(--pink);
-  background: var(--surface);
 }
 
 .grid-2 {
@@ -514,53 +437,48 @@ svg {
   display: grid;
 }
 
-/* Contenedor de ícono sobrio y técnico (sin recuadro pastel saturado) */
 .icon-tile {
-  background: color-mix(in srgb, var(--c, var(--pink)) 9%, transparent);
-  border: 1px solid color-mix(in srgb, var(--c, var(--pink)) 24%, var(--line));
-  width: 38px;
-  height: 38px;
+  background: color-mix(in srgb, var(--c, var(--pink)) 16%, transparent);
+  width: 42px;
+  height: 42px;
   color: var(--c, var(--pink));
-  border-radius: 9px;
+  border-radius: 13px;
   flex-shrink: 0;
   place-items: center;
   display: grid;
 }
 
-/* Selector segmentado nítido y plano */
 .seg {
   grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr));
   background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 3px;
+  border-radius: 14px;
+  padding: 4px;
   display: grid;
   position: relative;
 }
 
 .seg-pill {
-  width: calc((100% - 6px) / var(--n, 2));
+  width: calc((100% - 8px) / var(--n, 2));
   background: var(--surface);
-  border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-pill);
-  transition: transform 0.22s var(--ease);
-  border-radius: 7px;
+  transition: transform .35s var(--spring);
+  border-radius: 10px;
   position: absolute;
-  top: 3px;
-  bottom: 3px;
-  left: 3px;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
 }
 
 .seg-btn {
   z-index: 1;
-  min-height: 38px;
+  min-height: 40px;
   color: var(--ink-2);
   justify-content: center;
   align-items: center;
   gap: 6px;
   font-size: calc(13px * var(--text-scale));
   font-weight: 600;
-  transition: color 0.16s ease;
+  transition: color .2s;
   display: flex;
   position: relative;
   white-space: nowrap;
@@ -570,24 +488,24 @@ svg {
   color: var(--ink);
 }
 
-/* Barra inferior anclada estilo app nativa iOS / Strava (no isla flotante) */
 .tabbar {
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: 10px;
+  right: 10px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   z-index: 50;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  border-top: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  padding: 4px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border-radius: 26px;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 5px 4px;
   position: fixed;
   box-shadow: var(--shadow-bar);
 }
 
 .tabbar-inner {
-  max-width: 680px;
-  margin: 0 auto;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   height: 52px;
   display: grid;
@@ -601,28 +519,15 @@ svg {
   gap: 3px;
   font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.01em;
-  transition: color 0.16s ease;
+  transition: color .2s;
   display: flex;
   min-height: 44px;
-  position: relative;
 }
 
 .tab.on {
   color: var(--pink);
 }
 
-.tab.on::before {
-  content: "";
-  position: absolute;
-  top: -4px;
-  width: 22px;
-  height: 2px;
-  border-radius: 1px;
-  background: var(--pink);
-}
-
-/* Medidor clínico EVA */
 .gauge-wrap {
   flex-direction: column;
   align-items: center;
@@ -631,22 +536,21 @@ svg {
 
 .gauge {
   width: 100%;
-  max-width: 268px;
+  max-width: 280px;
   height: auto;
   display: block;
 }
 
 .gauge-needle {
   transform-origin: 150px 150px;
-  transition: transform 0.35s var(--ease);
+  transition: transform .7s var(--spring);
 }
 
 .gauge-value {
   font-family: var(--font-display);
   margin-top: 4px;
-  font-size: 46px;
+  font-size: 44px;
   font-weight: 800;
-  letter-spacing: -0.04em;
   line-height: 1;
 }
 
@@ -662,70 +566,66 @@ svg {
   aspect-ratio: 1;
   min-height: 36px;
   background: var(--surface-2);
-  border: 1px solid var(--line);
   color: var(--ink-2);
-  border-radius: 7px;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
+  border-radius: 10px;
+  font-size: 13px;
   font-weight: 700;
-  transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+  transition: transform .2s var(--spring), background .2s;
 }
 
 .pain-dot.on {
   background: var(--c);
-  border-color: var(--c);
-  color: #051b0c;
+  color: #000;
+  transform: scale(1.1);
 }
 
 .pain-advice {
-  background: color-mix(in srgb, var(--c) 10%, var(--surface-2));
-  border: 1px solid color-mix(in srgb, var(--c) 32%, var(--line));
-  border-radius: 10px;
+  background: color-mix(in srgb, var(--c) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 35%, transparent);
+  border-radius: 16px;
   align-items: center;
   gap: 10px;
   width: 100%;
   margin-top: 16px;
-  padding: 13px 14px;
+  padding: 14px;
   font-weight: 600;
   display: flex;
 }
 
 .meta-kicker {
   color: var(--pink);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-/* Notificación discreta (sin borde neón gigante) */
 .toast {
   position: fixed;
-  top: 66px;
+  top: 72px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 90;
-  background: var(--ink);
-  color: var(--bg);
-  padding: 9px 16px;
-  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--pink);
+  color: var(--ink);
+  padding: 10px 18px;
+  border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-  animation: rise 0.2s var(--ease);
+  box-shadow: var(--shadow-bar);
+  animation: rise .25s var(--ease);
   white-space: nowrap;
 }
 
-/* Nota legal limpia con línea divisoria (sin caja punteada de wireframe) */
 .footer-note {
   color: var(--ink-3);
-  border-top: 1px solid var(--line);
+  border: 1px dashed var(--line);
+  border-radius: 16px;
   margin-top: 28px;
-  padding: 14px 2px 4px;
+  padding: 14px 16px;
   font-size: calc(12px * var(--text-scale));
-  line-height: 1.55;
+  line-height: 1.5;
 }
