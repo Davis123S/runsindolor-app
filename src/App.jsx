@@ -967,7 +967,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
             color: '#34c759'
           }}
         >
-          Runease
+          Runeas
         </span>
       </div>
 
