@@ -477,7 +477,7 @@ const EXERCISES: ExerciseItem[] = [
     baseReps: 15,
     sets: 3,
     level: 'Esencial',
-    img: '/src/assets/images/ex1_eccentric_calf_raises_1794946906083.jpg',
+    img: '/assets/ex1-talones-NEeXVCxD.jpg',
     timer: { s: 45, label: 'Descanso entre series' },
     steps: [
       'Apoya la punta de los pies en un escalón con las rodillas ligeramente dobladas (25°–30°).',
@@ -494,7 +494,7 @@ const EXERCISES: ExerciseItem[] = [
     baseReps: 10,
     sets: 3,
     level: 'Esencial',
-    img: '/src/assets/images/ex2_band_dorsiflexion_1794946906660.jpg',
+    img: '/assets/ex2-banda-CEppt7e-.jpg',
     timer: { s: 5, label: 'Sostener contracción' },
     steps: [
       'Sentado o de pie descalzo, apoya toda la planta en el suelo.',
@@ -511,7 +511,7 @@ const EXERCISES: ExerciseItem[] = [
     baseReps: 12,
     sets: 3,
     level: 'Esencial',
-    img: '/src/assets/images/ex6_lateral_plyo_hops_1794946908576.jpg',
+    img: '/assets/ejercicios-atleta-Sq0ze4a5.jpg',
     timer: { s: 45, label: 'Descanso entre series' },
     steps: [
       'Acuéstate de lado con el cuerpo recto o usa una banda elástica sobre las rodillas.',
@@ -529,7 +529,7 @@ const EXERCISES: ExerciseItem[] = [
     sets: 3,
     isTime: true,
     level: 'Básico',
-    img: '/src/assets/images/ex3_wall_soleus_stretch_1794946906267.jpg',
+    img: '/assets/ex3-estiramiento-BQlpL-mO.jpg',
     timer: { s: 30, label: 'Tiempo de estiramiento' },
     steps: [
       'Ponte frente a una pared dando un paso corto hacia atrás.',
@@ -547,7 +547,7 @@ const EXERCISES: ExerciseItem[] = [
     sets: 2,
     isTime: true,
     level: 'Básico',
-    img: '/src/assets/images/ex4_foam_roller_calf_1794946907963.jpg',
+    img: '/assets/ex4-rodillo-CCWq0QBt.jpg',
     timer: { s: 40, label: 'Tiempo por pierna' },
     steps: [
       'Apoya la parte carnosa de la pantorrilla sobre un rodillo de espuma.',
@@ -565,7 +565,7 @@ const EXERCISES: ExerciseItem[] = [
     sets: 3,
     isTime: true,
     level: 'Intermedio',
-    img: '/src/assets/images/ex5_single_leg_balance_1794946908033.jpg',
+    img: '/assets/ex5-equilibrio-Dm1j_pE6.jpg',
     timer: { s: 30, label: 'Equilibrio por pie' },
     steps: [
       'Párate sobre un solo pie con la rodilla apenas flexionada (15°).',
@@ -1646,7 +1646,7 @@ function AuthView({
 
       <div className="hero-card" style={{ minHeight: '210px', marginBottom: '18px', justifyContent: 'flex-end' }}>
         <img
-          src="/src/assets/images/hero_runner_sunrise_1794946903897.jpg"
+          src="/assets/Inicio.jpg"
           alt="Running preventivo"
           className="hero-bg"
           referrerPolicy="no-referrer"
@@ -3762,7 +3762,7 @@ function WhatIsView({
     <div className="stack">
       <div className="hero-card">
         <img
-          src="/src/assets/images/que_es_fisio_anatomy_1794946904689.jpg"
+          src="/assets/que-es-fisio-DTwnd5so.jpg"
           alt="Educación preventiva SETM"
           className="hero-bg"
           referrerPolicy="no-referrer"
@@ -4061,7 +4061,7 @@ function PreventionView({
     <div className="stack">
       <div className="hero-card">
         <img
-          src="/src/assets/images/habitos_calentamiento_hero_1795049319206.jpg"
+          src="/assets/prevencion-calentamiento-CCHPQMaC.jpg"
           alt="Calentamiento deportivo"
           className="hero-bg"
           referrerPolicy="no-referrer"
@@ -4445,7 +4445,7 @@ function RecoveryView({
     <div className="stack">
       <div className="hero-card">
         <img
-          src="/src/assets/images/recuperacion_plan_trail_1794946905391.jpg"
+          src="/assets/recuperacion-hielo-fJVnTR5m.jpg"
           alt="Progresión segura de running"
           className="hero-bg"
           referrerPolicy="no-referrer"
