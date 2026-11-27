@@ -1115,7 +1115,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
             color: '#34c759'
           }}
         >
-          RunEase
+          RunSinDolor
         </span>
       </div>
 
@@ -1137,7 +1137,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
           </h1>
         </div>
       </div>
-      
+
       <div className="seg" style={{ '--n': 2, marginBottom: '14px' }}>
         <div className="seg-pill" style={{ transform: `translateX(${isRegister ? 100 : 0}%)` }} />
         <button type="button" className={`seg-btn ${!isRegister ? 'on' : ''}`} onClick={() => { setIsRegister(false); setError(null); }}>
