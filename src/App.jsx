@@ -20,9 +20,9 @@ const clampNum = (v, min, max, fallback) => {
 
 const PAIN_ZONE_LABELS = {
   ninguna: 'Sin dolor',
-  posteromedial_difuso: 'Borde posteromedial distal (difuso > 5 cm)',
-  focal_puntual: 'Punto óseo focalizado (< 2 cm)',
-  muscular_general: 'Compartimento muscular posterior (pantorrilla)'
+  posteromedial_difuso: 'Borde interno bajo de la espinilla (difuso > 5 cm)',
+  focal_puntual: 'Punto óseo exacto y punzante (< 2 cm)',
+  muscular_general: 'Músculo de la pantorrilla (parte posterior)'
 };
 
 const LEG_SIDE_LABELS = {
@@ -92,6 +92,127 @@ function useLocalStorage(key, initialValue) {
 }
 
 // ============================================================================
+// GLOSARIO INTERACTIVO EN LENGUAJE CERCANO (JÓVENES 18–25 AÑOS)
+// ============================================================================
+const GLOSARIO_DATA = {
+  SETM: {
+    titulo: 'SETM (Dolor en la espinilla al correr)',
+    resumen: 'Irritación por sobrecarga en el borde interno y bajo de la tibia. Pasa cuando subes kilómetros o ritmo más rápido de lo que tu hueso puede adaptarse.',
+    ejemplo: 'Ejemplo: Pasar de 5 km a 12 km en una semana y sentir molestia difusa en la espinilla al empezar a trotar.'
+  },
+  ACWR: {
+    titulo: 'ACWR (Relación de Carga Semanal)',
+    resumen: 'Compara los kilómetros que corriste los últimos 7 días frente a tu promedio semanal del último mes (28 días).',
+    ejemplo: 'Ejemplo: Entre 0.8 y 1.3 estás en zona verde. Subir de 1.5 significa un salto brusco con alto riesgo.'
+  },
+  BORG: {
+    titulo: 'Escala Borg CR-10 (Esfuerzo percibido)',
+    resumen: 'Califica del 0 al 10 qué tan duro sentiste el entrenamiento según tu respiración y fatiga.',
+    ejemplo: 'Ejemplo: Un trote suave donde puedes hablar equivale a 3–4. Terminar sin aliento equivale a 8–9.'
+  },
+  EVA: {
+    titulo: 'Escala EVA (Intensidad de dolor 0–10)',
+    resumen: 'Mide cuánta molestia sientes en la espinilla: 0 es cero dolor y 10 es dolor insoportable.',
+    ejemplo: 'Ejemplo: Marcar 4 o más en dos sesiones seguidas activa nuestra bandera roja preventiva.'
+  },
+  PRONACION: {
+    titulo: 'Pronación y caída del arco',
+    resumen: 'Es cuánto se inclina el tobillo hacia adentro y baja el arco del pie al aterrizar cada paso.',
+    ejemplo: 'Ejemplo: Si el arco baja mucho, los músculos profundos de la pantorrilla jalan más fuerte la tibia.'
+  },
+  CADENCIA: {
+    titulo: 'Cadencia (Pasos por minuto)',
+    resumen: 'Cantidad de pasos que das en 60 segundos. Subirla un 5 % hace tus pasos más cortos y suaves.',
+    ejemplo: 'Ejemplo: Pasar de 160 a 168 pasos/min reduce el golpe seco en la espinilla sin tener que correr más rápido.'
+  },
+  PERIOSTIO: {
+    titulo: 'Periostio tibial (Cubierta del hueso)',
+    resumen: 'Es una capa fina y sensible que envuelve la tibia como una piel protectora donde se anclan los músculos.',
+    ejemplo: 'Ejemplo: Cuando los músculos tiran demasiado rápido, esta capa se inflama y duele al tocarla.'
+  }
+};
+
+function GlosarioTerm({ term, children }) {
+  const [open, setOpen] = useState(false);
+  const info = GLOSARIO_DATA[term];
+  if (!info) return <span>{children}</span>;
+
+  return (
+    <span style={{ display: 'inline' }}>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '3px',
+          color: 'var(--pink)',
+          fontWeight: 700,
+          borderBottom: '1.5px dotted var(--pink)',
+          padding: '0 1px',
+          lineHeight: 1.2
+        }}
+        aria-expanded={open}
+        title={`Ver significado de ${info.titulo}`}
+      >
+        <span>{children}</span>
+        <span
+          style={{
+            display: 'inline-grid',
+            placeItems: 'center',
+            width: '14px',
+            height: '14px',
+            borderRadius: '999px',
+            background: 'color-mix(in srgb, var(--pink) 18%, transparent)',
+            fontSize: '10px',
+            fontWeight: 800
+          }}
+        >
+          ?
+        </span>
+      </button>
+
+      {open && (
+        <span
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            display: 'block',
+            marginTop: '8px',
+            marginBottom: '8px',
+            padding: '10px 12px',
+            borderRadius: '11px',
+            background: 'var(--surface-2)',
+            border: '1px solid color-mix(in srgb, var(--pink) 35%, var(--line))',
+            color: 'var(--ink)',
+            fontSize: '12px',
+            lineHeight: 1.45,
+            fontWeight: 400,
+            textAlign: 'left'
+          }}
+        >
+          <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <strong style={{ color: 'var(--pink)', fontSize: '12.5px' }}>{info.titulo}</strong>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              style={{ color: 'var(--ink-3)', padding: '2px' }}
+              aria-label="Cerrar explicación"
+            >
+              <X size={14} />
+            </button>
+          </span>
+          <span style={{ display: 'block', color: 'var(--ink-2)', marginBottom: '5px' }}>{info.resumen}</span>
+          <span style={{ display: 'block', fontSize: '11.5px', color: 'var(--ink)' }}>{info.ejemplo}</span>
+        </span>
+      )}
+    </span>
+  );
+}
+
+// ============================================================================
 // CONVERSORES DE UNIDADES Y CONSTANTES CLÍNICAS / BIOMECÁNICAS
 // ============================================================================
 const fmtDist = (km, unit) =>
@@ -125,12 +246,12 @@ const getPainInfo = (val) =>
 const BORG_LABELS = {
   0: 'Reposo absoluto',
   1: 'Muy muy suave',
-  2: 'Suave (aeróbico ligero)',
+  2: 'Suave (puedes hablar sin esfuerzo)',
   3: 'Moderado cómodo',
   4: 'Algo duro',
   5: 'Duro (respiración agitada)',
   6: 'Duro +',
-  7: 'Muy duro (umbral)',
+  7: 'Muy duro (cuesta hablar)',
   8: 'Muy duro +',
   9: 'Casi máximo',
   10: 'Esfuerzo máximo'
@@ -141,99 +262,126 @@ const BORG_LABELS = {
 // ============================================================================
 const QUIZ_QUESTIONS = [
   {
-    q: '1. ¿Cuál es el incremento máximo recomendado en el volumen semanal de carrera para prevenir el SETM?',
+    q: '1. ¿Cuánto es lo máximo que debes subir tus kilómetros semanales para cuidar tus espinillas?',
     options: ['Hasta 30% semanal', 'Máximo 10% semanal', '50% cada quince días'],
     correct: 1
   },
   {
-    q: '2. ¿Qué indica una Razón Carga Aguda:Crónica (ACWR) superior a 1.5?',
-    options: ['Zona óptima de adaptación', 'Subcarga de entrenamiento', 'Sobrecarga con riesgo elevado de lesión'],
+    q: '2. ¿Qué significa tener una relación de carga semanal (ACWR) mayor a 1.5?',
+    options: ['Zona óptima de adaptación', 'Subcarga de entrenamiento', 'Salto brusco con riesgo elevado de sobrecarga'],
     correct: 2
   },
   {
-    q: '3. ¿Dónde se localiza típicamente el dolor del Síndrome de Estrés Tibial Medial?',
-    options: ['Borde posteromedial distal de la tibia (≥ 5 cm)', 'Cara lateral externa de la rodilla', 'Planta del talón exclusivamente'],
+    q: '3. ¿Dónde aparece típicamente el dolor por estrés tibial medial (SETM)?',
+    options: ['Borde interno y bajo de la espinilla (zona difusa ≥ 5 cm)', 'Cara externa de la rodilla', 'Planta del talón exclusivamente'],
     correct: 0
   },
   {
-    q: '4. ¿Qué alteración biomecánica del pie se asocia con mayor tracción sobre el periostio tibial?',
-    options: ['Arco plantar rígido sin movilidad', 'Caída navicular aumentada y eversión prolongada', 'Apoyo exclusivo en antepié'],
+    q: '4. ¿Qué movimiento del pie aumenta la tracción sobre la cubierta de la tibia?',
+    options: ['Arco plantar rígido sin movilidad', 'Arco que baja demasiado al pisar (pronación marcada)', 'Apoyo exclusivo en antepié'],
     correct: 1
   },
   {
-    q: '5. ¿Cada cuántos kilómetros aproximados se recomienda evaluar el reemplazo del calzado de running?',
+    q: '5. ¿Cada cuántos kilómetros se recomienda revisar o cambiar tus tenis de correr?',
     options: ['Cada 600 a 800 km', 'Cada 2.500 km', 'Solo cuando se rompe la tela superior'],
     correct: 0
   },
   {
-    q: '6. ¿Qué ajuste en la cadencia de carrera ayuda a reducir el pico de impacto sobre la tibia?',
-    options: ['Reducir la cadencia por debajo de 150 ppm', 'Aumentar ligeramente la cadencia (+5% respecto a la habitual)', 'Correr con zancadas muy largas'],
+    q: '6. ¿Qué ajuste en tus pasos ayuda a bajar el golpe directo contra la espinilla?',
+    options: ['Dar menos de 150 pasos por minuto', 'Subir un 5 % tu cadencia (pasos más cortos y rápidos)', 'Dar zancadas muy largas'],
     correct: 1
   },
   {
-    q: '7. ¿Cuál de estos factores antropométricos incrementa la carga mecánica sobre la tibia?',
+    q: '7. ¿Qué factor corporal aumenta la carga mecánica que recibe la tibia en cada impacto?',
     options: ['Índice de Masa Corporal (IMC) elevado (≥ 25 kg/m²)', 'Talla baja', 'Frecuencia cardíaca en reposo baja'],
     correct: 0
   },
   {
-    q: '8. ¿Qué grupos musculares son prioritarios en el entrenamiento neuromuscular preventivo del SETM?',
-    options: ['Bíceps y pectoral mayor', 'Sóleo, tibial posterior y abductores de cadera', 'Cuádriceps únicamente'],
+    q: '8. ¿Qué músculos son clave fortalecer para proteger la espinilla al correr?',
+    options: ['Bíceps y pectoral mayor', 'Sóleo (pantorrilla profunda), tibial posterior y cadera', 'Cuádriceps únicamente'],
     correct: 1
   },
   {
-    q: '9. Si reportas dolor posteromedial EVA ≥ 4 en dos sesiones consecutivas o dolor puntual < 2 cm, ¿qué conducta debes tomar?',
-    options: ['Aumentar el ritmo para calentar el hueso', 'Suspender el impacto y buscar valoración profesional', 'Tomar analgésicos y continuar el plan'],
+    q: '9. Si sientes dolor ≥ 4/10 en dos entrenamientos seguidos o un dolor punzante en un punto exacto (< 2 cm), ¿qué debes hacer?',
+    options: ['Aumentar el ritmo para calentar el hueso', 'Frenar el impacto y consultar a un profesional de salud', 'Tomar analgésicos y seguir corriendo'],
     correct: 1
   },
   {
-    q: '10. ¿Qué grupo de corredores presenta mayor vulnerabilidad al SETM según la evidencia epidemiológica?',
+    q: '10. ¿Quiénes tienen mayor riesgo de sufrir dolor en la espinilla (SETM)?',
     options: ['Corredores principiantes (< 12 meses de práctica)', 'Corredores con más de 10 años de experiencia', 'Ciclistas recreativos'],
     correct: 0
   }
 ];
 
 const STATS_FACTS = [
-  { num: '47%', label: 'prevalencia reportada en corredores de calle', c: '#34c759' },
-  { num: '46.3%', label: 'de los casos ocurren entre 23 y 25 años', c: '#32ade6' },
-  { num: '≤ 10%', label: 'regla de progresión semanal segura', c: '#28a745' },
-  { num: '0.8–1.3', label: 'rango seguro de Razón Carga Aguda:Crónica', c: '#ff9f0a' },
+  { num: '47%', label: 'de corredores recreativos llegan a presentarlo', c: '#34c759' },
+  { num: '46.3%', label: 'de casos ocurren entre los 23 y 25 años', c: '#32ade6' },
+  { num: '≤ 10%', label: 'subida máxima segura de kilómetros por semana', c: '#28a745' },
+  { num: '0.8–1.3', label: 'zona verde de equilibrio de carga (ACWR)', c: '#ff9f0a' },
 ];
 
 const ANATOMY_CARDS = [
-  { title: 'Periostio tibial posteromedial', desc: 'Membrana vascularizada que recubre la tibia; se irrita por tracción fascial repetitiva y flexión ósea.', c: '#ff2e55', Icon: Bone },
-  { title: 'Sóleo y tibial posterior', desc: 'Músculos profundos cuya contracción excéntrica tracciona el borde medial al controlar el descenso del arco.', c: '#34c759', Icon: Activity },
-  { title: 'Remodelación ósea', desc: 'La diáfisis tibial requiere descanso progresivo para que la formación ósea compense el microdaño cíclico.', c: '#32ade6', Icon: Stethoscope },
+  {
+    title: 'Cubierta de la tibia (Periostio)',
+    desc: 'Es la capa sensible que envuelve el hueso de la espinilla; se irrita cuando los músculos jalan repetidamente sin descanso suficiente.',
+    c: '#ff2e55',
+    Icon: Bone
+  },
+  {
+    title: 'Músculos profundos de pantorrilla',
+    desc: 'El sóleo y el tibial posterior frenan el impacto en cada pisada y sostienen el arco del pie; si se fatigan, sobrecargan la tibia.',
+    c: '#34c759',
+    Icon: Activity
+  },
+  {
+    title: 'Adaptación del hueso',
+    desc: 'Tus pulmones mejoran en semanas, pero el hueso necesita meses de progresión gradual para volverse más resistente.',
+    c: '#32ade6',
+    Icon: Stethoscope
+  },
 ];
 
 const SYMPTOMS = [
-  'Molestia difusa a lo largo de > 5 cm en el tercio medio-distal interno de la tibia.',
-  'Dolor que aparece al iniciar el trote, suele disminuir al entrar en calor y reaparece tras finalizar.',
-  'Sensibilidad palpable a lo largo del borde posteromedial tibial.',
-  'Bandera roja temprana: dolor EVA ≥ 4 durante dos entrenamientos consecutivos, dolor puntual < 2 cm o dolor en reposo.',
+  'Molestia difusa (a lo largo de más de 5 cm) en la parte interna y baja de la espinilla.',
+  'Dolor que aparece al empezar a trotar, baja un poco al entrar en calor y vuelve al terminar.',
+  'Sensibilidad al presionar con los dedos el borde interno de la tibia.',
+  'Bandera roja: dolor ≥ 4/10 en 2 sesiones seguidas, dolor en un punto exacto (< 2 cm) o dolor en reposo.',
 ];
 
 const RISK_FACTORS = [
-  { title: 'Picos de carga semanal (ACWR > 1.5)', detail: 'Incrementar kilómetros o esfuerzo por encima de la tolerancia tisular supera la capacidad de adaptación ósea (Gabbett, 2016).' },
-  { title: 'Baja experiencia en running (< 12 meses)', detail: 'Los corredores novatos presentan más del doble de incidencia de lesiones por sobreuso frente a experimentados (Videbæk et al., 2015).' },
-  { title: 'Caída navicular y debilidad de cadera', detail: 'El descenso aumentado del arco medial y la debilidad de abductores de cadera incrementan el estrés torsional tibial (Becker et al., 2018).' },
-  { title: 'IMC ≥ 25 kg/m² y lesión previa', detail: 'Mayor masa corporal y antecedentes de lesión en miembro inferior elevan significativamente la probabilidad de SETM (Reinking et al., 2017).' },
+  {
+    title: 'Subir kilómetros o intensidad de golpe (ACWR > 1.5)',
+    detail: 'Aumentar tu carga muy rápido frente a lo que hiciste el último mes supera el ritmo al que el hueso se recupera (Gabbett, 2016).'
+  },
+  {
+    title: 'Llevar menos de 1 año corriendo',
+    detail: 'Los principiantes tienen más del doble de riesgo de molestias por sobreuso mientras sus tejidos se adaptan (Videbæk et al., 2015).'
+  },
+  {
+    title: 'Arco del pie que cede y cadera débil',
+    detail: 'Cuando el tobillo cae hacia adentro (pronación) o la cadera pierde estabilidad, la tibia recibe más torsión en cada paso (Becker et al., 2018).'
+  },
+  {
+    title: 'IMC ≥ 25 kg/m² o lesión previa',
+    detail: 'Mayor peso corporal o haber tenido lesiones previas en las piernas exige una progresión todavía más cuidadosa (Reinking et al., 2017).'
+  },
 ];
 
 const HABITS = [
-  { title: 'Progresión ≤ 10%', desc: 'Evita aumentos abruptos de volumen semanal.', Icon: TrendingUp, c: '#32ade6' },
-  { title: 'Cadencia protectora', desc: 'Eleva +5% tus pasos/min para acortar la zancada.', Icon: Timer, c: '#34c759' },
-  { title: 'Variedad de superficie', desc: 'Alterna asfalto con tierra, grama o pista sintética.', Icon: Mountain, c: '#28a745' },
-  { title: 'Fuerza de cadera y sóleo', desc: 'Estabiliza la pelvis y absorbe carga excéntrica.', Icon: Zap, c: '#f59e0b' },
-  { title: 'Días sin impacto', desc: 'Intercala descanso activo en las primeras 8 semanas.', Icon: Moon, c: '#bf5af2' },
-  { title: 'Calzado en buen estado', desc: 'Revisa desgaste y amortiguación cada 600–800 km.', Icon: Footprints, c: '#ff9f0a' },
+  { title: 'Regla del 10 %', desc: 'No subas más de 10 % tus km de una semana a otra.', Icon: TrendingUp, c: '#32ade6' },
+  { title: 'Pasos más rápidos', desc: 'Sube +5 % tu cadencia para aterrizar más suave.', Icon: Timer, c: '#34c759' },
+  { title: 'Cambia de terreno', desc: 'Alterna pavimento con grama, tierra o pista.', Icon: Mountain, c: '#28a745' },
+  { title: 'Fuerza preventiva', desc: 'Entrena pantorrilla profunda y cadera 3x/sem.', Icon: Zap, c: '#f59e0b' },
+  { title: 'Días sin impacto', desc: 'Intercala descanso activo las primeras 8 semanas.', Icon: Moon, c: '#bf5af2' },
+  { title: 'Revisa tus tenis', desc: 'Evalúa su amortiguación cada 600–800 km.', Icon: Footprints, c: '#ff9f0a' },
 ];
 
 const WARMUP = [
-  { time: 2, act: 'Movilidad articular de tobillo (círculos y dorsiflexión en carga)' },
-  { time: 2, act: 'Caminata en talones y puntas (activación tibial posterior y sóleo)' },
-  { time: 2, act: 'Activación de abductores de cadera (pasos laterales controlados)' },
-  { time: 2, act: 'Skipping bajo con cadencia alta (> 172 ppm)' },
-  { time: 2, act: 'Trote progresivo suave con aterrizaje silencioso' },
+  { time: 2, act: 'Círculos suaves de tobillo y flexión contra pared' },
+  { time: 2, act: 'Caminar 30 s en talones y 30 s en puntas de pie' },
+  { time: 2, act: 'Pasos laterales para activar glúteo medio (cadera)' },
+  { time: 2, act: 'Trote en el puesto con pasos cortos y rápidos (> 172 ppm)' },
+  { time: 2, act: 'Arranque de trote suave procurando pisar silencioso' },
 ];
 
 // ============================================================================
@@ -243,76 +391,76 @@ const EXERCISES = [
   {
     id: 1,
     phase: 'Fortalecimiento',
-    title: 'Elevación de talón con rodilla flexionada (Sóleo)',
+    title: 'Elevación de talón con rodilla doblada (Sóleo)',
     baseReps: 15,
     sets: 3,
     level: 'Esencial',
     img: '/assets/ex1-talones-NEeXVCxD.jpg',
     timer: { s: 45, label: 'Descanso entre series' },
     steps: [
-      'Coloca el antepié sobre un escalón con las rodillas ligeramente flexionadas (25°–30°).',
-      'Eleva los talones en 2 segundos usando ambos pies.',
-      'Desciende lentamente durante 3 a 4 segundos controlando el movimiento.',
-      'Mantén la flexión de rodilla para enfocar la carga en el músculo sóleo.'
+      'Apoya la punta de los pies en un escalón con las rodillas ligeramente dobladas (25°–30°).',
+      'Sube los talones en 2 segundos usando ambos pies.',
+      'Baja lentamente contando 3 a 4 segundos sin perder el control.',
+      'Mantén las rodillas dobladas todo el tiempo para trabajar el músculo profundo (sóleo).'
     ],
-    tip: 'Fortalece el sóleo excéntricamente para reducir la tracción sobre la fascia crural y el periostio tibial (Moen et al., 2009).'
+    tip: 'Fortalece el sóleo para absorber impacto y evitar que jale la cubierta de la tibia (Moen et al., 2009).'
   },
   {
     id: 2,
     phase: 'Fortalecimiento',
-    title: 'Pie corto (Short Foot) y control de tibial posterior',
+    title: 'Arco activo / Pie corto (Short Foot)',
     baseReps: 10,
     sets: 3,
     level: 'Esencial',
     img: '/assets/ex2-banda-CEppt7e-.jpg',
-    timer: { s: 5, label: 'Contracción isométrica' },
+    timer: { s: 5, label: 'Sostener contracción' },
     steps: [
       'Sentado o de pie descalzo, apoya toda la planta en el suelo.',
-      'Intenta acercar la base del dedo gordo hacia el talón elevando el arco plantar.',
-      'Mantén los dedos largos y relajados (sin encogerlos en garra).',
-      'Sostén 5 segundos por repetición.'
+      'Intenta acercar la base del dedo gordo hacia el talón formando un puente en el arco.',
+      'Mantén los dedos largos y relajados (sin arrugarlos como garra).',
+      'Sostén 5 segundos y relaja.'
     ],
-    tip: 'Contrarresta la caída navicular aumentada y fortalece el soporte dinámico del arco medial (Hamstra-Wright et al., 2015; Marques et al., 2025).'
+    tip: 'Evita que el arco del pie se hunda demasiado al correr y protege el tendón tibial posterior (Marques et al., 2025).'
   },
   {
     id: 3,
     phase: 'Fortalecimiento',
-    title: 'Abducción de cadera para glúteo medio',
+    title: 'Elevación lateral de pierna (Glúteo medio)',
     baseReps: 12,
     sets: 3,
     level: 'Esencial',
     img: '/assets/ejercicios-atleta-Sq0ze4a5.jpg',
     timer: { s: 45, label: 'Descanso entre series' },
     steps: [
-      'Recuéstate de lado con el tronco alineado o usa banda elástica sobre las rodillas.',
-      'Eleva la pierna superior unos 30° llevando el talón ligeramente hacia atrás.',
-      'Desciende de forma controlada sin rotar la pelvis.',
-      'Realiza las repeticiones en ambos lados.'
+      'Acuéstate de lado con el cuerpo recto o usa una banda elástica sobre las rodillas.',
+      'Sube la pierna de arriba unos 30° llevando el talón un poco hacia atrás.',
+      'Baja despacio sin girar la cadera hacia atrás.',
+      'Haz todas las repeticiones por cada lado.'
     ],
-    tip: 'La debilidad de abductores de cadera es un predictor clave del SETM documentado prospectivamente (Becker et al., 2018).'
+    tip: 'Una cadera estable evita que la rodilla y el tobillo se metan hacia adentro al aterrizar (Becker et al., 2018).'
   },
   {
     id: 4,
     phase: 'Estiramiento',
-    title: 'Estiramiento de sóleo y tríceps sural en pared',
+    title: 'Estiramiento profundo de pantorrilla en pared',
     baseReps: 30,
     sets: 3,
     isTime: true,
     level: 'Básico',
     img: '/assets/ex3-estiramiento-BQlpL-mO.jpg',
-    timer: { s: 30, label: 'Tiempo de mantenimiento' },
+    timer: { s: 30, label: 'Tiempo de estiramiento' },
     steps: [
-      'Colócate frente a una pared en posición de paso corto.',
-      'Flexiona la rodilla trasera manteniendo el talón completamente apoyado.',
-      'Adelanta la rodilla hacia la pared hasta percibir tensión profunda en la pantorrilla baja.',
-      'Sostén 30 segundos sin rebotes.'
+      'Ponte frente a una pared dando un paso corto hacia atrás.',
+      'Dobla la rodilla de atrás sin despegar el talón del piso.',
+      'Acerca esa rodilla hacia la pared hasta sentir estiramiento en la parte baja de la pantorrilla.',
+      'Sostén 30 segundos sin dar rebotes.'
     ],
-    tip: 'Disminuye la rigidez pasiva del tríceps sural tras sesiones de carrera.'
+    tip: 'Libera la tensión acumulada en la pantorrilla después de correr.'
   },
   {
     id: 5,
     phase: 'Estiramiento',
-    title: 'Descarga miofascial controlada de pantorrilla',
+    title: 'Masaje suave de pantorrilla con rodillo',
     baseReps: 40,
     sets: 2,
     isTime: true,
@@ -320,81 +468,81 @@ const EXERCISES = [
     img: '/assets/ex4-rodillo-CCWq0QBt.jpg',
     timer: { s: 40, label: 'Tiempo por pierna' },
     steps: [
-      'Apoya la parte posterior de la pantorrilla sobre un rodillo de espuma.',
-      'Desliza suavemente desde el tendón de Aquiles hasta debajo de la rodilla.',
-      'Nunca presiones directamente sobre el borde interno óseo de la tibia.',
-      'Detente si aparece dolor agudo.'
+      'Apoya la parte carnosa de la pantorrilla sobre un rodillo de espuma.',
+      'Desliza despacio desde el tobillo hasta debajo de la rodilla.',
+      'Importante: nunca pases el rodillo directamente sobre el hueso de la espinilla.',
+      'Si sientes dolor agudo, detente.'
     ],
-    tip: 'Favorece la recuperación muscular posterior sin irritar el periostio tibial.'
+    tip: 'Ayuda a relajar los músculos posteriores sin lastimar el borde interno de la tibia.'
   },
   {
     id: 6,
     phase: 'Propiocepción',
-    title: 'Equilibrio monopodal controlado',
+    title: 'Equilibrio en un solo pie',
     baseReps: 30,
     sets: 3,
     isTime: true,
     level: 'Intermedio',
     img: '/assets/ex5-equilibrio-Dm1j_pE6.jpg',
-    timer: { s: 30, label: 'Equilibrio por apoyo' },
+    timer: { s: 30, label: 'Equilibrio por pie' },
     steps: [
-      'Apóyate sobre un solo pie con la rodilla en semiflexión (15°).',
-      'Mantén la pelvis horizontal y evita que la rodilla caiga hacia adentro.',
-      'Conserva activo el arco longitudinal del pie durante toda la serie.',
-      'Alterna ambas extremidades.'
+      'Párate sobre un solo pie con la rodilla apenas flexionada (15°).',
+      'Mantén la cadera nivelada y evita que la rodilla se vaya hacia adentro.',
+      'Sostén el arco del pie activo sin agarrarte con los dedos.',
+      'Cambia de pierna al terminar el tiempo.'
     ],
-    tip: 'El entrenamiento neuromuscular del miembro inferior es una de las intervenciones preventivas con mayor evidencia (Marques et al., 2025).'
+    tip: 'Entrena el control neuromuscular del tobillo y la rodilla antes de sumar más kilómetros (Marques et al., 2025).'
   }
 ];
 
 const PREVENTION_PLAN = [
   {
     week: 'Sem 1–2',
-    title: 'Adaptación tisular y método Caminar–Trotar',
+    title: 'Adaptación inicial: alternar caminar y trotar',
     tasks: [
-      'Alternar bloques de 3 min de trote suave y 2 min de caminata rápida (20–25 min total)',
-      'Mantener esfuerzo percibido Borg CR-10 entre 3 y 4 (suave-moderado)',
-      'Completar rutina neuromuscular preventiva 3 veces por semana',
-      'Verificar ausencia de dolor posteromedial tibial (EVA ≤ 1/10)'
+      'Alternar 3 min de trote suave + 2 min de caminata rápida (20–25 min total)',
+      'Mantener esfuerzo Borg CR-10 entre 3 y 4 (puedes conversar cómodo)',
+      'Hacer los ejercicios de fuerza preventiva 3 veces por semana',
+      'Confirmar que terminas sin dolor en la espinilla (EVA ≤ 1/10)'
     ]
   },
   {
     week: 'Sem 3–4',
-    title: 'Consolidación de cadencia y control de carga',
+    title: 'Mejorar cadencia y controlar la carga',
     tasks: [
-      'Incrementar volumen semanal máximo un 10% respecto a Sem 2',
-      'Practicar cadencia objetivo (+5%) con el metrónomo integrado',
-      'Verificar Razón Carga Aguda:Crónica (ACWR) en zona segura (0.8–1.3)',
-      'Realizar calentamiento dinámico de 10 min antes de cada salida'
+      'Subir los kilómetros semanales máximo un 10 % frente a Sem 2',
+      'Practicar tu cadencia objetivo (+5 %) con el metrónomo de la app',
+      'Verificar que tu relación de carga (ACWR) siga en zona verde (0.8–1.3)',
+      'Hacer siempre el calentamiento de 10 min antes de salir'
     ]
   },
   {
     week: 'Sem 5–6',
-    title: 'Progresión aeróbica continua segura',
+    title: 'Trote continuo suave y recuperación',
     tasks: [
-      'Transición a trote continuo de 25–30 min en superficie mixta o blanda',
-      'Incluir al menos 1 día sin impacto entre sesiones de carrera',
-      'Registrar cada entrenamiento con escala Borg CR-10 y EVA',
-      'Evaluar estabilidad y desgaste del calzado deportivo'
+      'Pasar a trote continuo de 25–30 min en grama, tierra o asfalto plano',
+      'Dejar al menos 1 día sin impacto entre días de carrera',
+      'Registrar cada salida con esfuerzo Borg y escala de dolor EVA',
+      'Revisar el desgaste de la suela de tus tenis'
     ]
   },
   {
     week: 'Sem 7–8',
-    title: 'Autonomía preventiva y evaluación final',
+    title: 'Consolidación y evaluación final',
     tasks: [
-      'Completar 30–40 min de running recreativo asintomático (EVA 0/10)',
-      'Mantener equilibrio de carga aguda:crónica sin picos abruptos',
-      'Completar Test Post de conocimiento preventivo (meta ≥ 30% mejora)',
-      'Sostener rutina semanal de sóleo, tibial posterior y cadera'
+      'Completar 30–40 min de running continuo sin molestias (EVA 0/10)',
+      'Mantener equilibrio de carga sin picos repentinos',
+      'Completar el Test Final en Guía/Test (meta ≥ 30 % de mejora)',
+      'Conservar la rutina de pantorrilla y cadera 2 veces por semana'
     ]
   }
 ];
 
 const RED_FLAGS = [
-  'Dolor posteromedial tibial EVA ≥ 4 en dos sesiones consecutivas.',
-  'Dolor punzante focalizado en un punto específico menor a 2 cm sobre el hueso.',
-  'Molestia que persiste en reposo, al caminar o durante la noche.',
-  'Inflamación visible, enrojecimiento o calor local en la espinilla.',
+  'Dolor en el borde interno de la espinilla ≥ 4/10 en dos entrenamientos seguidos.',
+  'Dolor punzante en un punto exacto y pequeño del hueso (< 2 cm).',
+  'Molestia que sigue doliendo en reposo, al caminar normal o en la noche.',
+  'Hinchazón visible, enrojecimiento o calor local en la espinilla.',
 ];
 
 // ============================================================================
@@ -752,19 +900,19 @@ export default function App() {
 
     if (bmi >= 25) {
       riskScore += 1.5;
-      reasons.push(`IMC elevado (${bmi} kg/m² ≥ 25) incrementa carga mecánica tibial.`);
+      reasons.push(`IMC elevado (${bmi} kg/m² ≥ 25) aumenta el impacto mecánico sobre la espinilla.`);
     }
     if (p.sex === 'femenino') {
       riskScore += 1;
-      reasons.push('Sexo femenino registrado como factor predisponente intrínseco.');
+      reasons.push('Sexo femenino registrado como factor predisponente intrínseco en literatura deportiva.');
     }
     if (p.footType === 'pronador') {
       riskScore += 1.5;
-      reasons.push('Tendencia pronadora / caída navicular aumenta tracción sobre tibial posterior y sóleo.');
+      reasons.push('Tendencia pronadora (arco que cede al pisar) aumenta la tracción sobre los músculos de la tibia.');
     }
     if (p.experience === '<3m' || p.experience === '3-6m') {
       riskScore += 1;
-      reasons.push('Experiencia menor a 6 meses requiere progresión tisular gradual.');
+      reasons.push('Experiencia menor a 6 meses requiere adaptación progresiva del hueso.');
     }
     if (p.priorInjury === 'si') {
       riskScore += 2;
@@ -772,22 +920,22 @@ export default function App() {
     }
     if (sortedSessions.length > 0 && acwr > 1.5) {
       riskScore += 3;
-      reasons.push(`Pico de carga semanal elevado (ACWR = ${acwr} > 1.5).`);
+      reasons.push(`Pico de carga semanal elevado (ACWR = ${acwr} > 1.5): subiste los km demasiado rápido.`);
     } else if (sortedSessions.length > 0 && acwr > 1.3) {
       riskScore += 1.5;
-      reasons.push(`Zona de precaución de carga (ACWR = ${acwr} entre 1.3 y 1.5).`);
+      reasons.push(`Zona de precaución de carga (ACWR = ${acwr} entre 1.3 y 1.5): evita añadir más volumen.`);
     }
     if (avgRpe > 7) {
       riskScore += 1.5;
-      reasons.push(`Esfuerzo percibido promedio alto (Borg ${avgRpe}/10 > 7).`);
+      reasons.push(`Esfuerzo percibido promedio alto (Borg ${avgRpe}/10 > 7): baja un poco el ritmo.`);
     }
     if ((p.cadencePpm || 164) < 170) {
       riskScore += 0.5;
-      reasons.push(`Cadencia habitual baja (${p.cadencePpm || 164} ppm < 170 ppm).`);
+      reasons.push(`Cadencia habitual baja (${p.cadencePpm || 164} ppm < 170 ppm): pasos largos generan mayor impacto.`);
     }
     if (!redFlagActive && lastSession && lastSession.eva > 0 && lastSession.painLocation === 'posteromedial_difuso') {
       riskScore += 1;
-      reasons.push('Signo temprano: molestia difusa (> 5 cm) en borde posteromedial distal.');
+      reasons.push('Signo temprano: molestia difusa (> 5 cm) en el borde interno bajo de la espinilla.');
     }
 
     let riskLevel = 'Bajo';
@@ -799,11 +947,11 @@ export default function App() {
       riskColor = '#ff453a';
       loadFactor = 0;
       if (focalBonePain) {
-        reasons.unshift('BANDERA ROJA: Dolor puntual focalizado (< 2 cm) sobre cortical tibial. Sospecha de estrés óseo focal.');
+        reasons.unshift('BANDERA ROJA: Dolor puntual en un sitio exacto (< 2 cm) del hueso. Suspende impacto y consulta.');
       } else if (restPainAlert) {
-        reasons.unshift('BANDERA ROJA: Dolor tibial persistente en reposo o al caminar. Requiere valoración médica prioritaria.');
+        reasons.unshift('BANDERA ROJA: Dolor en la espinilla que persiste en reposo o al caminar. Requiere valoración profesional.');
       } else if (consecutivePainAlert) {
-        reasons.unshift('BANDERA ROJA: Dolor posteromedial EVA ≥ 4 en dos sesiones consecutivas.');
+        reasons.unshift('BANDERA ROJA: Dolor en la espinilla EVA ≥ 4 en dos entrenamientos seguidos.');
       } else if (severeSinglePain) {
         reasons.unshift(`BANDERA ROJA: Dolor intenso reportado (EVA ${lastSession.eva}/10).`);
       }
@@ -818,7 +966,7 @@ export default function App() {
     }
 
     if (reasons.length === 0) {
-      reasons.push('Parámetros antropométricos y de carga dentro de rangos preventivos seguros.');
+      reasons.push('Tus datos corporales y tu carga semanal están dentro de rangos preventivos seguros.');
     }
 
     return {
@@ -1375,7 +1523,12 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoScenario })
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
-        <button type="button" onClick={onToggleTheme} className="btn-soft tap" style={{ minHeight: '36px', padding: '0 14px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+        <button
+          type="button"
+          onClick={onToggleTheme}
+          className="btn-soft tap"
+          style={{ minHeight: '36px', padding: '0 14px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+        >
           {theme === 'dark' ? <><Sun size={15} color="#ffd60a" /> Tema Claro</> : <><Moon size={15} /> Tema Oscuro</>}
         </button>
       </div>
@@ -1624,32 +1777,45 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
             style={{ minHeight: '34px', padding: '0 12px', fontSize: '12px' }}
             onClick={() => setUnit(unit === 'metric' ? 'imperial' : 'metric')}
           >
-            {unit === 'metric' ? 'Métrico (kg/cm)' : 'Imperial (lb/in)'}
+            {unit === 'metric' ? 'kg / km' : 'lb / mi'}
           </button>
         </div>
       </div>
 
-      <h1 className="display">
-        Perfil del <span className="grad-text">corredor</span>
-      </h1>
-      <p className="muted small" style={{ marginTop: '6px', marginBottom: '18px' }}>
-        Parametrización antropométrica, sociodemográfica y de carga base (población objetivo 18–25 años).
+      <h1 className="display">Calibra tu <span className="grad-text">perfil corredor</span></h1>
+      <p className="small muted" style={{ marginTop: '4px', marginBottom: '16px' }}>
+        Usamos estos datos para calcular tu carga segura y prevenir el <GlosarioTerm term="SETM">dolor en la espinilla</GlosarioTerm>.
       </p>
 
       <form onSubmit={handleSubmit} className="stack">
-        <div className="card">
-          <div className="input-group">
-            <label className="eyebrow">Nombre completo</label>
-            <input type="text" required placeholder="Ej. Laura Gómez" className="input-field" value={name} onChange={(e) => setName(e.target.value)} />
+        <div className="card stack">
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label className="eyebrow">Nombre o alias</label>
+            <input
+              type="text"
+              required
+              placeholder="Ej. Camila Gómez"
+              className="input-field"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
 
           <div className="grid-2">
-            <div className="input-group">
-              <label className="eyebrow">Edad (años)</label>
-              <input type="number" min="15" max="85" required className="input-field tnum" value={age} onChange={(e) => setAge(e.target.value)} />
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="eyebrow">Edad (18–25 objetivo)</label>
+              <input
+                type="number"
+                min="14"
+                max="90"
+                required
+                className="input-field tnum"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+              />
             </div>
 
-            <div className="input-group">
+            <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="eyebrow">Sexo biológico</label>
               <select className="input-field" value={sex} onChange={(e) => setSex(e.target.value)}>
                 <option value="femenino">Femenino</option>
@@ -1658,15 +1824,25 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
             </div>
           </div>
 
+          {(age < 18 || age > 25) && (
+            <div style={{ padding: '8px 10px', borderRadius: '10px', background: '#f59e0b1f', color: '#f59e0b', fontSize: '12px' }}>
+              Nota del estudio UMB: la población objetivo principal son jóvenes principiantes entre 18 y 25 años, pero puedes usar la guía igualmente.
+            </div>
+          )}
+
           <div className="grid-2">
-            <div className="input-group">
-              <label className="eyebrow">Peso ({unit === 'metric' ? 'kg' : 'lb'})</label>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="eyebrow">
+                {unit === 'metric' ? 'Peso (kg)' : 'Peso (lb)'}
+              </label>
               <input
                 type="number"
-                step="0.1"
+                step="0.5"
+                min="30"
+                max="450"
                 required
                 className="input-field tnum"
-                value={unit === 'metric' ? weightKg : Math.round(weightKg * 2.20462)}
+                value={unit === 'metric' ? weightKg : +(weightKg * 2.20462).toFixed(1)}
                 onChange={(e) => {
                   const val = Number(e.target.value);
                   setWeightKg(unit === 'metric' ? val : +(val / 2.20462).toFixed(1));
@@ -1674,1286 +1850,416 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
               />
             </div>
 
-            <div className="input-group">
-              <label className="eyebrow">Talla ({unit === 'metric' ? 'cm' : 'in'})</label>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="eyebrow">Estatura (cm)</label>
               <input
                 type="number"
+                min="120"
+                max="230"
                 required
                 className="input-field tnum"
-                value={unit === 'metric' ? heightCm : Math.round(heightCm / 2.54)}
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  setHeightCm(unit === 'metric' ? val : Math.round(val * 2.54));
-                }}
+                value={heightCm}
+                onChange={(e) => setHeightCm(Number(e.target.value))}
               />
             </div>
           </div>
 
-          <div style={{ padding: '8px 12px', borderRadius: '10px', background: 'var(--surface-2)', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', borderRadius: '10px', background: 'var(--surface-2)' }}>
             <span className="small muted">IMC calculado automáticamente:</span>
-            <span className="h3 tnum" style={{ color: liveBmi >= 25 ? '#f59e0b' : 'var(--pink)' }}>
-              {liveBmi} kg/m² {liveBmi >= 25 ? '(≥ 25)' : '(Normopeso)'}
+            <span className="badge tnum" style={{ color: liveBmi >= 25 ? '#f59e0b' : 'var(--pink)' }}>
+              {liveBmi} kg/m² {liveBmi >= 25 ? '(Sobrepeso)' : '(Normal)'}
             </span>
           </div>
+        </div>
 
+        <div className="card stack">
           <div className="grid-2">
-            <div className="input-group">
-              <label className="eyebrow">Experiencia en running</label>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="eyebrow">Tiempo corriendo</label>
               <select className="input-field" value={experience} onChange={(e) => setExperience(e.target.value)}>
-                <option value="<3m">Menos de 3 meses (Novato)</option>
+                <option value="<3m">Menos de 3 meses</option>
                 <option value="3-6m">3 a 6 meses</option>
                 <option value="6-12m">6 a 12 meses</option>
                 <option value=">12m">Más de 12 meses</option>
               </select>
             </div>
 
-            <div className="input-group">
-              <label className="eyebrow">Volumen base ({unit === 'metric' ? 'km/sem' : 'mi/sem'})</label>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="eyebrow">
+                {unit === 'metric' ? 'Km base/semana' : 'Millas base/sem'}
+              </label>
               <input
                 type="number"
+                step="0.5"
                 min="1"
-                max="150"
+                max="200"
                 required
                 className="input-field tnum"
-                value={unit === 'metric' ? weeklyKm : +(weeklyKm * 0.621371).toFixed(1)}
+                value={unit === 'metric' ? weeklyKm : distVal(weeklyKm, 'imperial')}
                 onChange={(e) => {
-                  const val = Number(e.target.value);
-                  setWeeklyKm(unit === 'metric' ? val : +(val / 0.621371).toFixed(1));
+                  const v = Number(e.target.value);
+                  setWeeklyKm(unit === 'metric' ? v : +(v / 0.621371).toFixed(1));
                 }}
               />
             </div>
           </div>
 
-          <div className="input-group">
-            <label className="eyebrow">Apoyo plantar / arco medial (orientativo)</label>
-            <select className="input-field" value={footType} onChange={(e) => setFootType(e.target.value)}>
-              <option value="desconocido">No lo sé / Sin valoración biomecánica</option>
-              <option value="neutra">Apoyo neutro</option>
-              <option value="pronador">Tendencia pronadora (caída marcada del arco interno)</option>
-              <option value="supinador">Tendencia supinadora (arco elevado / apoyo externo)</option>
-            </select>
+          <div className="grid-2">
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="eyebrow">Tipo de pisada</label>
+              <select className="input-field" value={footType} onChange={(e) => setFootType(e.target.value)}>
+                <option value="desconocido">No lo sé</option>
+                <option value="neutra">Neutra</option>
+                <option value="pronador">Pronadora (arco baja)</option>
+                <option value="supinador">Supinadora</option>
+              </select>
+            </div>
+
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="eyebrow">¿Lesión previa?</label>
+              <select className="input-field" value={priorInjury} onChange={(e) => setPriorInjury(e.target.value)}>
+                <option value="no">No</option>
+                <option value="si">Sí, en piernas/pies</option>
+              </select>
+            </div>
           </div>
 
           <div className="input-group" style={{ marginBottom: 0 }}>
-            <label className="eyebrow">Antecedente de lesión previa en miembro inferior</label>
-            <select className="input-field" value={priorInjury} onChange={(e) => setPriorInjury(e.target.value)}>
-              <option value="no">No</option>
-              <option value="si">Sí</option>
-            </select>
+            <label className="eyebrow">Cadencia habitual (pasos/min)</label>
+            <input
+              type="number"
+              min="130"
+              max="220"
+              className="input-field tnum"
+              value={cadencePpm}
+              onChange={(e) => setCadencePpm(Number(e.target.value))}
+            />
           </div>
         </div>
 
-        <button type="submit" disabled={requireConsent && !consentChecked} className="btn btn-primary tap">
-          <span>Guardar y Calibrar Sistema</span>
-          <ArrowRight size={19} />
-        </button>
-
-        {onCancel && (
-          <button type="button" className="btn btn-soft tap" onClick={onCancel}>
-            Cancelar
-          </button>
+        {requireConsent && (
+          <label style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px', borderRadius: '12px', background: 'var(--surface)' }}>
+            <input
+              type="checkbox"
+              checked={consentChecked}
+              onChange={(e) => setConsentChecked(e.target.checked)}
+              style={{ marginTop: '3px', accentColor: '#34c759' }}
+            />
+            <span className="small muted">Acepto el tratamiento confidencial de mis datos bajo Ley 1581 de 2012.</span>
+          </label>
         )}
+
+        <div className={onCancel ? 'grid-2' : ''}>
+          {onCancel && (
+            <button type="button" onClick={onCancel} className="btn btn-soft tap">
+              Cancelar
+            </button>
+          )}
+          <button type="submit" className="btn btn-primary tap">
+            <Check size={18} />
+            <span>Guardar perfil</span>
+          </button>
+        </div>
       </form>
     </div>
   );
 }
 
 // ============================================================================
-// 2. PANEL PRINCIPAL DESPEJADO (DIVULGACIÓN PROGRESIVA)
+// 2. RESUMEN BIOMÉTRICO Y PANEL PRINCIPAL (TAB: INICIO)
 // ============================================================================
-function DashboardView({
-  user, bio, unit, onOpenSession, onOpenClinicalReport, onGoTab
-}) {
-  const [showReasons, setShowReasons] = useState(false);
-
-  const volumeRatio = Math.min(1, Math.max(0.08, bio.acuteKm / Math.max(1, bio.chronicKm)));
-  const outerRadius = 46;
-  const outerCirc = 2 * Math.PI * outerRadius;
-  const outerOffset = outerCirc * (1 - volumeRatio);
-
-  const acwrRatio = Math.min(1, Math.max(0.1, bio.acwr / 1.6));
-  const innerRadius = 33;
-  const innerCirc = 2 * Math.PI * innerRadius;
-  const innerOffset = innerCirc * (1 - acwrRatio);
-
-  const todayLabel = new Date().toLocaleDateString('es-CO', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'short'
-  });
+function DashboardView({ user, bio, unit, onOpenSession, onOpenClinicalReport, onGoTab }) {
+  const recentSessions = [...(user.sessions || [])].slice(-6);
+  const maxDist = Math.max(5, ...recentSessions.map((s) => Number(s.distanceKm || 0)));
 
   return (
     <div className="stack">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '12px', padding: '2px 2px 4px' }}>
-        <div>
-          <div className="eyebrow" style={{ textTransform: 'capitalize' }}>
-            {todayLabel} · {user.profile.name.split(' ')[0]}
-          </div>
-          <h1 className="display" style={{ marginTop: '2px' }}>Resumen</h1>
-        </div>
-        <button type="button" onClick={onOpenSession} className="btn-pill-sm tap">
-          <PlusCircle size={16} />
-          <span>Registrar</span>
-        </button>
-      </div>
-
-      {/* ALERTA CLÍNICA DE BANDERA ROJA */}
+      {/* ALERTA DE BANDERA ROJA SI ESTÁ ACTIVA */}
       {bio.redFlagActive && (
-        <div className="card" style={{ borderColor: 'var(--danger)', background: 'color-mix(in srgb, var(--danger) 14%, var(--surface))' }}>
+        <div
+          className="card"
+          style={{
+            borderColor: '#ff453a',
+            background: 'color-mix(in srgb, #ff453a 14%, var(--surface))'
+          }}
+        >
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-            <AlertTriangle size={22} color="var(--danger)" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div className="icon-tile" style={{ '--c': '#ff453a' }}>
+              <AlertTriangle size={20} />
+            </div>
             <div style={{ flex: 1 }}>
-              <div className="h3" style={{ color: 'var(--danger)' }}>Bandera Roja · Suspensión de Impacto</div>
-              <p className="small muted" style={{ marginTop: '4px' }}>
-                {bio.reasons[0]} Se ha pausado la rutina de carga física. Solicita valoración por medicina deportiva o fisioterapia.
+              <div className="eyebrow" style={{ color: '#ff453a' }}>Bandera Roja Preventiva</div>
+              <h2 className="h2" style={{ color: '#ff453a', marginTop: '2px' }}>
+                Pausa el impacto y consulta a un profesional
+              </h2>
+              <p className="small" style={{ marginTop: '4px' }}>
+                {bio.reasons[0]} Por seguridad, hemos pausado la carga de ejercicios de alto impacto.
               </p>
-              <button
-                type="button"
-                onClick={onOpenClinicalReport}
-                className="btn-soft tap"
-                style={{ marginTop: '10px', background: '#ff453a28', color: '#ff453a', width: '100%' }}
-              >
-                <FileText size={15} />
-                <span>Ver Resumen Clínico-Deportivo</span>
-              </button>
+              <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button type="button" onClick={onOpenClinicalReport} className="btn-pill-sm tap" style={{ background: '#ff453a', color: '#fff' }}>
+                  <FileText size={14} /> Ver reporte para consulta
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* TARJETA PRINCIPAL DE ANILLOS ACWR */}
+      {/* TARJETA HERO CON MÉTRICAS STRAVA */}
       <div className="card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ position: 'relative', width: '92px', height: '92px', flexShrink: 0 }}>
-            <svg viewBox="0 0 112 112" style={{ width: '92px', height: '92px', transform: 'rotate(-90deg)' }}>
-              <circle cx="56" cy="56" r={outerRadius} fill="none" stroke="var(--surface-2)" strokeWidth="10" />
-              <circle
-                cx="56"
-                cy="56"
-                r={outerRadius}
-                fill="none"
-                stroke="var(--pink)"
-                strokeWidth="10"
-                strokeLinecap="round"
-                strokeDasharray={outerCirc}
-                strokeDashoffset={outerOffset}
-                style={{ transition: 'stroke-dashoffset 0.6s var(--ease)' }}
-              />
-              <circle cx="56" cy="56" r={innerRadius} fill="none" stroke="var(--surface-2)" strokeWidth="9" />
-              <circle
-                cx="56"
-                cy="56"
-                r={innerRadius}
-                fill="none"
-                stroke={bio.acwrColor}
-                strokeWidth="9"
-                strokeLinecap="round"
-                strokeDasharray={innerCirc}
-                strokeDashoffset={innerOffset}
-                style={{ transition: 'stroke-dashoffset 0.6s var(--ease)' }}
-              />
-            </svg>
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center'
-              }}
-            >
-              <span className="tnum" style={{ fontSize: '16px', fontWeight: 800, lineHeight: 1, color: bio.acwrColor }}>
-                {bio.acwr}
-              </span>
-              <span className="eyebrow" style={{ fontSize: '9px', marginTop: '2px' }}>ACWR</span>
-            </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+          <div>
+            <div className="eyebrow">Semáforo Preventivo · {user.profile.name}</div>
+            <h1 className="display" style={{ marginTop: '2px', color: bio.riskColor }}>
+              Riesgo {bio.riskLevel}
+            </h1>
+            <p className="small muted" style={{ marginTop: '4px' }}>
+              Monitoreo continuo para evitar el <GlosarioTerm term="SETM">dolor en la espinilla</GlosarioTerm>.
+            </p>
           </div>
-
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="eyebrow">Carga aguda (7 días)</div>
-            <div className="display tnum" style={{ fontSize: '24px', marginTop: '2px' }}>
-              {fmtDist(bio.acuteKm, unit)}
-            </div>
-            <div className="small muted tnum" style={{ marginTop: '2px' }}>
-              Crónica (28d): {fmtDist(bio.chronicKm, unit)}/sem
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: bio.riskColor }}>
-                Alerta {bio.riskLevel}
-              </span>
-              <span className="muted" aria-hidden="true">·</span>
-              <span className="small muted">{bio.acwrStatus}</span>
-            </div>
-          </div>
+          <button type="button" onClick={onOpenSession} className="btn-pill-sm tap">
+            <PlusCircle size={15} /> Registrar salida
+          </button>
         </div>
 
         <div className="strava-stat-strip">
           <div className="strava-stat-cell">
-            <span className="eyebrow">IMC</span>
-            <span className="h3 tnum">{bio.bmi}</span>
+            <span className="eyebrow">Carga 7 días</span>
+            <strong className="h2 tnum">{fmtDist(bio.acuteKm, unit)}</strong>
+            <span className="small muted" style={{ fontSize: '11px' }}>Base: {fmtDist(bio.chronicKm, unit)}/sem</span>
           </div>
+
           <div className="strava-stat-cell">
-            <span className="eyebrow">Dosis Ej.</span>
-            <span className="h3 tnum" style={{ color: bio.redFlagActive ? 'var(--danger)' : 'var(--pink)' }}>
-              {bio.redFlagActive ? 'Pausada' : `${Math.round(bio.loadFactor * 100)}%`}
+            <span className="eyebrow">
+              <GlosarioTerm term="ACWR">ACWR</GlosarioTerm>
+            </span>
+            <strong className="h2 tnum" style={{ color: bio.acwrColor }}>{bio.acwr}</strong>
+            <span className="small" style={{ fontSize: '11px', color: bio.acwrColor, fontWeight: 600 }}>
+              {bio.acwrStatus}
             </span>
           </div>
+
           <div className="strava-stat-cell">
-            <span className="eyebrow">Borg Prom.</span>
-            <span className="h3 tnum">{bio.avgRpe}/10</span>
-          </div>
-        </div>
-
-        {/* DIVULGACIÓN PROGRESIVA: EXPLICACIÓN DEL ALGORITMO DESPLEGABLE */}
-        <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '0.5px solid var(--line)' }}>
-          <button
-            type="button"
-            onClick={() => setShowReasons(!showReasons)}
-            style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '4px 0'
-            }}
-          >
-            <span className="eyebrow" style={{ color: 'var(--ink-2)' }}>
-              ¿Por qué tengo este nivel de alerta? ({bio.reasons.length})
+            <span className="eyebrow">IMC / Dolor</span>
+            <strong className="h2 tnum">{bio.bmi}</strong>
+            <span className="small muted" style={{ fontSize: '11px' }}>
+              EVA últ: {bio.lastSession ? `${bio.lastSession.eva}/10` : '0/10'}
             </span>
-            <ChevronDown
-              size={16}
-              color="var(--ink-3)"
-              style={{ transform: showReasons ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }}
-            />
-          </button>
-
-          {showReasons && (
-            <div className="stack" style={{ gap: '5px', marginTop: '8px' }}>
-              {bio.reasons.map((r, idx) => (
-                <div key={idx} className="small muted" style={{ fontSize: '12px', display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
-                  <span style={{ color: bio.riskColor, fontWeight: 800 }}>•</span>
-                  <span>{r}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* ACCESOS RÁPIDOS DE ACCIÓN */}
-      <div className="grid-2">
-        <button
-          type="button"
-          className="card tap"
-          onClick={() => onGoTab('cadencia')}
-          style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '6px' }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 700, color: 'var(--accent)' }}>
-              <Timer size={15} /> Cadencia
-            </span>
-            <ChevronRight size={16} color="var(--ink-3)" />
+      {/* GRID DESKTOP: EXPLICACIÓN + HISTORIAL GRÁFICO */}
+      <div className="desktop-split">
+        <div className="stack">
+          <div className="section-heading">
+            <span>¿Qué detectó tu análisis?</span>
+            <button
+              type="button"
+              onClick={onOpenClinicalReport}
+              style={{ color: 'var(--pink)', fontSize: '12px', fontWeight: 700 }}
+            >
+              Ver ficha completa
+            </button>
           </div>
-          <div className="h2 tnum">{user.profile.cadencePpm || 164} <span className="small muted" style={{ fontWeight: 500 }}>ppm</span></div>
-          <div className="small muted tnum">Meta +5%: {Math.round((user.profile.cadencePpm || 164) * 1.05)} ppm</div>
-        </button>
 
-        <button
-          type="button"
-          className="card tap"
-          onClick={() => onGoTab('ejercicios')}
-          style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '6px' }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 700, color: bio.redFlagActive ? 'var(--danger)' : 'var(--pink)' }}>
-              <Dumbbell size={15} /> Fuerza
-            </span>
-            <ChevronRight size={16} color="var(--ink-3)" />
-          </div>
-          <div className="h2 tnum" style={{ color: bio.redFlagActive ? 'var(--danger)' : 'inherit' }}>
-            {bio.redFlagActive ? 'Pausada' : `${Math.round(bio.loadFactor * 100)}%`}
-          </div>
-          <div className="small muted">{bio.redFlagActive ? 'Reposo relativo' : 'Rutina preventiva'}</div>
-        </button>
-      </div>
-
-      {/* ACTIVIDAD RECIENTE */}
-      <div className="section-heading">
-        <span>Actividad reciente</span>
-        <span className="small muted tnum" style={{ fontWeight: 500 }}>
-          {user.sessions.length} {user.sessions.length === 1 ? 'sesión' : 'sesiones'}
-        </span>
-      </div>
-
-      <div className="ios-group">
-        {user.sessions.length === 0 ? (
-          <button type="button" onClick={onOpenSession} className="ios-row">
-            <div>
-              <div className="h3">Aún no hay entrenamientos</div>
-              <div className="small muted">Toca aquí para registrar tu primera carrera</div>
-            </div>
-            <PlusCircle size={20} color="var(--pink)" />
-          </button>
-        ) : (
-          [...user.sessions].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3).map((s) => (
-            <div key={s.id} className="ios-row">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div
+          <div className="card stack" style={{ gap: '8px' }}>
+            {bio.reasons.map((r, i) => (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  gap: '9px',
+                  alignItems: 'flex-start',
+                  padding: '8px 10px',
+                  borderRadius: '10px',
+                  background: 'var(--surface-2)'
+                }}
+              >
+                <span
                   style={{
-                    width: '4px',
-                    height: '34px',
-                    borderRadius: '99px',
-                    background: s.eva >= 4 || s.painLocation === 'focal_puntual' || s.painAtRest ? 'var(--danger)' : 'var(--pink)',
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '999px',
+                    background: bio.riskColor,
+                    marginTop: '6px',
                     flexShrink: 0
                   }}
                 />
+                <span className="small">{r}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* ACCESOS RÁPIDOS */}
+          <div className="ios-group">
+            <button type="button" className="ios-row" onClick={() => onGoTab('ejercicios')}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className="icon-tile" style={{ '--c': '#34c759' }}>
+                  <Dumbbell size={17} />
+                </div>
                 <div>
-                  <div className="h3 tnum">{fmtDist(s.distanceKm, unit)}</div>
-                  <div className="small muted tnum">
-                    {s.date} · {s.durationMin} min {s.eva > 0 ? `· ${PAIN_ZONE_LABELS[s.painLocation || 'posteromedial_difuso']}` : ''}
+                  <div className="h3">Rutina neuromuscular preventiva</div>
+                  <div className="small muted">
+                    {bio.redFlagActive
+                      ? 'Pausada por alerta de dolor'
+                      : `Dosis calibrada al ${Math.round(bio.loadFactor * 100)} % según tu perfil`}
                   </div>
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div className="tnum" style={{ fontSize: '13.5px', fontWeight: 700, color: s.eva >= 4 || s.painLocation === 'focal_puntual' || s.painAtRest ? 'var(--danger)' : 'var(--pink)' }}>
-                  EVA {s.eva}/10
-                </div>
-                <div className="small muted tnum">Borg {s.rpe}</div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* GRÁFICAS LONGITUDINALES */}
-      <TrendChartsCard
-        sessions={[...user.sessions].sort((a, b) => a.date.localeCompare(b.date))}
-        chronicKm={bio.chronicKm}
-        acwr={bio.acwr}
-        acwrColor={bio.acwrColor}
-        acwrStatus={bio.acwrStatus}
-        unit={unit}
-      />
-    </div>
-  );
-}
-
-// ============================================================================
-// COMPONENTE DE GRÁFICAS SVG: CARGA + ACWR Y TENDENCIA EVA / BORG
-// ============================================================================
-function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, unit }) {
-  const [chartTab, setChartTab] = useState(0);
-  const recent = sessions.slice(-7);
-  const unitLabel = unit === 'metric' ? 'km' : 'mi';
-  const markerPct = Math.min(97, Math.max(3, (acwr / 2.0) * 100));
-
-  return (
-    <div className="card stack">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <BarChart3 size={14} color="var(--pink)" /> Monitoreo Longitudinal
-          </div>
-          <h2 className="h2" style={{ marginTop: '4px' }}>Gráficas de Seguimiento</h2>
-        </div>
-      </div>
-
-      <div className="seg" style={{ '--n': 2 }}>
-        <div className="seg-pill" style={{ transform: `translateX(${chartTab * 100}%)` }} />
-        <button type="button" className={`seg-btn ${chartTab === 0 ? 'on' : ''}`} onClick={() => setChartTab(0)}>
-          Carga y ACWR
-        </button>
-        <button type="button" className={`seg-btn ${chartTab === 1 ? 'on' : ''}`} onClick={() => setChartTab(1)}>
-          Dolor EVA y Borg
-        </button>
-      </div>
-
-      {chartTab === 0 && (
-        <div className="stack" style={{ gap: '14px' }}>
-          <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span className="eyebrow" style={{ fontSize: '10px' }}>Índice Carga Aguda:Crónica</span>
-              <span className="badge tnum" style={{ color: acwrColor, background: `color-mix(in srgb, ${acwrColor} 18%, transparent)` }}>
-                ACWR {acwr} · {acwrStatus}
-              </span>
-            </div>
-
-            <div style={{ position: 'relative', height: '12px', borderRadius: '999px', overflow: 'hidden', display: 'flex' }}>
-              <div style={{ width: '40%', background: '#32ade6' }} title="Subcarga (< 0.8)" />
-              <div style={{ width: '25%', background: '#34c759' }} title="Zona segura (0.8 - 1.3)" />
-              <div style={{ width: '10%', background: '#ffd60a' }} title="Precaución (1.3 - 1.5)" />
-              <div style={{ width: '25%', background: '#ff453a' }} title="Sobrecarga (> 1.5)" />
-            </div>
-
-            <div style={{ position: 'relative', height: '14px', marginTop: '2px' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  left: `${markerPct}%`,
-                  transform: 'translateX(-50%)',
-                  width: 0,
-                  height: 0,
-                  borderLeft: '6px solid transparent',
-                  borderRight: '6px solid transparent',
-                  borderBottom: `8px solid ${acwrColor}`,
-                  transition: 'left .4s ease'
-                }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--ink-3)' }} className="tnum">
-              <span>0.0</span>
-              <span>0.8 (Segura)</span>
-              <span>1.3</span>
-              <span>1.5+</span>
-            </div>
-          </div>
-
-          {recent.length === 0 ? (
-            <div className="small muted" style={{ textAlign: 'center', padding: '16px 0' }}>
-              Registra tu primer entrenamiento arriba para visualizar la evolución de carga.
-            </div>
-          ) : (
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span className="eyebrow" style={{ fontSize: '10px' }}>Distancia por sesión ({unitLabel})</span>
-                <span className="small muted tnum" style={{ fontSize: '11px' }}>
-                  Crónica: {fmtDist(chronicKm, unit)}/sem
-                </span>
-              </div>
-
-              {(() => {
-                const values = recent.map((s) => distVal(s.distanceKm, unit));
-                const maxVal = Math.max(...values, distVal(chronicKm / 3, unit) * 1.3, 1);
-                const svgW = 320;
-                const svgH = 135;
-                const padTop = 22;
-                const padBot = 24;
-                const plotH = svgH - padTop - padBot;
-                const slotW = svgW / recent.length;
-                const barW = Math.min(28, slotW * 0.55);
-
-                return (
-                  <svg viewBox={`0 0 ${svgW} ${svgH}`} style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
-                    {[0, 0.5, 1].map((t, i) => {
-                      const y = padTop + plotH * (1 - t);
-                      return (
-                        <line
-                          key={i}
-                          x1="0"
-                          y1={y}
-                          x2={svgW}
-                          y2={y}
-                          stroke="var(--line)"
-                          strokeDasharray={t === 0 ? 'none' : '3 3'}
-                          strokeWidth="1"
-                        />
-                      );
-                    })}
-
-                    {recent.map((s, idx) => {
-                      const v = distVal(s.distanceKm, unit);
-                      const h = Math.max(4, (v / maxVal) * plotH);
-                      const x = idx * slotW + (slotW - barW) / 2;
-                      const y = padTop + plotH - h;
-                      const shortDate = s.date.slice(5);
-                      const barColor = s.eva >= 4 || s.painLocation === 'focal_puntual' || s.painAtRest ? '#ff453a' : 'var(--pink)';
-
-                      return (
-                        <g key={s.id || idx}>
-                          <rect
-                            x={x}
-                            y={y}
-                            width={barW}
-                            height={h}
-                            rx="6"
-                            fill={barColor}
-                            style={{ transition: 'height .4s ease, y .4s ease' }}
-                          />
-                          <text
-                            x={x + barW / 2}
-                            y={y - 6}
-                            textAnchor="middle"
-                            fill="var(--ink)"
-                            fontSize="10"
-                            fontWeight="700"
-                          >
-                            {v}
-                          </text>
-                          <text
-                            x={x + barW / 2}
-                            y={svgH - 6}
-                            textAnchor="middle"
-                            fill="var(--ink-3)"
-                            fontSize="9.5"
-                          >
-                            {shortDate}
-                          </text>
-                        </g>
-                      );
-                    })}
-                  </svg>
-                );
-              })()}
-            </div>
-          )}
-        </div>
-      )}
-
-      {chartTab === 1 && (
-        <div>
-          {recent.length === 0 ? (
-            <div className="small muted" style={{ textAlign: 'center', padding: '16px 0' }}>
-              Aún no hay sesiones registradas para graficar dolor EVA y esfuerzo Borg.
-            </div>
-          ) : (
-            <div>
-              {(() => {
-                const svgW = 320;
-                const svgH = 150;
-                const padL = 22;
-                const padR = 14;
-                const padTop = 18;
-                const padBot = 26;
-                const plotW = svgW - padL - padR;
-                const plotH = svgH - padTop - padBot;
-
-                const getX = (i) =>
-                  recent.length === 1
-                    ? padL + plotW / 2
-                    : padL + (i / (recent.length - 1)) * plotW;
-
-                const getY = (val) => padTop + plotH * (1 - val / 10);
-
-                const evaPoints = recent.map((s, i) => `${getX(i)},${getY(s.eva)}`).join(' ');
-                const rpePoints = recent.map((s, i) => `${getX(i)},${getY(s.rpe)}`).join(' ');
-                const alertY = getY(4);
-
-                return (
-                  <>
-                    <svg viewBox={`0 0 ${svgW} ${svgH}`} style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
-                      {[0, 5, 10].map((tick) => {
-                        const y = getY(tick);
-                        return (
-                          <g key={tick}>
-                            <line x1={padL} y1={y} x2={svgW - padR} y2={y} stroke="var(--line)" strokeWidth="1" />
-                            <text x={padL - 6} y={y + 3} textAnchor="end" fill="var(--ink-3)" fontSize="9.5">
-                              {tick}
-                            </text>
-                          </g>
-                        );
-                      })}
-
-                      <line
-                        x1={padL}
-                        y1={alertY}
-                        x2={svgW - padR}
-                        y2={alertY}
-                        stroke="#ff453a"
-                        strokeDasharray="4 3"
-                        strokeWidth="1.2"
-                      />
-                      <text x={svgW - padR} y={alertY - 4} textAnchor="end" fill="#ff453a" fontSize="8.5" fontWeight="700">
-                        Umbral EVA ≥ 4
-                      </text>
-
-                      {recent.length > 1 && (
-                        <polyline
-                          fill="none"
-                          stroke="#32ade6"
-                          strokeWidth="2"
-                          strokeDasharray="4 3"
-                          points={rpePoints}
-                        />
-                      )}
-
-                      {recent.length > 1 && (
-                        <polyline
-                          fill="none"
-                          stroke="var(--pink)"
-                          strokeWidth="2.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          points={evaPoints}
-                        />
-                      )}
-
-                      {recent.map((s, i) => {
-                        const cx = getX(i);
-                        const cyEva = getY(s.eva);
-                        const cyRpe = getY(s.rpe);
-                        const dotColor = s.eva >= 4 || s.painLocation === 'focal_puntual' ? '#ff453a' : 'var(--pink)';
-                        return (
-                          <g key={s.id || i}>
-                            <circle cx={cx} cy={cyRpe} r="3.2" fill="#32ade6" />
-                            <circle cx={cx} cy={cyEva} r="4.8" fill={dotColor} stroke="var(--surface)" strokeWidth="1.5" />
-                            <text x={cx} y={cyEva - 8} textAnchor="middle" fill={dotColor} fontSize="9.5" fontWeight="800">
-                              {s.eva}
-                            </text>
-                            <text x={cx} y={svgH - 6} textAnchor="middle" fill="var(--ink-3)" fontSize="9.5">
-                              {s.date.slice(5)}
-                            </text>
-                          </g>
-                        );
-                      })}
-                    </svg>
-
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '6px', fontSize: '11.5px' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--pink)', display: 'inline-block' }} />
-                        <span className="muted">Dolor EVA (0–10)</span>
-                      </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#32ade6', display: 'inline-block' }} />
-                        <span className="muted">Borg CR-10</span>
-                      </span>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================================================
-// MAPA ANATÓMICO INTERACTIVO Y ANIMADO DE TAMIZAJE SEMIOLÓGICO DIFERENCIAL
-// ============================================================================
-function AnatomicalLegMap({ legSide, setLegSide, painLocation, setPainLocation, painAtRest, setPainAtRest }) {
-  const zones = [
-    {
-      id: 'posteromedial_difuso',
-      shortTitle: 'Borde interno difuso (> 5 cm)',
-      clinicalTag: 'Signo temprano SETM',
-      desc: 'Molestia alargada en el tercio medio-distal interno de la tibia.',
-      color: '#f59e0b'
-    },
-    {
-      id: 'focal_puntual',
-      shortTitle: 'Punto específico en hueso (< 2 cm)',
-      clinicalTag: 'Bandera Roja · Estrés focal',
-      desc: 'Dolor punzante localizable con la yema de un solo dedo.',
-      color: '#ff453a'
-    },
-    {
-      id: 'muscular_general',
-      shortTitle: 'Masa muscular posterior',
-      clinicalTag: 'Sobrecarga sóleo / gemelos',
-      desc: 'Tensión en la pantorrilla sin dolor directo sobre el borde óseo.',
-      color: '#32ade6'
-    }
-  ];
-
-  const activeZone = zones.find((z) => z.id === painLocation) || zones[0];
-
-  return (
-    <div className="stack" style={{ gap: '12px', marginTop: '6px' }}>
-      <style>{`
-        @keyframes rsdPulseWave {
-          0% { transform: scale(0.92); opacity: 0.85; }
-          70% { transform: scale(1.38); opacity: 0; }
-          100% { transform: scale(1.38); opacity: 0; }
-        }
-        @keyframes rsdSoftGlow {
-          0%, 100% { opacity: 0.78; }
-          50% { opacity: 1; }
-        }
-        @keyframes rsdCardSlide {
-          from { opacity: 0; transform: translateY(4px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .rsd-pulse-ring {
-          transform-box: fill-box;
-          transform-origin: center;
-          animation: rsdPulseWave 1.9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-        }
-        .rsd-zone-active {
-          animation: rsdSoftGlow 2s ease-in-out infinite;
-          transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .rsd-zone-idle {
-          transition: all 0.25s ease;
-        }
-        .rsd-zone-idle:hover {
-          opacity: 0.9;
-        }
-        .rsd-diag-card {
-          animation: rsdCardSlide 0.25s ease-out;
-        }
-      `}</style>
-
-      {/* 1. Selector de lateralidad */}
-      <div>
-        <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>
-          1. Extremidad afectada
-        </label>
-        <div className="seg" style={{ '--n': 3 }}>
-          <div
-            className="seg-pill"
-            style={{
-              transform: `translateX(${legSide === 'izquierda' ? 0 : legSide === 'derecha' ? 100 : 200}%)`
-            }}
-          />
-          {[
-            { id: 'izquierda', label: 'Izquierda' },
-            { id: 'derecha', label: 'Derecha' },
-            { id: 'bilateral', label: 'Ambas' }
-          ].map((opt) => (
-            <button
-              key={opt.id}
-              type="button"
-              className={`seg-btn ${legSide === opt.id ? 'on' : ''}`}
-              onClick={() => setLegSide(opt.id)}
-            >
-              {opt.label}
+              <ChevronRight size={18} color="var(--ink-3)" />
             </button>
-          ))}
+
+            <button type="button" className="ios-row" onClick={() => onGoTab('cadencia')}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className="icon-tile" style={{ '--c': '#32ade6' }}>
+                  <Timer size={17} />
+                </div>
+                <div>
+                  <div className="h3">Metrónomo de cadencia (+5 %)</div>
+                  <div className="small muted">
+                    Tu objetivo protector: {Math.round((user.profile.cadencePpm || 164) * 1.05)} pasos/min
+                  </div>
+                </div>
+              </div>
+              <ChevronRight size={18} color="var(--ink-3)" />
+            </button>
+
+            <button type="button" className="ios-row" onClick={() => onGoTab('quees')}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className="icon-tile" style={{ '--c': '#ff9f0a' }}>
+                  <ClipboardCheck size={17} />
+                </div>
+                <div>
+                  <div className="h3">Guía visual y Test Pre/Post</div>
+                  <div className="small muted">
+                    {user.quizScores?.pre !== null
+                      ? `Pre: ${user.quizScores.pre}/10 · Post: ${user.quizScores.post ?? 'Pendiente'}`
+                      : 'Evalúa cuánto sabes sobre prevención'}
+                  </div>
+                </div>
+              </div>
+              <ChevronRight size={18} color="var(--ink-3)" />
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* 2. Esquema anatómico SVG interactivo y animado */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-          <label className="eyebrow">2. Toca la zona dolorosa en el esquema</label>
-          <span className="small muted" style={{ fontSize: '11px' }}>Interactivo</span>
-        </div>
-
-        <div
-          style={{
-            background: 'var(--surface-2)',
-            borderRadius: '18px',
-            padding: '12px 10px 10px',
-            border: '1px solid var(--line)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)'
-          }}
-        >
-          <svg
-            viewBox="0 0 320 242"
-            role="img"
-            aria-label="Mapa anatómico interactivo de la pierna"
-            style={{ width: '100%', height: 'auto', display: 'block', touchAction: 'manipulation' }}
-          >
-            <defs>
-              <linearGradient id="rsd-leg-fill" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="var(--surface)" stopOpacity="1" />
-                <stop offset="100%" stopColor="var(--surface-2)" stopOpacity="0.95" />
-              </linearGradient>
-              <linearGradient id="rsd-bone-grad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--ink-3)" stopOpacity="0.16" />
-                <stop offset="50%" stopColor="var(--ink-3)" stopOpacity="0.28" />
-                <stop offset="100%" stopColor="var(--ink-3)" stopOpacity="0.14" />
-              </linearGradient>
-              <linearGradient id="rsd-amber-grad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#fbbf24" />
-                <stop offset="100%" stopColor="#d97706" />
-              </linearGradient>
-              <radialGradient id="rsd-red-grad" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#ff6b63" />
-                <stop offset="100%" stopColor="#dc2626" />
-              </radialGradient>
-              <linearGradient id="rsd-cyan-grad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#38bdf8" />
-                <stop offset="100%" stopColor="#0284c7" />
-              </linearGradient>
-            </defs>
-
-            {/* Encabezados de vista anatómica */}
-            <text x="84" y="15" textAnchor="middle" fill="var(--ink-3)" fontSize="9.5" fontWeight="700" letterSpacing="0.04em">
-              VISTA MEDIAL (TIBIA)
-            </text>
-            <text x="236" y="15" textAnchor="middle" fill="var(--ink-3)" fontSize="9.5" fontWeight="700" letterSpacing="0.04em">
-              VISTA POSTERIOR
-            </text>
-
-            <line x1="160" y1="24" x2="160" y2="222" stroke="var(--line)" strokeDasharray="3 3" strokeWidth="1" />
-
-            {/* ================= VISTA MEDIAL (IZQUIERDA) ================= */}
-            <g>
-              <path
-                d="M 60 28 C 56 62, 57 105, 62 152 C 64 170, 63 184, 58 196 C 55 204, 62 214, 76 215 L 118 215 C 126 215, 129 208, 123 203 C 109 194, 96 186, 93 170 C 91 144, 96 102, 99 65 C 101 48, 98 35, 94 28 Z"
-                fill="url(#rsd-leg-fill)"
-                stroke="var(--ink-3)"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M 73 36 C 72 82, 73 135, 75 186 L 83 186 C 84 135, 84 82, 83 36 Z"
-                fill="url(#rsd-bone-grad)"
-              />
-              <circle cx="79" cy="189" r="5.5" fill="none" stroke="var(--ink-3)" strokeOpacity="0.45" strokeWidth="1.3" />
-
-              {/* ZONA A: Borde posteromedial distal difuso (> 5 cm) */}
-              <g
-                onClick={() => setPainLocation('posteromedial_difuso')}
-                style={{ cursor: 'pointer' }}
-                className={painLocation === 'posteromedial_difuso' ? 'rsd-zone-active' : 'rsd-zone-idle'}
-              >
-                {painLocation === 'posteromedial_difuso' && (
-                  <rect
-                    x="57"
-                    y="94"
-                    width="22"
-                    height="76"
-                    rx="11"
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeWidth="1.6"
-                    className="rsd-pulse-ring"
-                  />
-                )}
-                <rect
-                  x="60"
-                  y="98"
-                  width="16"
-                  height="68"
-                  rx="8"
-                  fill={painLocation === 'posteromedial_difuso' ? 'url(#rsd-amber-grad)' : '#f59e0b2e'}
-                  stroke="#f59e0b"
-                  strokeWidth={painLocation === 'posteromedial_difuso' ? '2' : '1.2'}
-                />
-                <line x1="46" y1="100" x2="46" y2="164" stroke="#f59e0b" strokeWidth="1.3" />
-                <line x1="42" y1="100" x2="50" y2="100" stroke="#f59e0b" strokeWidth="1.3" />
-                <line x1="42" y1="164" x2="50" y2="164" stroke="#f59e0b" strokeWidth="1.3" />
-                <text x="39" y="135" textAnchor="end" fill="#f59e0b" fontSize="9" fontWeight="800">
-                  &gt; 5 cm
-                </text>
-              </g>
-
-              {/* ZONA B: Punto focalizado sobre cortical tibial (< 2 cm) */}
-              <g
-                onClick={() => setPainLocation('focal_puntual')}
-                style={{ cursor: 'pointer' }}
-                className={painLocation === 'focal_puntual' ? 'rsd-zone-active' : 'rsd-zone-idle'}
-              >
-                {painLocation === 'focal_puntual' && (
-                  <>
-                    <circle
-                      cx="85"
-                      cy="128"
-                      r="14"
-                      fill="none"
-                      stroke="#ff453a"
-                      strokeWidth="1.8"
-                      className="rsd-pulse-ring"
-                    />
-                    <circle
-                      cx="85"
-                      cy="128"
-                      r="19"
-                      fill="none"
-                      stroke="#ff453a"
-                      strokeOpacity="0.45"
-                      strokeDasharray="2 2"
-                      strokeWidth="1.1"
-                    />
-                  </>
-                )}
-                <circle
-                  cx="85"
-                  cy="128"
-                  r="9.5"
-                  fill={painLocation === 'focal_puntual' ? 'url(#rsd-red-grad)' : '#ff453a33'}
-                  stroke="#ff453a"
-                  strokeWidth={painLocation === 'focal_puntual' ? '2' : '1.3'}
-                />
-                <circle cx="85" cy="128" r="2.6" fill={painLocation === 'focal_puntual' ? '#ffffff' : '#ff453a'} />
-                <line x1="95" y1="123" x2="113" y2="112" stroke="#ff453a" strokeWidth="1.2" />
-                <text x="116" y="112" textAnchor="start" fill="#ff453a" fontSize="9" fontWeight="800">
-                  &lt; 2 cm
-                </text>
-              </g>
-            </g>
-
-            {/* ================= VISTA POSTERIOR (DERECHA) ================= */}
-            <g>
-              <path
-                d="M 216 28 C 208 56, 206 88, 215 118 C 222 140, 226 164, 225 188 C 223 198, 220 208, 226 215 L 246 215 C 252 208, 249 198, 247 188 C 246 164, 250 140, 257 118 C 266 88, 264 56, 256 28 Z"
-                fill="url(#rsd-leg-fill)"
-                stroke="var(--ink-3)"
-                strokeWidth="1.5"
-              />
-              <line x1="236" y1="138" x2="236" y2="200" stroke="var(--ink-3)" strokeOpacity="0.38" strokeWidth="4.5" strokeLinecap="round" />
-
-              {/* ZONA C: Compartimento muscular posterior (sóleo / gastrocnemio) */}
-              <g
-                onClick={() => setPainLocation('muscular_general')}
-                style={{ cursor: 'pointer' }}
-                className={painLocation === 'muscular_general' ? 'rsd-zone-active' : 'rsd-zone-idle'}
-              >
-                {painLocation === 'muscular_general' && (
-                  <ellipse
-                    cx="236"
-                    cy="86"
-                    rx="22"
-                    ry="42"
-                    fill="none"
-                    stroke="#32ade6"
-                    strokeWidth="1.6"
-                    className="rsd-pulse-ring"
-                  />
-                )}
-                <ellipse
-                  cx="236"
-                  cy="86"
-                  rx="18"
-                  ry="38"
-                  fill={painLocation === 'muscular_general' ? 'url(#rsd-cyan-grad)' : '#32ade62e'}
-                  stroke="#32ade6"
-                  strokeWidth={painLocation === 'muscular_general' ? '2' : '1.3'}
-                />
-                <line
-                  x1="236"
-                  y1="54"
-                  x2="236"
-                  y2="104"
-                  stroke={painLocation === 'muscular_general' ? '#ffffff' : '#32ade6'}
-                  strokeOpacity="0.45"
-                  strokeWidth="1.2"
-                />
-                <text x="236" y="84" textAnchor="middle" fill={painLocation === 'muscular_general' ? '#04121c' : '#32ade6'} fontSize="8.5" fontWeight="800">
-                  Sóleo /
-                </text>
-                <text x="236" y="94" textAnchor="middle" fill={painLocation === 'muscular_general' ? '#04121c' : '#32ade6'} fontSize="8.5" fontWeight="800">
-                  Gemelos
-                </text>
-              </g>
-            </g>
-          </svg>
-
-          {/* Tarjeta semiológica animada sincronizada */}
-          <div
-            key={activeZone.id}
-            className="rsd-diag-card"
-            style={{
-              marginTop: '8px',
-              padding: '10px 12px',
-              borderRadius: '13px',
-              background: `color-mix(in srgb, ${activeZone.color} 14%, var(--surface))`,
-              border: `1px solid ${activeZone.color}`
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span className="h3" style={{ fontSize: '13px', color: activeZone.color }}>
-                {activeZone.shortTitle}
-              </span>
-              <span
-                className="badge"
-                style={{
-                  background: `color-mix(in srgb, ${activeZone.color} 22%, transparent)`,
-                  color: activeZone.color,
-                  fontSize: '10px'
-                }}
-              >
-                {activeZone.clinicalTag}
-              </span>
-            </div>
-            <div className="small muted" style={{ fontSize: '11.5px', marginTop: '3px' }}>
-              {activeZone.desc}
-            </div>
+        {/* GRÁFICO DE ÚLTIMAS SESIONES */}
+        <div className="stack">
+          <div className="section-heading">
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <BarChart3 size={16} color="var(--pink)" /> Últimas sesiones ({user.sessions.length})
+            </span>
+            <span className="eyebrow">Regla máx. +10 %</span>
           </div>
 
-          {/* Botones rápidos de selección directa */}
-          <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
-            {zones.map((z) => {
-              const isSel = painLocation === z.id;
-              return (
+          <div className="card">
+            {recentSessions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '18px 8px' }}>
+                <p className="small muted">Aún no has registrado carreras.</p>
                 <button
-                  key={z.id}
                   type="button"
-                  onClick={() => setPainLocation(z.id)}
-                  className="tap"
+                  onClick={onOpenSession}
+                  className="btn btn-primary tap"
+                  style={{ marginTop: '10px' }}
+                >
+                  <PlusCircle size={17} /> Registrar mi primera sesión
+                </button>
+              </div>
+            ) : (
+              <>
+                <div
                   style={{
-                    flex: 1,
-                    padding: '7px 6px',
-                    borderRadius: '9px',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    background: isSel ? z.color : 'var(--surface)',
-                    color: isSel ? (z.id === 'focal_puntual' ? '#fff' : '#000') : 'var(--ink-2)',
-                    border: `1px solid ${isSel ? z.color : 'var(--line)'}`,
-                    transition: 'all 0.2s ease'
+                    display: 'grid',
+                    gridTemplateColumns: `repeat(${recentSessions.length}, minmax(0, 1fr))`,
+                    gap: '8px',
+                    alignItems: 'end',
+                    height: '120px',
+                    paddingTop: '12px'
                   }}
                 >
-                  {z.id === 'posteromedial_difuso' ? 'Difuso > 5 cm' : z.id === 'focal_puntual' ? 'Puntual < 2 cm' : 'Muscular'}
-                </button>
-              );
-            })}
+                  {recentSessions.map((s) => {
+                    const pct = Math.max(16, Math.round((Number(s.distanceKm) / maxDist) * 100));
+                    const barColor = s.eva >= 4 ? '#ff453a' : s.eva > 0 ? '#f59e0b' : 'var(--pink)';
+                    return (
+                      <div
+                        key={s.id || s.date}
+                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end' }}
+                      >
+                        <span className="tnum" style={{ fontSize: '10px', fontWeight: 700, color: 'var(--ink-2)' }}>
+                          {distVal(s.distanceKm, unit)}
+                        </span>
+                        <div
+                          style={{
+                            width: '100%',
+                            maxWidth: '32px',
+                            height: `${pct}%`,
+                            borderRadius: '7px',
+                            background: barColor,
+                            transition: 'height .25s var(--ease)'
+                          }}
+                        />
+                        <span className="tnum" style={{ fontSize: '9.5px', color: 'var(--ink-3)' }}>
+                          {s.date.slice(5)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {recentSessions.slice(-3).reverse().map((s) => (
+                    <div
+                      key={s.id || s.date}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '8px 10px',
+                        borderRadius: '10px',
+                        background: 'var(--surface-2)',
+                        fontSize: '12px'
+                      }}
+                    >
+                      <div>
+                        <strong className="tnum">{s.date}</strong>
+                        <span className="muted"> · {fmtDist(s.distanceKm, unit)} ({s.durationMin} min)</span>
+                      </div>
+                      <div className="tnum" style={{ display: 'flex', gap: '6px', fontWeight: 700 }}>
+                        <span style={{ color: 'var(--ink-2)' }}>Borg {s.rpe}</span>
+                        <span style={{ color: s.eva >= 4 ? '#ff453a' : s.eva > 0 ? '#f59e0b' : '#34c759' }}>
+                          EVA {s.eva}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
-
-      {/* 3. Criterio de dolor en reposo */}
-      <label
-        style={{
-          display: 'flex',
-          gap: '10px',
-          alignItems: 'flex-start',
-          cursor: 'pointer',
-          padding: '10px 12px',
-          borderRadius: '12px',
-          background: painAtRest ? '#ff453a1f' : 'var(--surface-2)',
-          border: `1px solid ${painAtRest ? '#ff453a' : 'transparent'}`,
-          transition: 'all 0.2s ease'
-        }}
-      >
-        <input
-          type="checkbox"
-          checked={painAtRest}
-          onChange={(e) => setPainAtRest(e.target.checked)}
-          style={{ marginTop: '2px', accentColor: '#ff453a', width: '16px', height: '16px' }}
-        />
-        <div>
-          <div className="h3" style={{ fontSize: '12.5px', color: painAtRest ? '#ff453a' : 'var(--ink)' }}>
-            El dolor persiste en reposo, al caminar o en la noche
-          </div>
-          <div className="small muted" style={{ fontSize: '11px', marginTop: '2px' }}>
-            Activa Bandera Roja inmediata y suspende el impacto hasta valoración médica.
-          </div>
-        </div>
-      </label>
     </div>
   );
 }
 
 // ============================================================================
-// MODAL: REGISTRO DE SESIÓN CON MAPA ANATÓMICO INTERACTIVO
-// ============================================================================
-function LogSessionModal({ unit, onClose, onSaveSession }) {
-  const [distanceKm, setDistanceKm] = useState(4.0);
-  const [durationMin, setDurationMin] = useState(25);
-  const [rpe, setRpe] = useState(4);
-  const [eva, setEva] = useState(0);
-  const [legSide, setLegSide] = useState('izquierda');
-  const [painLocation, setPainLocation] = useState('posteromedial_difuso');
-  const [painAtRest, setPainAtRest] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSaveSession({
-      date: new Date().toISOString().split('T')[0],
-      distanceKm: Number(distanceKm),
-      durationMin: Number(durationMin),
-      rpe: Number(rpe),
-      eva: Number(eva),
-      legSide: eva > 0 ? legSide : 'izquierda',
-      painLocation: eva > 0 ? painLocation : 'ninguna',
-      painAtRest: eva > 0 ? painAtRest : false
-    });
-  };
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 100,
-        background: '#000000cc',
-        backdropFilter: 'blur(8px)',
-        display: 'flex',
-        alignItems: 'flex-end',
-        justifyContent: 'center'
-      }}
-      onClick={onClose}
-    >
-      <form
-        onSubmit={handleSubmit}
-        className="card"
-        style={{
-          width: '100%',
-          maxWidth: '640px',
-          borderBottomLeftRadius: 0,
-          borderBottomRightRadius: 0,
-          maxHeight: '92dvh',
-          overflowY: 'auto',
-          padding: '22px 20px 36px'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-          <div>
-            <span className="badge">Autorregistro Post-Entrenamiento</span>
-            <h2 className="h2" style={{ marginTop: '6px' }}>Carga y Tamizaje Semiológico</h2>
-          </div>
-          <button type="button" onClick={onClose} className="btn-soft" style={{ width: '36px', minHeight: '36px', padding: 0, display: 'grid', placeItems: 'center' }}>
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="grid-2">
-          <div className="input-group">
-            <label className="eyebrow">Distancia ({unit === 'metric' ? 'km' : 'mi'})</label>
-            <input
-              type="number"
-              step="0.1"
-              min="0.1"
-              required
-              className="input-field tnum"
-              value={unit === 'metric' ? distanceKm : +(distanceKm * 0.621371).toFixed(1)}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                setDistanceKm(unit === 'metric' ? val : +(val / 0.621371).toFixed(2));
-              }}
-            />
-          </div>
-
-          <div className="input-group">
-            <label className="eyebrow">Tiempo (minutos)</label>
-            <input type="number" min="1" required className="input-field tnum" value={durationMin} onChange={(e) => setDurationMin(e.target.value)} />
-          </div>
-        </div>
-
-        <div className="input-group">
-          <label className="eyebrow">Esfuerzo Percibido · Borg CR-10: <span style={{ color: 'var(--pink)' }}>{rpe}/10 ({BORG_LABELS[rpe]})</span></label>
-          <input
-            type="range"
-            min="0"
-            max="10"
-            value={rpe}
-            onChange={(e) => setRpe(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#34c759', marginTop: '6px' }}
-          />
-        </div>
-
-        <div className="input-group">
-          <label className="eyebrow">Intensidad de dolor · EVA: <span style={{ color: getPainInfo(eva).c }}>{eva}/10</span></label>
-          <input
-            type="range"
-            min="0"
-            max="10"
-            value={eva}
-            onChange={(e) => {
-              const nextEva = Number(e.target.value);
-              setEva(nextEva);
-              if (nextEva === 0) setPainAtRest(false);
-            }}
-            style={{ width: '100%', accentColor: getPainInfo(eva).c, marginTop: '6px' }}
-          />
-        </div>
-
-        {eva > 0 && (
-          <AnatomicalLegMap
-            legSide={legSide}
-            setLegSide={setLegSide}
-            painLocation={painLocation}
-            setPainLocation={setPainLocation}
-            painAtRest={painAtRest}
-            setPainAtRest={setPainAtRest}
-          />
-        )}
-
-        <button type="submit" className="btn btn-primary tap" style={{ marginTop: '14px' }}>
-          <span>Guardar Sesión y Evaluar Riesgo</span>
-        </button>
-      </form>
-    </div>
-  );
-}
-
-// ============================================================================
-// MODAL: RESUMEN CLÍNICO-DEPORTIVO (INTEROPERABILIDAD BÁSICA)
-// ============================================================================
-function ClinicalReportModal({ user, bio, unit, onClose, onCopyText }) {
-  const p = user.profile;
-  const ls = bio.lastSession;
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 110,
-        background: '#000000cc',
-        backdropFilter: 'blur(8px)',
-        display: 'grid',
-        placeItems: 'center',
-        padding: '16px'
-      }}
-      onClick={onClose}
-    >
-      <div
-        className="card stack"
-        style={{ maxWidth: '460px', width: '100%', maxHeight: '88dvh', overflowY: 'auto' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <span className="badge">Síntesis para Consulta Profesional</span>
-            <h2 className="h2" style={{ marginTop: '4px' }}>Resumen Clínico-Deportivo</h2>
-          </div>
-          <button type="button" onClick={onClose} className="icon-circle-btn tap">
-            <X size={16} />
-          </button>
-        </div>
-
-        <p className="small muted">
-          Ficha estructurada con el historial de carga y tamizaje semiológico para facilitar la valoración por medicina deportiva o fisioterapia.
-        </p>
-
-        <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: '12px' }} className="stack">
-          <div className="grid-2">
-            <div>
-              <div className="eyebrow">Corredor</div>
-              <div className="h3">{p.name} ({p.age} años)</div>
-            </div>
-            <div>
-              <div className="eyebrow">IMC / Sexo</div>
-              <div className="h3 tnum">{bio.bmi} kg/m² · {p.sex}</div>
-            </div>
-          </div>
-          <div className="grid-2">
-            <div>
-              <div className="eyebrow">ACWR (7d / 28d)</div>
-              <div className="h3 tnum" style={{ color: bio.acwrColor }}>{bio.acwr} ({bio.acwrStatus})</div>
-            </div>
-            <div>
-              <div className="eyebrow">Nivel de Alerta</div>
-              <div className="h3" style={{ color: bio.riskColor }}>{bio.riskLevel}</div>
-            </div>
-          </div>
-          <div>
-            <div className="eyebrow">Último reporte de síntomas</div>
-            <div className="small" style={{ marginTop: '2px' }}>
-              {ls
-                ? `${ls.date}: ${fmtDist(ls.distanceKm, unit)}, Borg ${ls.rpe}/10, Dolor EVA ${ls.eva}/10${ls.eva > 0 ? ` (${LEG_SIDE_LABELS[ls.legSide || 'izquierda']} · ${PAIN_ZONE_LABELS[ls.painLocation || 'ninguna']}${ls.painAtRest ? ' · Dolor en reposo' : ''})` : ''}`
-                : 'Sin sesiones registradas'}
-            </div>
-          </div>
-        </div>
-
-        <button type="button" onClick={onCopyText} className="btn btn-primary tap">
-          <span>Copiar Resumen para Compartir</span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// 3. MÓDULO FUNCIONAL DE CADENCIA BIOMECÁNICA (METRÓNOMO WEB AUDIO + TEST 15S)
+// 3. METRÓNOMO BIOMECÁNICO DE CADENCIA (TAB: CADENCIA)
 // ============================================================================
 function CadenceView({ cadencePpm, onSaveCadence }) {
-  const recommendedTarget = Math.min(188, Math.max(170, Math.round(cadencePpm * 1.05)));
-  const [bpm, setBpm] = useState(recommendedTarget);
+  const [ppm, setPpm] = useState(cadencePpm || 164);
   const [playing, setPlaying] = useState(false);
-  const [beatPulse, setBeatPulse] = useState(false);
-  const [soundOn, setSoundOn] = useState(true);
-
-  const [testRunning, setTestRunning] = useState(false);
-  const [testSeconds, setTestSeconds] = useState(15);
-  const [stepCount15s, setStepCount15s] = useState('');
-
+  const [muted, setMuted] = useState(false);
+  const [beat, setBeat] = useState(false);
   const audioCtxRef = useRef(null);
 
+  const recommendedTarget = Math.min(195, Math.round((cadencePpm || 164) * 1.05));
+
   const playClick = () => {
-    if (!soundOn) return;
+    if (muted) return;
     try {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new AudioContextClass();
-      }
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!audioCtxRef.current) audioCtxRef.current = new AudioCtx();
       const ctx = audioCtxRef.current;
       if (ctx.state === 'suspended') ctx.resume();
 
@@ -2962,506 +2268,347 @@ function CadenceView({ cadencePpm, onSaveCadence }) {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(880, ctx.currentTime);
       gain.gain.setValueAtTime(0.18, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.045);
-
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.05);
+      osc.stop(ctx.currentTime + 0.065);
     } catch {
-      // Silencio seguro si el dispositivo bloquea audio
+      // Silencio seguro si el navegador bloquea audio sin gesto previo
     }
   };
 
   useEffect(() => {
     if (!playing) {
-      setBeatPulse(false);
+      setBeat(false);
       return;
     }
-    const intervalMs = Math.round(60000 / bpm);
+    const intervalMs = Math.round(60000 / ppm);
     playClick();
-    setBeatPulse(true);
-    const offTimer = setTimeout(() => setBeatPulse(false), 110);
+    setBeat(true);
+    const tOff = setTimeout(() => setBeat(false), 90);
 
-    const timer = setInterval(() => {
+    const id = setInterval(() => {
       playClick();
-      setBeatPulse(true);
-      setTimeout(() => setBeatPulse(false), 110);
+      setBeat(true);
+      setTimeout(() => setBeat(false), 90);
     }, intervalMs);
 
     return () => {
-      clearInterval(timer);
-      clearTimeout(offTimer);
+      clearInterval(id);
+      clearTimeout(tOff);
     };
-  }, [playing, bpm, soundOn]);
-
-  useEffect(() => {
-    if (!testRunning) return;
-    const interval = setInterval(() => {
-      setTestSeconds((prev) => {
-        if (prev <= 1) {
-          setTestRunning(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [testRunning]);
-
-  const lowCadence = cadencePpm < 170;
+  }, [playing, ppm, muted]);
 
   return (
     <div className="stack">
       <div className="card">
-        <span className="badge">Biomecánica de Carrera</span>
-        <h2 className="display" style={{ marginTop: '8px', fontSize: '21px' }}>
-          Control de Cadencia
-        </h2>
+        <span className="badge">Biofeedback Auditivo</span>
+        <h1 className="display" style={{ marginTop: '4px' }}>
+          Control de <span className="grad-text">Cadencia</span>
+        </h1>
         <p className="small muted" style={{ marginTop: '4px' }}>
-          Aumentar ligeramente la frecuencia de pasos (+5%) acorta la zancada y atenúa los picos de impacto vertical sobre la tibia.
+          Subir tu <GlosarioTerm term="CADENCIA">cadencia</GlosarioTerm> apenas un 5 % hace que des pasos más cortos, caigas debajo de tu cuerpo y bajes el golpe sobre la espinilla.
         </p>
-
-        <div className="grid-2" style={{ marginTop: '12px' }}>
-          <div style={{ background: 'var(--surface-2)', padding: '10px 12px', borderRadius: '12px' }}>
-            <div className="eyebrow">Tu cadencia habitual</div>
-            <div className="h2 tnum" style={{ marginTop: '2px', color: lowCadence ? '#f59e0b' : 'var(--pink)' }}>
-              {cadencePpm} <span className="small muted">ppm</span>
-            </div>
-          </div>
-          <div style={{ background: 'var(--surface-2)', padding: '10px 12px', borderRadius: '12px' }}>
-            <div className="eyebrow">Meta protectora (+5%)</div>
-            <div className="h2 tnum" style={{ marginTop: '2px', color: 'var(--pink)' }}>
-              {recommendedTarget} <span className="small muted">ppm</span>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* METRÓNOMO ACÚSTICO Y VISUAL */}
-      <div className="card stack">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <div className="eyebrow">Metrónomo Guía Offline</div>
-            <div className="h2 tnum" style={{ marginTop: '2px' }}>{bpm} pasos/min</div>
-          </div>
+      <div className="card" style={{ textAlign: 'center', padding: '18px 14px' }}>
+        <div
+          style={{
+            width: '76px',
+            height: '76px',
+            margin: '0 auto 10px',
+            borderRadius: '999px',
+            background: beat ? 'var(--pink)' : 'color-mix(in srgb, var(--pink) 16%, var(--surface-2))',
+            color: beat ? 'var(--pink-ink)' : 'var(--pink)',
+            display: 'grid',
+            placeItems: 'center',
+            transform: beat ? 'scale(1.08)' : 'scale(1)',
+            transition: 'transform .09s ease, background .09s ease'
+          }}
+        >
+          <Footprints size={32} />
+        </div>
+
+        <div className="eyebrow">Ritmo seleccionado</div>
+        <div className="display tnum" style={{ fontSize: '42px', marginTop: '2px' }}>
+          {ppm} <span className="small muted" style={{ fontSize: '15px' }}>ppm</span>
+        </div>
+
+        <div style={{ marginTop: '8px' }}>
           <button
             type="button"
-            className="icon-circle-btn tap"
-            onClick={() => setSoundOn(!soundOn)}
-            aria-label="Activar o silenciar sonido"
+            onClick={() => setPpm(recommendedTarget)}
+            className="btn-soft tap tnum"
+            style={{ color: 'var(--pink)' }}
           >
-            {soundOn ? <Volume2 size={16} color="var(--pink)" /> : <VolumeX size={16} />}
+            <Zap size={14} /> Aplicar objetivo +5 % ({recommendedTarget} ppm)
           </button>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0' }}>
-          <div
-            style={{
-              width: '74px',
-              height: '74px',
-              borderRadius: '50%',
-              background: beatPulse ? 'var(--pink)' : 'var(--surface-2)',
-              border: '2px solid var(--pink)',
-              display: 'grid',
-              placeItems: 'center',
-              transform: beatPulse ? 'scale(1.08)' : 'scale(1)',
-              transition: 'transform 0.09s ease, background 0.09s ease'
-            }}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '16px' }}>
+          <button
+            type="button"
+            className="btn-soft tap tnum"
+            onClick={() => setPpm((v) => Math.max(140, v - 2))}
           >
-            <Footprints size={28} color={beatPulse ? 'var(--pink-ink)' : 'var(--pink)'} />
-          </div>
-        </div>
-
-        <div>
+            -2
+          </button>
           <input
             type="range"
-            min="155"
-            max="190"
-            value={bpm}
-            onChange={(e) => setBpm(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#34c759' }}
+            min="140"
+            max="200"
+            value={ppm}
+            onChange={(e) => setPpm(Number(e.target.value))}
+            style={{ flex: 1, accentColor: 'var(--pink)' }}
+            aria-label="Ajustar pasos por minuto"
           />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--ink-3)' }} className="tnum">
-            <span>155 ppm</span>
-            <span>Meta: {recommendedTarget} ppm</span>
-            <span>190 ppm</span>
-          </div>
-        </div>
-
-        <div className="grid-2">
           <button
             type="button"
+            className="btn-soft tap tnum"
+            onClick={() => setPpm((v) => Math.min(200, v + 2))}
+          >
+            +2
+          </button>
+        </div>
+
+        <div className="grid-2" style={{ marginTop: '16px' }}>
+          <button
+            type="button"
+            onClick={() => setPlaying((p) => !p)}
             className="btn btn-primary tap"
-            onClick={() => setPlaying(!playing)}
           >
-            {playing ? <Pause size={17} /> : <Play size={17} />}
-            <span>{playing ? 'Detener' : 'Iniciar Metrónomo'}</span>
+            {playing ? <><Pause size={18} /> Pausar</> : <><Play size={18} /> Iniciar ritmo</>}
           </button>
-          <button
-            type="button"
-            className="btn btn-soft tap"
-            onClick={() => setBpm(recommendedTarget)}
-          >
-            <span>Fijar Meta ({recommendedTarget})</span>
-          </button>
-        </div>
-      </div>
 
-      {/* TEST RÁPIDO DE CADENCIA (15 SEGUNDOS) */}
-      <div className="card stack">
-        <div>
-          <div className="eyebrow">Autoevaluación de Campo</div>
-          <h3 className="h2" style={{ marginTop: '2px' }}>Test Rápido de 15 Segundos</h3>
-          <p className="small muted" style={{ marginTop: '4px' }}>
-            Durante un trote suave, inicia el temporizador y cuenta cada vez que ambos pies tocan el suelo durante 15 segundos.
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-2)', padding: '12px', borderRadius: '12px' }}>
-          <div className="h2 tnum" style={{ fontSize: '24px' }}>{testSeconds}s</div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
               type="button"
-              className="btn-pill-sm tap"
-              onClick={() => {
-                if (testSeconds === 0) setTestSeconds(15);
-                setTestRunning(!testRunning);
-              }}
+              onClick={() => setMuted((m) => !m)}
+              className="btn btn-soft tap"
+              aria-label={muted ? 'Activar sonido' : 'Silenciar'}
             >
-              {testRunning ? 'Pausar' : 'Contar 15s'}
+              {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
             </button>
             <button
               type="button"
-              className="btn-soft tap"
               onClick={() => {
-                setTestRunning(false);
-                setTestSeconds(15);
+                setPlaying(false);
+                setPpm(cadencePpm || 164);
               }}
+              className="btn btn-soft tap"
+              aria-label="Restablecer"
             >
-              Reiniciar
+              <RotateCcw size={18} />
             </button>
           </div>
         </div>
 
-        <div className="grid-2" style={{ alignItems: 'end' }}>
-          <div className="input-group" style={{ marginBottom: 0 }}>
-            <label className="eyebrow">Pasos contados en 15s</label>
-            <input
-              type="number"
-              min="30"
-              max="60"
-              placeholder="Ej. 41"
-              className="input-field tnum"
-              value={stepCount15s}
-              onChange={(e) => setStepCount15s(e.target.value)}
-            />
-          </div>
-          <button
-            type="button"
-            className="btn btn-soft tap"
-            disabled={!stepCount15s || Number(stepCount15s) < 25}
-            onClick={() => {
-              const calculated = Math.round(Number(stepCount15s) * 4);
-              onSaveCadence(calculated);
-              setBpm(Math.min(188, Math.max(170, Math.round(calculated * 1.05))));
-              setStepCount15s('');
-            }}
-          >
-            Guardar ({stepCount15s ? `${Number(stepCount15s) * 4} ppm` : '--'})
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => onSaveCadence(ppm)}
+          className="btn btn-soft tap"
+          style={{ marginTop: '10px', width: '100%' }}
+        >
+          <Check size={16} color="var(--pink)" /> Guardar {ppm} ppm en mi perfil
+        </button>
       </div>
     </div>
   );
 }
 
 // ============================================================================
-// 4. MÓDULO EDUCATIVO DIFERENCIADO POR SEXO + TEST PRE/POST
+// 4. GUÍA EDUCATIVA EN LENGUAJE CLARO Y TEST PRE/POST (TAB: GUÍA/TEST)
 // ============================================================================
 function WhatIsView({ sex, quizScores, onSaveQuiz }) {
-  const [subTab, setSubTab] = useState(0);
-  const [openRisk, setOpenRisk] = useState(0);
-  const [quizMode, setQuizMode] = useState(null);
+  const [subTab, setSubTab] = useState('guia');
+  const [quizType, setQuizType] = useState('pre');
   const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
 
-  const isFemale = sex === 'femenino';
+  const score = QUIZ_QUESTIONS.reduce(
+    (acc, q, idx) => (answers[idx] === q.correct ? acc + 1 : acc),
+    0
+  );
 
-  const sexGuidance = isFemale
-    ? {
-      badge: 'Enfoque Diferenciado · Sexo Femenino',
-      accent: '#ff2e55',
-      title: 'Control neuromuscular de cadera y adaptación ósea',
-      summary:
-        'La evidencia epidemiológica identifica el sexo femenino como factor de riesgo intrínseco para SETM (Reinking et al., 2017), por lo que la progresión gradual y el fortalecimiento de cadera son prioritarios.',
-      points: [
-        {
-          label: 'Estabilidad pélvica y abductores de cadera',
-          text: 'Fortalecer el glúteo medio reduce el colapso medial de rodilla y la tracción excéntrica sobre el compartimento tibial.'
-        },
-        {
-          label: 'Remodelación ósea y recuperación',
-          text: 'Durante las primeras 8 semanas alterna días sin impacto para permitir la adaptación del periostio y la cortical tibial.'
-        }
-      ]
-    }
-    : {
-      badge: 'Enfoque Diferenciado · Sexo Masculino',
-      accent: '#32ade6',
-      title: 'Control de picos de volumen y fuerza de sóleo',
-      summary:
-        'En corredores principiantes de sexo masculino, el SETM suele desencadenarse por incrementos abruptos de ritmo o distancia y sobrecarga del tríceps sural.',
-      points: [
-        {
-          label: 'Prevención de picos de carga (ACWR > 1.5)',
-          text: 'Evita aumentar más del 10% semanal o correr a esfuerzos máximos (Borg > 7) durante la fase de adaptación.'
-        },
-        {
-          label: 'Descenso excéntrico del sóleo',
-          text: 'El fortalecimiento controlado de pantorrilla con rodilla flexionada mejora la absorción de fuerzas de reacción del suelo.'
-        }
-      ]
-    };
-
-  const improvement =
+  const deltaPct =
     quizScores.pre !== null && quizScores.post !== null && quizScores.pre > 0
       ? Math.round(((quizScores.post - quizScores.pre) / quizScores.pre) * 100)
+      : quizScores.pre === 0 && quizScores.post !== null
+      ? quizScores.post * 10
       : null;
-
-  const submitQuiz = () => {
-    let score = 0;
-    QUIZ_QUESTIONS.forEach((item, i) => {
-      if (answers[i] === item.correct) score += 1;
-    });
-    onSaveQuiz(quizMode, score);
-    setQuizMode(null);
-    setAnswers({});
-  };
 
   return (
     <div className="stack">
-      <div className="hero-card">
-        <img
-          src="/assets/que-es-fisio-DTwnd5so.jpg"
-          alt="Educación preventiva SETM"
-          className="hero-bg"
-          onError={(e) => { e.currentTarget.style.display = 'none'; }}
-        />
-        <div className="hero-overlay" />
-        <div className="hero-content">
-          <span className="badge" style={{ marginBottom: '8px' }}>Módulo Educativo</span>
-          <h2 className="display" style={{ fontSize: '21px' }}>Comprende el SETM</h2>
-          <p className="small muted" style={{ marginTop: '4px' }}>
-            Alfabetización preventiva basada en evidencia científica para corredores novatos.
-          </p>
-        </div>
+      <div className="seg" style={{ '--n': 2 }}>
+        <div className="seg-pill" style={{ transform: `translateX(${subTab === 'guia' ? 0 : 100}%)` }} />
+        <button type="button" className={`seg-btn ${subTab === 'guia' ? 'on' : ''}`} onClick={() => setSubTab('guia')}>
+          <BookOpen size={14} /> Guía Rápida
+        </button>
+        <button type="button" className={`seg-btn ${subTab === 'test' ? 'on' : ''}`} onClick={() => setSubTab('test')}>
+          <ClipboardCheck size={14} /> Test Pre / Post
+        </button>
       </div>
 
-      <div
-        className="card stack"
-        style={{
-          borderColor: `color-mix(in srgb, ${sexGuidance.accent} 45%, var(--line))`,
-          background: `color-mix(in srgb, ${sexGuidance.accent} 7%, var(--surface))`
-        }}
-      >
-        <div>
-          <span
-            className="badge"
-            style={{
-              background: `color-mix(in srgb, ${sexGuidance.accent} 18%, transparent)`,
-              color: sexGuidance.accent
-            }}
-          >
-            {sexGuidance.badge}
-          </span>
-          <h3 className="h2" style={{ marginTop: '8px', fontSize: '17px' }}>
-            {sexGuidance.title}
-          </h3>
-          <p className="small muted" style={{ marginTop: '4px' }}>
-            {sexGuidance.summary}
-          </p>
-        </div>
-
-        <div className="stack" style={{ gap: '8px' }}>
-          {sexGuidance.points.map((pt, idx) => (
-            <div
-              key={idx}
-              style={{
-                background: 'var(--surface-2)',
-                padding: '10px 12px',
-                borderRadius: '14px'
-              }}
-            >
-              <div className="h3" style={{ fontSize: '13.5px', color: sexGuidance.accent }}>
-                {pt.label}
-              </div>
-              <div className="small muted" style={{ marginTop: '2px', fontSize: '12.5px' }}>
-                {pt.text}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid-2">
-        {STATS_FACTS.map((st, i) => (
-          <div key={i} className="card">
-            <div className="h2 tnum" style={{ color: st.c, fontSize: '22px' }}>{st.num}</div>
-            <div className="small muted" style={{ marginTop: '4px' }}>{st.label}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="seg" style={{ '--n': 4 }}>
-        <div className="seg-pill" style={{ transform: `translateX(${subTab * 100}%)` }} />
-        {['Anatomía', 'Síntomas', 'Riesgos', 'Test 10p'].map((lbl, idx) => (
-          <button key={lbl} className={`seg-btn ${subTab === idx ? 'on' : ''}`} onClick={() => setSubTab(idx)}>
-            {lbl}
-          </button>
-        ))}
-      </div>
-
-      {subTab === 0 && (
+      {subTab === 'guia' ? (
         <div className="stack">
-          {ANATOMY_CARDS.map(({ title, desc, c, Icon }, i) => (
-            <div key={i} className="card" style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-              <div className="icon-tile" style={{ '--c': c }}><Icon size={20} /></div>
-              <div>
-                <div className="h3">{title}</div>
-                <p className="small muted" style={{ marginTop: '4px' }}>{desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {subTab === 1 && (
-        <div className="card stack">
-          <div className="h3">Reconocimiento de señales tempranas</div>
-          {SYMPTOMS.map((sym, i) => (
-            <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <span className="badge tnum">{i + 1}</span>
-              <span className="small muted">{sym}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {subTab === 2 && (
-        <div className="stack">
-          {RISK_FACTORS.map((rf, i) => {
-            const isOpen = openRisk === i;
-            return (
-              <div key={i} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <button
-                  onClick={() => setOpenRisk(isOpen ? null : i)}
-                  style={{ width: '100%', padding: '16px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left' }}
-                >
-                  <span className="h3">{rf.title}</span>
-                  <ChevronDown size={18} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
-                </button>
-                {isOpen && (
-                  <div className="small muted" style={{ padding: '0 18px 16px', borderTop: '1px solid var(--line)', paddingTop: '12px' }}>
-                    {rf.detail}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {subTab === 3 && (
-        <div className="stack">
-          {!quizMode ? (
-            <div className="card stack">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <ClipboardCheck size={22} color="var(--pink)" />
-                <div className="h2">Evaluación Pre / Post</div>
-              </div>
-              <p className="small muted">
-                Instrumento de 10 ítems (0–10 pts) para verificar la apropiación de conceptos preventivos del SETM.
+          <div className="card">
+            <span className="badge">Educación Preventiva</span>
+            <h1 className="display" style={{ marginTop: '4px' }}>
+              ¿Qué es el <GlosarioTerm term="SETM">dolor en la espinilla</GlosarioTerm>?
+            </h1>
+            <p className="small muted" style={{ marginTop: '6px' }}>
+              Es la lesión por sobreuso más común cuando empiezas a correr. Ocurre porque la <GlosarioTerm term="PERIOSTIO">cubierta de la tibia</GlosarioTerm> se irrita al recibir más impacto del que puede reparar entre entrenamientos.
+            </p>
+            {sex === 'femenino' && (
+              <p className="small" style={{ marginTop: '8px', color: 'var(--pink)' }}>
+                Nota personalizada: en mujeres corredoras la evidencia reporta mayor susceptibilidad, por lo que respetar los días de recuperación y fuerza es clave.
               </p>
+            )}
+          </div>
 
-              <div className="grid-2">
-                <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: '14px' }}>
-                  <div className="eyebrow" style={{ fontSize: '10px' }}>Puntaje Pre-Test</div>
-                  <div className="h2 tnum" style={{ marginTop: '4px' }}>
-                    {quizScores.pre !== null ? `${quizScores.pre}/10` : 'Pendiente'}
-                  </div>
-                </div>
-                <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: '14px' }}>
-                  <div className="eyebrow" style={{ fontSize: '10px' }}>Puntaje Post-Test</div>
-                  <div className="h2 tnum" style={{ marginTop: '4px', color: 'var(--pink)' }}>
-                    {quizScores.post !== null ? `${quizScores.post}/10` : 'Pendiente'}
-                  </div>
-                </div>
+          <div className="grid-2">
+            {STATS_FACTS.map((st, i) => (
+              <div key={i} className="card">
+                <div className="display tnum" style={{ color: st.c, fontSize: '24px' }}>{st.num}</div>
+                <div className="small muted" style={{ marginTop: '3px' }}>{st.label}</div>
               </div>
+            ))}
+          </div>
 
-              {improvement !== null && (
-                <div style={{ padding: '12px', borderRadius: '14px', background: improvement >= 30 ? '#34c7591a' : '#ffd60a1a', border: '1px solid var(--pink)' }}>
-                  <span className="small" style={{ fontWeight: '700' }}>
-                    Variación del conocimiento: {improvement >= 0 ? `+${improvement}%` : `${improvement}%`}
-                    {improvement >= 30 ? ' (Meta ≥ 30% cumplida)' : ''}
-                  </span>
-                </div>
-              )}
-
-              <div className="grid-2">
-                <button className="btn btn-soft tap" onClick={() => { setAnswers({}); setQuizMode('pre'); }}>
-                  Iniciar Test Pre
-                </button>
-                <button className="btn btn-primary tap" onClick={() => { setAnswers({}); setQuizMode('post'); }}>
-                  Iniciar Test Post
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="card stack">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="badge">Test {quizMode === 'pre' ? 'Inicial (Pre)' : 'Final (Post)'}</span>
-                <button onClick={() => setQuizMode(null)}><X size={18} /></button>
-              </div>
-
-              {QUIZ_QUESTIONS.map((item, qIdx) => (
-                <div key={qIdx} style={{ paddingBottom: '12px', borderBottom: '1px solid var(--line)' }}>
-                  <div className="h3" style={{ fontSize: '14px', marginBottom: '8px' }}>{item.q}</div>
-                  <div className="stack" style={{ gap: '6px' }}>
-                    {item.options.map((opt, oIdx) => {
-                      const selected = answers[qIdx] === oIdx;
-                      return (
-                        <button
-                          key={oIdx}
-                          type="button"
-                          onClick={() => setAnswers({ ...answers, [qIdx]: oIdx })}
-                          style={{
-                            textAlign: 'left',
-                            padding: '10px 12px',
-                            borderRadius: '12px',
-                            fontSize: '13px',
-                            background: selected ? '#34c75922' : 'var(--surface-2)',
-                            border: `1px solid ${selected ? 'var(--pink)' : 'transparent'}`,
-                            color: selected ? 'var(--ink)' : 'var(--ink-2)',
-                            fontWeight: selected ? '600' : '400'
-                          }}
-                        >
-                          {opt}
-                        </button>
-                      );
-                    })}
+          <div className="section-heading"><span>¿Qué pasa dentro de tu pierna?</span></div>
+          <div className="desktop-grid-3">
+            {ANATOMY_CARDS.map(({ title, desc, c, Icon }, i) => (
+              <div key={i} className="card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '6px' }}>
+                  <div className="icon-tile" style={{ '--c': c }}>
+                    <Icon size={17} />
                   </div>
+                  <h3 className="h3">{title}</h3>
                 </div>
-              ))}
+                <p className="small muted">{desc}</p>
+              </div>
+            ))}
+          </div>
 
+          <div className="section-heading"><span>Señales tempranas para frenar a tiempo</span></div>
+          <div className="card stack" style={{ gap: '8px' }}>
+            {SYMPTOMS.map((sym, i) => (
+              <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                <Check size={16} color="var(--pink)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                <span className="small">{sym}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="section-heading"><span>Principales factores de riesgo</span></div>
+          <div className="desktop-grid-2">
+            {RISK_FACTORS.map((rf, i) => (
+              <div key={i} className="card">
+                <h3 className="h3">{rf.title}</h3>
+                <p className="small muted" style={{ marginTop: '4px' }}>{rf.detail}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="stack">
+          <div className="card">
+            <span className="badge">Evaluación de Aprendizaje</span>
+            <h2 className="h2" style={{ marginTop: '4px' }}>Cuestionario Preventivo (10 preguntas)</h2>
+            <p className="small muted" style={{ marginTop: '4px' }}>
+              Compara lo que sabías antes (Test Inicial) y después de usar la guía (Test Final). Meta del estudio: mejora ≥ 30 %.
+            </p>
+
+            <div className="seg" style={{ '--n': 2, marginTop: '12px' }}>
+              <div className="seg-pill" style={{ transform: `translateX(${quizType === 'pre' ? 0 : 100}%)` }} />
               <button
-                className="btn btn-primary tap"
-                disabled={Object.keys(answers).length < QUIZ_QUESTIONS.length}
-                onClick={submitQuiz}
+                type="button"
+                className={`seg-btn ${quizType === 'pre' ? 'on' : ''}`}
+                onClick={() => {
+                  setQuizType('pre');
+                  setAnswers({});
+                  setSubmitted(false);
+                }}
               >
-                Finalizar y Guardar Puntaje ({Object.keys(answers).length}/10)
+                1. Test Inicial ({quizScores.pre !== null ? `${quizScores.pre}/10` : 'Pendiente'})
+              </button>
+              <button
+                type="button"
+                className={`seg-btn ${quizType === 'post' ? 'on' : ''}`}
+                onClick={() => {
+                  setQuizType('post');
+                  setAnswers({});
+                  setSubmitted(false);
+                }}
+              >
+                2. Test Final ({quizScores.post !== null ? `${quizScores.post}/10` : 'Pendiente'})
               </button>
             </div>
-          )}
+
+            {deltaPct !== null && (
+              <div
+                style={{
+                  marginTop: '10px',
+                  padding: '8px 12px',
+                  borderRadius: '10px',
+                  background: deltaPct >= 30 ? '#34c75922' : '#f59e0b22',
+                  color: deltaPct >= 30 ? '#34c759' : '#f59e0b',
+                  fontSize: '12.5px',
+                  fontWeight: 700
+                }}
+              >
+                Variación Pre → Post: {deltaPct >= 0 ? `+${deltaPct}%` : `${deltaPct}%`}{' '}
+                {deltaPct >= 30 ? '· Meta preventiva cumplida (≥ 30 %)' : ''}
+              </div>
+            )}
+          </div>
+
+          {QUIZ_QUESTIONS.map((item, qIdx) => (
+            <div key={qIdx} className="card stack" style={{ gap: '8px' }}>
+              <div className="h3">{item.q}</div>
+              {item.options.map((opt, oIdx) => {
+                const selected = answers[qIdx] === oIdx;
+                const isCorrect = oIdx === item.correct;
+                let borderCol = 'transparent';
+                if (submitted && isCorrect) borderCol = '#34c759';
+                else if (submitted && selected && !isCorrect) borderCol = '#ff453a';
+                else if (selected) borderCol = 'var(--pink)';
+
+                return (
+                  <button
+                    key={oIdx}
+                    type="button"
+                    onClick={() => !submitted && setAnswers({ ...answers, [qIdx]: oIdx })}
+                    style={{
+                      textAlign: 'left',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      background: 'var(--surface-2)',
+                      border: `1.5px solid ${borderCol}`,
+                      fontSize: '12.5px',
+                      fontWeight: selected ? 600 : 400
+                    }}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+
+          <button
+            type="button"
+            disabled={Object.keys(answers).length < QUIZ_QUESTIONS.length}
+            onClick={() => {
+              setSubmitted(true);
+              onSaveQuiz(quizType, score);
+            }}
+            className="btn btn-primary tap"
+          >
+            <Check size={18} />
+            <span>Calificar y guardar ({score}/10 pts)</span>
+          </button>
         </div>
       )}
     </div>
@@ -3469,511 +2616,627 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
 }
 
 // ============================================================================
-// 5. PREVENCIÓN PRIMARIA
+// 5. HÁBITOS Y CALENTAMIENTO DINÁMICO (TAB: PREVENIR)
 // ============================================================================
 function PreventionView({ checked, setChecked, notify }) {
   const toggleItem = (idx) => {
-    const next = checked.includes(idx) ? checked.filter((i) => i !== idx) : [...checked, idx];
+    const exists = checked.includes(idx);
+    const next = exists ? checked.filter((i) => i !== idx) : [...checked, idx];
     setChecked(next);
     if (next.length === WARMUP.length) {
-      notify('¡Calentamiento preventivo completado!');
+      notify('¡Calentamiento de 10 min completado!');
     }
   };
 
-  const totalMin = WARMUP.reduce((acc, w) => acc + w.time, 0);
-  const doneMin = WARMUP.reduce((acc, w, i) => acc + (checked.includes(i) ? w.time : 0), 0);
-
   return (
     <div className="stack">
-      <div className="hero-card">
-        <img
-          src="/assets/prevencion-calentamiento-CCHPQMaC.jpg"
-          alt="Calentamiento deportivo"
-          className="hero-bg"
-          onError={(e) => { e.currentTarget.style.display = 'none'; }}
-        />
-        <div className="hero-overlay" />
-        <div className="hero-content">
-          <span className="badge" style={{ marginBottom: '8px' }}>Prevención Primaria</span>
-          <h2 className="display" style={{ fontSize: '21px' }}>Hábitos y Calentamiento</h2>
-          <p className="small muted" style={{ marginTop: '4px' }}>
-            Control de factores modificables para evitar sobrecarga tibial.
-          </p>
-        </div>
+      <div className="card">
+        <span className="badge">6 Pilares Protectores</span>
+        <h1 className="display" style={{ marginTop: '4px' }}>
+          Hábitos que <span className="grad-text">evitan lesiones</span>
+        </h1>
+        <p className="small muted" style={{ marginTop: '4px' }}>
+          Pequeños ajustes semanales reducen hasta a la mitad el riesgo de sobrecarga en principiantes.
+        </p>
       </div>
 
       <div className="grid-2">
         {HABITS.map(({ title, desc, Icon, c }, i) => (
           <div key={i} className="card">
-            <div className="icon-tile" style={{ '--c': c, marginBottom: '10px' }}><Icon size={20} /></div>
-            <div className="h3" style={{ fontSize: '14.5px' }}>{title}</div>
-            <div className="small muted" style={{ marginTop: '4px', fontSize: '12.5px' }}>{desc}</div>
+            <div className="icon-tile" style={{ '--c': c, marginBottom: '8px' }}>
+              <Icon size={17} />
+            </div>
+            <h3 className="h3">{title}</h3>
+            <p className="small muted" style={{ marginTop: '3px' }}>{desc}</p>
           </div>
         ))}
       </div>
 
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 className="h2">Activación Pre-Carrera</h3>
-          <span className="badge tnum">{doneMin}/{totalMin} min</span>
-        </div>
+      <div className="section-heading">
+        <span>Calentamiento dinámico (10 min)</span>
+        <span className="badge tnum">{checked.length}/{WARMUP.length}</span>
+      </div>
 
-        <div style={{ background: 'var(--surface-2)', height: '8px', borderRadius: '4px', marginTop: '12px', overflow: 'hidden' }}>
-          <div style={{ background: 'var(--grad)', width: `${(doneMin / totalMin) * 100}%`, height: '100%', transition: 'width .4s ease' }} />
-        </div>
-
-        <div className="stack" style={{ marginTop: '16px' }}>
-          {WARMUP.map((item, idx) => {
-            const isDone = checked.includes(idx);
-            return (
-              <button
-                key={idx}
-                onClick={() => toggleItem(idx)}
-                className="tap"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  textAlign: 'left',
-                  padding: '12px',
-                  borderRadius: '14px',
-                  background: isDone ? '#34c7591a' : 'var(--surface-2)',
-                  border: `1px solid ${isDone ? 'var(--pink)' : 'transparent'}`
-                }}
-              >
+      <div className="ios-group">
+        {WARMUP.map((w, idx) => {
+          const done = checked.includes(idx);
+          return (
+            <button
+              key={idx}
+              type="button"
+              className="ios-row"
+              onClick={() => toggleItem(idx)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div
                   style={{
                     width: '22px',
                     height: '22px',
-                    borderRadius: '6px',
-                    background: isDone ? 'var(--pink)' : 'transparent',
-                    border: `2px solid ${isDone ? 'var(--pink)' : 'var(--ink-3)'}`,
+                    borderRadius: '999px',
+                    border: done ? 'none' : '1.5px solid var(--line-strong)',
+                    background: done ? 'var(--pink)' : 'transparent',
+                    color: 'var(--pink-ink)',
                     display: 'grid',
                     placeItems: 'center',
                     flexShrink: 0
                   }}
                 >
-                  {isDone && <Check size={14} color="#000" strokeWidth={3} />}
+                  {done && <Check size={14} strokeWidth={3} />}
                 </div>
-                <span className="small" style={{ flex: 1, textDecoration: isDone ? 'line-through' : 'none', color: isDone ? 'var(--ink-3)' : 'var(--ink)' }}>
-                  {item.act}
+                <span
+                  className="small"
+                  style={{
+                    textDecoration: done ? 'line-through' : 'none',
+                    color: done ? 'var(--ink-3)' : 'var(--ink)'
+                  }}
+                >
+                  {w.act}
                 </span>
-                <span className="badge tnum">{item.time}m</span>
-              </button>
-            );
-          })}
-        </div>
+              </div>
+              <span className="badge tnum">{w.time} min</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 // ============================================================================
-// 6. ACONDICIONAMIENTO NEUROMUSCULAR PREVENTIVO (CON BLOQUEO POR BANDERA ROJA)
+// 6. RUTINA NEUROMUSCULAR CALIBRADA (TAB: EJERCICIOS)
 // ============================================================================
 function ExercisesView({ bio, onOpenExercise, onOpenClinicalReport }) {
-  const [filter, setFilter] = useState('Todos');
+  const [phaseFilter, setPhaseFilter] = useState('Todos');
   const phases = ['Todos', 'Fortalecimiento', 'Estiramiento', 'Propiocepción'];
 
-  if (bio.redFlagActive) {
-    return (
-      <div className="stack">
-        <div className="card stack" style={{ borderColor: 'var(--danger)', background: 'color-mix(in srgb, var(--danger) 12%, var(--surface))' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div className="icon-tile" style={{ '--c': '#ff453a' }}>
-              <AlertTriangle size={20} />
-            </div>
-            <div>
-              <div className="eyebrow" style={{ color: '#ff453a' }}>Seguridad Clínica · Prevención Primaria</div>
-              <h2 className="h2">Rutina Bloqueada por Dolor Activo</h2>
-            </div>
-          </div>
-          <p className="small muted">
-            Este software está diseñado exclusivamente para <strong>prevención primaria en corredores sin lesión instaurada</strong>. Debido a que reportaste signos de alarma ({bio.reasons[0]}), las rutinas de carga física permanecen suspendidas.
-          </p>
-          <p className="small muted">
-            <strong>Conducta recomendada:</strong> Suspende el impacto de carrera y acude a valoración por medicina del deporte o fisioterapia.
-          </p>
-          <button type="button" onClick={onOpenClinicalReport} className="btn btn-primary tap" style={{ background: '#ff453a', color: '#fff' }}>
-            <FileText size={17} />
-            <span>Generar Resumen para Consulta</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const filtered = filter === 'Todos'
+  const filtered = phaseFilter === 'Todos'
     ? EXERCISES
-    : EXERCISES.filter((e) => e.phase === filter);
+    : EXERCISES.filter((e) => e.phase === phaseFilter);
+
+  const factor = bio?.loadFactor ?? 1.0;
 
   return (
     <div className="stack">
       <div className="card">
-        <span className="badge">Acondicionamiento Preventivo</span>
-        <h2 className="display" style={{ marginTop: '8px', fontSize: '21px' }}>
-          Entrenamiento Neuromuscular
-        </h2>
-        <p className="small muted" style={{ marginTop: '6px' }}>
-          Dosificación ajustada al <strong>{Math.round(bio.loadFactor * 100)}%</strong> según tu nivel de alerta ({bio.riskLevel}).
+        <span className="badge">Entrenamiento Neuromuscular</span>
+        <h1 className="display" style={{ marginTop: '4px' }}>
+          Fuerza para <span className="grad-text">proteger tu tibia</span>
+        </h1>
+        <p className="small muted" style={{ marginTop: '4px' }}>
+          Rutina enfocada en pantorrilla profunda (sóleo), arco plantar (<GlosarioTerm term="PRONACION">pronación</GlosarioTerm>) y estabilidad de cadera.
         </p>
-
-        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', marginTop: '14px', paddingBottom: '4px' }}>
-          {phases.map((ph) => (
-            <button
-              key={ph}
-              onClick={() => setFilter(ph)}
-              className="tap"
-              style={{
-                padding: '7px 13px',
-                borderRadius: '999px',
-                fontSize: '12px',
-                fontWeight: '700',
-                whiteSpace: 'nowrap',
-                background: filter === ph ? 'var(--pink)' : 'var(--surface-2)',
-                color: filter === ph ? '#000' : 'var(--ink-2)'
-              }}
-            >
-              {ph}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {filtered.map((ex) => {
-        const adjustedVal = Math.max(5, Math.round(ex.baseReps * bio.loadFactor));
-        const doseLabel = ex.isTime
-          ? `${ex.sets} × ${adjustedVal} seg`
-          : `${ex.sets} × ${adjustedVal} reps`;
-
-        return (
-          <button
-            key={ex.id}
-            className="card tap"
-            onClick={() => onOpenExercise({ ...ex, doseLabel })}
-            style={{ textAlign: 'left', padding: '12px', display: 'flex', alignItems: 'center', gap: '14px' }}
-          >
-            <img
-              src={ex.img}
-              alt={ex.title}
-              style={{ width: '60px', height: '60px', borderRadius: '11px', objectFit: 'cover', flexShrink: 0 }}
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
-            <div style={{ flex: 1 }}>
-              <span className="badge" style={{ marginBottom: '3px' }}>{ex.phase}</span>
-              <div className="h3" style={{ fontSize: '14px' }}>{ex.title}</div>
-              <div className="small tnum" style={{ color: 'var(--pink)', fontWeight: '700', marginTop: '3px' }}>
-                {doseLabel} · {ex.level}
-              </div>
-            </div>
-            <div className="icon-tile">
-              <Play size={16} fill="currentColor" />
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function ExerciseModal({ ex, onClose }) {
-  const [seconds, setSeconds] = useState(ex.timer.s);
-  const [running, setRunning] = useState(false);
-
-  useEffect(() => {
-    if (!running) return;
-    const interval = setInterval(() => {
-      setSeconds((s) => {
-        if (s <= 1) {
-          setRunning(false);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [running]);
-
-  const radius = 44;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - seconds / ex.timer.s);
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 100,
-        background: '#000000cc',
-        backdropFilter: 'blur(8px)',
-        display: 'flex',
-        alignItems: 'flex-end',
-        justifyContent: 'center'
-      }}
-      onClick={onClose}
-    >
-      <div
-        className="card"
-        style={{
-          width: '100%',
-          maxWidth: '640px',
-          borderBottomLeftRadius: 0,
-          borderBottomRightRadius: 0,
-          maxHeight: '92vh',
-          overflowY: 'auto',
-          padding: '20px 20px 36px'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div style={{ position: 'relative', borderRadius: '18px', overflow: 'hidden', height: '170px', marginBottom: '16px', background: 'var(--surface-2)' }}>
-          <img
-            src={ex.img}
-            alt={ex.title}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
-          <button
-            onClick={onClose}
-            style={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: '#000000aa',
-              display: 'grid',
-              placeItems: 'center'
-            }}
-          >
-            <X size={20} color="#fff" />
-          </button>
-        </div>
-
-        <span className="badge">{ex.phase} · {ex.doseLabel}</span>
-        <h2 className="h2" style={{ marginTop: '8px' }}>{ex.title}</h2>
-
-        <div className="eyebrow" style={{ marginTop: '16px', marginBottom: '10px' }}>Ejecución paso a paso</div>
-        <div className="stack">
-          {ex.steps.map((step, i) => (
-            <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <span className="badge tnum">{i + 1}</span>
-              <span className="small muted">{step}</span>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ marginTop: '14px', padding: '12px', borderRadius: '14px', background: '#34c75914', border: '1px solid #34c75933' }}>
-          <span className="small" style={{ color: 'var(--pink)', fontWeight: '600' }}>Sustento biomecánico: </span>
-          <span className="small muted">{ex.tip}</span>
-        </div>
-
+      {bio?.redFlagActive && (
         <div
+          className="card"
           style={{
-            marginTop: '18px',
-            background: 'var(--surface-2)',
-            borderRadius: '20px',
-            padding: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '18px'
+            borderColor: '#ff453a',
+            background: 'color-mix(in srgb, #ff453a 14%, var(--surface))'
           }}
         >
-          <div style={{ position: 'relative', width: '96px', height: '96px', flexShrink: 0 }}>
-            <svg width="96" height="96" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
-              <circle cx="50" cy="50" r={radius} fill="none" stroke="var(--surface)" strokeWidth="8" />
-              <circle
-                cx="50"
-                cy="50"
-                r={radius}
-                fill="none"
-                stroke="#34c759"
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={offset}
-                style={{ transition: 'stroke-dashoffset .9s linear' }}
-              />
-            </svg>
-            <div className="tnum" style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', fontSize: '22px', fontWeight: '800' }}>
-              {seconds}s
-            </div>
+          <div className="h3" style={{ color: '#ff453a' }}>
+            Rutina pausada por bandera roja de dolor
           </div>
-
-          <div>
-            <div className="h3">{ex.timer.label}</div>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-              <button
-                className="btn btn-primary tap"
-                style={{ minHeight: '42px', padding: '0 16px', width: 'auto' }}
-                onClick={() => {
-                  if (seconds === 0) setSeconds(ex.timer.s);
-                  setRunning(!running);
-                }}
-              >
-                {running ? <Pause size={18} /> : <Play size={18} />}
-                <span>{running ? 'Pausar' : 'Iniciar'}</span>
-              </button>
-              <button
-                className="btn btn-soft tap"
-                style={{ minHeight: '42px', width: '42px', padding: 0 }}
-                onClick={() => {
-                  setRunning(false);
-                  setSeconds(ex.timer.s);
-                }}
-              >
-                <RotateCcw size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// 7. PLAN DE PROGRESIÓN SEGURA (8 SEMANAS)
-// ============================================================================
-function RecoveryView({ doneTasks, setDoneTasks, notify }) {
-  const [subTab, setSubTab] = useState(0);
-  const [openStage, setOpenStage] = useState(0);
-
-  const toggleTask = (sIdx, tIdx) => {
-    const key = `${sIdx}-${tIdx}`;
-    const next = { ...doneTasks, [key]: !doneTasks[key] };
-    setDoneTasks(next);
-    const stageDone = PREVENTION_PLAN[sIdx].tasks.every((_, i) => next[`${sIdx}-${i}`]);
-    if (stageDone) {
-      notify(`¡Completaste ${PREVENTION_PLAN[sIdx].week}!`);
-    }
-  };
-
-  return (
-    <div className="stack">
-      <div className="hero-card">
-        <img
-          src="/assets/recuperacion-hielo-fJVnTR5m.jpg"
-          alt="Progresión segura de running"
-          className="hero-bg"
-          onError={(e) => { e.currentTarget.style.display = 'none'; }}
-        />
-        <div className="hero-overlay" />
-        <div className="hero-content">
-          <span className="badge" style={{ marginBottom: '8px' }}>Progresión de Carga</span>
-          <h2 className="display" style={{ fontSize: '21px' }}>Plan 8 Semanas</h2>
           <p className="small muted" style={{ marginTop: '4px' }}>
-            Adaptación gradual del tejido óseo para jóvenes principiantes (18–25 años).
+            Mientras tengas dolor activo en la espinilla, prioriza reposo relativo y valoración profesional.
           </p>
+          <button
+            type="button"
+            onClick={onOpenClinicalReport}
+            className="btn-pill-sm tap"
+            style={{ marginTop: '10px', background: '#ff453a', color: '#fff' }}
+          >
+            Ver resumen para fisioterapia
+          </button>
         </div>
-      </div>
+      )}
 
-      <div className="seg" style={{ '--n': 3 }}>
-        <div className="seg-pill" style={{ transform: `translateX(${subTab * 100}%)` }} />
-        {['Plan 8 sem', 'Banderas Rojas', 'Pautas'].map((lbl, idx) => (
-          <button key={lbl} className={`seg-btn ${subTab === idx ? 'on' : ''}`} onClick={() => setSubTab(idx)}>
-            {lbl}
+      <div className="seg" style={{ '--n': 4 }}>
+        <div
+          className="seg-pill"
+          style={{ transform: `translateX(${phases.indexOf(phaseFilter) * 100}%)` }}
+        />
+        {phases.map((ph) => (
+          <button
+            key={ph}
+            type="button"
+            className={`seg-btn ${phaseFilter === ph ? 'on' : ''}`}
+            onClick={() => setPhaseFilter(ph)}
+            style={{ fontSize: '11px' }}
+          >
+            {ph === 'Fortalecimiento' ? 'Fuerza' : ph === 'Propiocepción' ? 'Equilibrio' : ph}
           </button>
         ))}
       </div>
 
-      {subTab === 0 && (
-        <div className="stack">
-          {PREVENTION_PLAN.map((stage, sIdx) => {
-            const isOpen = openStage === sIdx;
-            const completedCount = stage.tasks.filter((_, tIdx) => doneTasks[`${sIdx}-${tIdx}`]).length;
-            return (
-              <div key={sIdx} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <button
-                  onClick={() => setOpenStage(isOpen ? null : sIdx)}
-                  style={{ width: '100%', padding: '16px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left' }}
-                >
-                  <div>
-                    <div className="eyebrow" style={{ color: 'var(--pink)' }}>
-                      {stage.week} · {completedCount}/{stage.tasks.length} metas
-                    </div>
-                    <div className="h3" style={{ marginTop: '2px' }}>{stage.title}</div>
-                  </div>
-                  <ChevronDown size={20} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .25s ease' }} />
-                </button>
-
-                {isOpen && (
-                  <div style={{ padding: '0 18px 18px', borderTop: '1px solid var(--line)' }}>
-                    <div className="stack" style={{ marginTop: '12px' }}>
-                      {stage.tasks.map((task, tIdx) => {
-                        const checked = !!doneTasks[`${sIdx}-${tIdx}`];
-                        return (
-                          <button
-                            key={tIdx}
-                            onClick={() => toggleTask(sIdx, tIdx)}
-                            style={{ display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left' }}
-                          >
-                            <div
-                              style={{
-                                width: '20px',
-                                height: '20px',
-                                borderRadius: '6px',
-                                background: checked ? 'var(--pink)' : 'transparent',
-                                border: `2px solid ${checked ? 'var(--pink)' : 'var(--ink-3)'}`,
-                                display: 'grid',
-                                placeItems: 'center',
-                                flexShrink: 0
-                              }}
-                            >
-                              {checked && <Check size={13} color="#000" strokeWidth={3} />}
-                            </div>
-                            <span className="small" style={{ color: checked ? 'var(--ink-3)' : 'var(--ink-2)', textDecoration: checked ? 'line-through' : 'none' }}>
-                              {task}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+      <div className="desktop-grid-2">
+        {filtered.map((ex) => {
+          const adjustedReps = bio?.redFlagActive
+            ? 0
+            : Math.max(5, Math.round(ex.baseReps * factor));
+          return (
+            <div key={ex.id} className="card stack" style={{ justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span className="badge">{ex.phase}</span>
+                  <span className="badge tnum">
+                    {bio?.redFlagActive
+                      ? 'En pausa'
+                      : `${ex.sets} × ${adjustedReps}${ex.isTime ? ' s' : ' reps'}`}
+                  </span>
+                </div>
+                <h3 className="h3">{ex.title}</h3>
+                <p className="small muted" style={{ marginTop: '4px' }}>{ex.tip}</p>
               </div>
+
+              <button
+                type="button"
+                disabled={bio?.redFlagActive}
+                onClick={() => onOpenExercise({ ...ex, adjustedReps })}
+                className="btn btn-soft tap"
+                style={{ marginTop: '6px' }}
+              >
+                <Play size={15} color="var(--pink)" />
+                <span>Ver técnica y temporizador</span>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// 7. PLAN PROGRESIVO DE 8 SEMANAS (TAB: PLAN 8S)
+// ============================================================================
+function RecoveryView({ doneTasks, setDoneTasks, notify }) {
+  const totalTasks = PREVENTION_PLAN.reduce((acc, w) => acc + w.tasks.length, 0);
+  const completedCount = Object.values(doneTasks).filter(Boolean).length;
+  const pct = Math.round((completedCount / totalTasks) * 100);
+
+  const toggleTask = (wIdx, tIdx) => {
+    const key = `${wIdx}-${tIdx}`;
+    const next = { ...doneTasks, [key]: !doneTasks[key] };
+    setDoneTasks(next);
+    if (!doneTasks[key]) notify('Meta semanal completada');
+  };
+
+  return (
+    <div className="stack">
+      <div className="card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span className="badge">Progresión Segura</span>
+          <span className="badge tnum">{completedCount}/{totalTasks} ({pct} %)</span>
+        </div>
+        <h1 className="display" style={{ marginTop: '4px' }}>
+          Plan de <span className="grad-text">8 Semanas</span>
+        </h1>
+        <p className="small muted" style={{ marginTop: '4px' }}>
+          Ruta gradual para pasar de principiante a correr 30–40 min continuos sin dolor tibial.
+        </p>
+        <div style={{ height: '7px', borderRadius: '999px', background: 'var(--surface-2)', marginTop: '12px', overflow: 'hidden' }}>
+          <div style={{ width: `${pct}%`, height: '100%', background: 'var(--pink)', transition: 'width .25s var(--ease)' }} />
+        </div>
+      </div>
+
+      {PREVENTION_PLAN.map((block, wIdx) => (
+        <div key={wIdx} className="card stack" style={{ gap: '8px' }}>
+          <div>
+            <span className="badge">{block.week}</span>
+            <h3 className="h3" style={{ marginTop: '2px' }}>{block.title}</h3>
+          </div>
+          {block.tasks.map((task, tIdx) => {
+            const checked = Boolean(doneTasks[`${wIdx}-${tIdx}`]);
+            return (
+              <button
+                key={tIdx}
+                type="button"
+                onClick={() => toggleTask(wIdx, tIdx)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '10px',
+                  textAlign: 'left',
+                  padding: '8px 10px',
+                  borderRadius: '10px',
+                  background: 'var(--surface-2)'
+                }}
+              >
+                <div
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '6px',
+                    border: checked ? 'none' : '1.5px solid var(--line-strong)',
+                    background: checked ? 'var(--pink)' : 'transparent',
+                    color: 'var(--pink-ink)',
+                    display: 'grid',
+                    placeItems: 'center',
+                    flexShrink: 0,
+                    marginTop: '1px'
+                  }}
+                >
+                  {checked && <Check size={13} strokeWidth={3} />}
+                </div>
+                <span
+                  className="small"
+                  style={{
+                    textDecoration: checked ? 'line-through' : 'none',
+                    color: checked ? 'var(--ink-3)' : 'var(--ink)'
+                  }}
+                >
+                  {task}
+                </span>
+              </button>
             );
           })}
         </div>
-      )}
+      ))}
 
-      {subTab === 1 && (
-        <div className="card stack" style={{ borderColor: '#ff453a66' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <AlertTriangle size={22} color="#ff453a" />
-            <div className="h2" style={{ color: '#ff453a' }}>Criterios de Suspensión</div>
+      <div className="card" style={{ borderColor: '#ff453a55' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <AlertTriangle size={18} color="#ff453a" />
+          <h3 className="h3" style={{ color: '#ff453a' }}>Señales para detener el plan</h3>
+        </div>
+        <div className="stack" style={{ gap: '6px' }}>
+          {RED_FLAGS.map((rf, i) => (
+            <div key={i} className="small muted">• {rf}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// 8. MODAL DE REGISTRO DE SESIÓN CON MEDIDOR SEMICIRCULAR EVA
+// ============================================================================
+function LogSessionModal({ unit, onClose, onSaveSession }) {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [date, setDate] = useState(todayStr);
+  const [distanceInput, setDistanceInput] = useState(4.0);
+  const [durationMin, setDurationMin] = useState(25);
+  const [rpe, setRpe] = useState(4);
+  const [eva, setEva] = useState(0);
+  const [legSide, setLegSide] = useState('izquierda');
+  const [painLocation, setPainLocation] = useState('posteromedial_difuso');
+  const [painAtRest, setPainAtRest] = useState(false);
+
+  const painInfo = getPainInfo(eva);
+  const needleAngle = -90 + (eva / 10) * 180;
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    const distanceKm = unit === 'metric'
+      ? Number(distanceInput)
+      : +(Number(distanceInput) / 0.621371).toFixed(2);
+    onSaveSession({
+      date,
+      distanceKm,
+      durationMin: Number(durationMin),
+      rpe: Number(rpe),
+      eva: Number(eva),
+      legSide,
+      painLocation: eva === 0 ? 'ninguna' : painLocation,
+      painAtRest: eva > 0 ? painAtRest : false
+    });
+  };
+
+  return (
+    <div className="sheet-overlay" onClick={onClose}>
+      <div className="sheet-panel stack" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-handle" />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <span className="badge">Control Post-Entrenamiento</span>
+            <h2 className="h2">Registrar carrera</h2>
           </div>
-          {RED_FLAGS.map((flag, i) => (
-            <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <span className="badge" style={{ background: '#ff453a22', color: '#ff453a' }}>!</span>
-              <span className="small muted">{flag}</span>
+          <button type="button" className="icon-circle-btn tap" onClick={onClose} aria-label="Cerrar">
+            <X size={16} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSave} className="stack">
+          <div className="card stack">
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="eyebrow">Fecha</label>
+              <input
+                type="date"
+                required
+                className="input-field tnum"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </div>
+
+            <div className="grid-2">
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="eyebrow">{unit === 'metric' ? 'Distancia (km)' : 'Distancia (mi)'}</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  max="150"
+                  required
+                  className="input-field tnum"
+                  value={distanceInput}
+                  onChange={(e) => setDistanceInput(e.target.value)}
+                />
+              </div>
+
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="eyebrow">Duración (min)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="600"
+                  required
+                  className="input-field tnum"
+                  value={durationMin}
+                  onChange={(e) => setDurationMin(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ESCALA BORG CR-10 */}
+          <div className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span className="eyebrow">
+                <GlosarioTerm term="BORG">Esfuerzo (Borg CR-10)</GlosarioTerm>
+              </span>
+              <span className="badge tnum">{rpe} / 10</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              value={rpe}
+              onChange={(e) => setRpe(Number(e.target.value))}
+              style={{ width: '100%', marginTop: '8px', accentColor: 'var(--pink)' }}
+            />
+            <div className="small muted" style={{ marginTop: '4px' }}>{BORG_LABELS[rpe]}</div>
+          </div>
+
+          {/* MEDIDOR SEMICIRCULAR DE DOLOR EVA */}
+          <div className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span className="eyebrow">
+                <GlosarioTerm term="EVA">Dolor en espinilla (EVA)</GlosarioTerm>
+              </span>
+              <span className="badge tnum" style={{ color: painInfo.c }}>{painInfo.label}</span>
+            </div>
+
+            <div className="gauge-wrap">
+              <svg viewBox="0 0 300 165" className="gauge" aria-hidden="true">
+                <path d="M 30 150 A 120 120 0 0 1 270 150" fill="none" stroke="var(--surface-2)" strokeWidth="20" strokeLinecap="round" />
+                <path d="M 30 150 A 120 120 0 0 1 115 36" fill="none" stroke="#34c759" strokeWidth="20" strokeLinecap="round" />
+                <path d="M 115 36 A 120 120 0 0 1 205 44" fill="none" stroke="#ffd60a" strokeWidth="20" />
+                <path d="M 205 44 A 120 120 0 0 1 270 150" fill="none" stroke="#ff453a" strokeWidth="20" strokeLinecap="round" />
+                <g className="gauge-needle" style={{ transform: `rotate(${needleAngle}deg)` }}>
+                  <line x1="150" y1="150" x2="150" y2="48" stroke="var(--ink)" strokeWidth="4" strokeLinecap="round" />
+                  <circle cx="150" cy="150" r="9" fill="var(--ink)" />
+                </g>
+              </svg>
+              <div className="gauge-value tnum" style={{ color: painInfo.c }}>{eva}</div>
+            </div>
+
+            <div className="pain-dots">
+              {Array.from({ length: 11 }, (_, n) => {
+                const info = getPainInfo(n);
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    className={`pain-dot tnum ${eva === n ? 'on' : ''}`}
+                    style={{ '--c': info.c }}
+                    onClick={() => setEva(n)}
+                  >
+                    {n}
+                  </button>
+                );
+              })}
+            </div>
+
+            {eva >= 4 && (
+              <div className="pain-advice" style={{ '--c': '#ff453a', color: '#ff453a', fontSize: '12px' }}>
+                <AlertTriangle size={16} />
+                <span>Dolor ≥ 4: si se repite en 2 sesiones seguidas, activará bandera roja.</span>
+              </div>
+            )}
+          </div>
+
+          {eva > 0 && (
+            <div className="card stack">
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="eyebrow">¿En qué pierna sentiste la molestia?</label>
+                <select className="input-field" value={legSide} onChange={(e) => setLegSide(e.target.value)}>
+                  <option value="izquierda">Pierna izquierda</option>
+                  <option value="derecha">Pierna derecha</option>
+                  <option value="bilateral">Ambas piernas</option>
+                </select>
+              </div>
+
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="eyebrow">¿Cómo se siente el dolor?</label>
+                <select className="input-field" value={painLocation} onChange={(e) => setPainLocation(e.target.value)}>
+                  <option value="posteromedial_difuso">Zona amplia en borde interno de espinilla (&gt; 5 cm)</option>
+                  <option value="focal_puntual">Un punto exacto y punzante en el hueso (&lt; 2 cm)</option>
+                  <option value="muscular_general">Cansancio o tensión en la pantorrilla</option>
+                </select>
+              </div>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={painAtRest}
+                  onChange={(e) => setPainAtRest(e.target.checked)}
+                  style={{ accentColor: '#ff453a' }}
+                />
+                <span className="small">Sigue doliendo en reposo o al caminar normal</span>
+              </label>
+            </div>
+          )}
+
+          <button type="submit" className="btn btn-primary tap">
+            <Check size={18} />
+            <span>Guardar entrenamiento</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// 9. MODAL DE REPORTE CLÍNICO-DEPORTIVO (INTEROPERABILIDAD / CONSULTA)
+// ============================================================================
+function ClinicalReportModal({ user, bio, unit, onClose, onCopyText }) {
+  const p = user.profile;
+  return (
+    <div className="sheet-overlay" onClick={onClose}>
+      <div className="sheet-panel stack" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-handle" />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <span className="badge">Ficha para Fisioterapia / Medicina</span>
+            <h2 className="h2">Resumen Clínico-Deportivo</h2>
+          </div>
+          <button type="button" className="icon-circle-btn tap" onClick={onClose} aria-label="Cerrar">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="card stack" style={{ gap: '6px' }}>
+          <div className="h3">{p.name} · {p.age} años ({p.sex})</div>
+          <div className="small muted">
+            Peso: {p.weightKg} kg · Talla: {p.heightCm} cm · <strong>IMC: {bio.bmi} kg/m²</strong>
+          </div>
+          <div className="small muted">
+            Experiencia: {p.experience} · Pisada: {p.footType} · Lesión previa: {p.priorInjury.toUpperCase()} · Cadencia: {p.cadencePpm} ppm
+          </div>
+        </div>
+
+        <div className="card stack" style={{ gap: '6px' }}>
+          <div className="eyebrow">Carga y Estratificación SETM</div>
+          <div className="small">
+            Carga aguda (7d): <strong>{fmtDist(bio.acuteKm, unit)}</strong> · Carga crónica (28d): <strong>{fmtDist(bio.chronicKm, unit)}</strong>
+          </div>
+          <div className="small">
+            ACWR: <strong style={{ color: bio.acwrColor }}>{bio.acwr} ({bio.acwrStatus})</strong> · Alerta global:{' '}
+            <strong style={{ color: bio.riskColor }}>{bio.riskLevel.toUpperCase()}</strong>
+          </div>
+          <div className="small">
+            Bandera roja activa: <strong>{bio.redFlagActive ? 'SÍ (Priorizar valoración clínica)' : 'NO'}</strong>
+          </div>
+        </div>
+
+        <div className="card stack" style={{ gap: '6px' }}>
+          <div className="eyebrow">Criterios detectados</div>
+          {bio.reasons.map((r, i) => (
+            <div key={i} className="small muted">• {r}</div>
+          ))}
+        </div>
+
+        <button type="button" onClick={onCopyText} className="btn btn-primary tap">
+          <FileText size={17} />
+          <span>Copiar resumen para consulta</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// 10. MODAL DE EJERCICIO CON TEMPORIZADOR INTEGRADO
+// ============================================================================
+function ExerciseModal({ ex, onClose }) {
+  const [secondsLeft, setSecondsLeft] = useState(ex.timer?.s || 30);
+  const [running, setRunning] = useState(false);
+
+  useEffect(() => {
+    if (!running) return;
+    if (secondsLeft <= 0) {
+      setRunning(false);
+      return;
+    }
+    const id = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(id);
+  }, [running, secondsLeft]);
+
+  return (
+    <div className="sheet-overlay" onClick={onClose}>
+      <div className="sheet-panel stack" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-handle" />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <span className="badge">{ex.phase} · {ex.sets} × {ex.adjustedReps}{ex.isTime ? ' s' : ' reps'}</span>
+            <h2 className="h2">{ex.title}</h2>
+          </div>
+          <button type="button" className="icon-circle-btn tap" onClick={onClose} aria-label="Cerrar">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="card stack" style={{ gap: '8px' }}>
+          <div className="eyebrow">Ejecución paso a paso</div>
+          {ex.steps.map((st, i) => (
+            <div key={i} className="small">
+              <strong>{i + 1}.</strong> {st}
             </div>
           ))}
         </div>
-      )}
 
-      {subTab === 2 && (
-        <div className="stack">
-          <div className="card">
-            <div className="h3">Control de Carga Aguda:Crónica</div>
-            <p className="small muted" style={{ marginTop: '4px' }}>
-              Mantén tu indicador ACWR entre 0.8 y 1.3 registrando cada entrenamiento con distancia, esfuerzo Borg y dolor EVA.
-            </p>
+        {ex.timer && (
+          <div className="card" style={{ textAlign: 'center' }}>
+            <div className="eyebrow">{ex.timer.label}</div>
+            <div className="display tnum" style={{ fontSize: '36px', margin: '4px 0 10px', color: 'var(--pink)' }}>
+              {secondsLeft} s
+            </div>
+            <div className="grid-2">
+              <button
+                type="button"
+                onClick={() => setRunning((r) => !r)}
+                className="btn btn-primary tap"
+              >
+                {running ? <><Pause size={16} /> Pausar</> : <><Play size={16} /> Iniciar</>}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setRunning(false);
+                  setSecondsLeft(ex.timer.s);
+                }}
+                className="btn btn-soft tap"
+              >
+                <RotateCcw size={16} /> Reiniciar
+              </button>
+            </div>
           </div>
-          <div className="card">
-            <div className="h3">Autogestión del Descanso</div>
-            <p className="small muted" style={{ marginTop: '4px' }}>
-              Evita correr días consecutivos durante tus primeras 6 semanas para favorecer la remodelación ósea.
-            </p>
-          </div>
-          <div className="card">
-            <div className="h3">Consulta Oportuna</div>
-            <p className="small muted" style={{ marginTop: '4px' }}>
-              Este prototipo es preventivo: ante dolor persistente, acude a fisioterapia o medicina del deporte.
-            </p>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
