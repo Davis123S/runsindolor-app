@@ -62,11 +62,11 @@ html[data-theme="light"] {
 }
 
 html[data-font="large"] {
-  --text-scale: 1.14;
+  --text-scale: 1.12;
 }
 
 html[data-font="xlarge"] {
-  --text-scale: 1.28;
+  --text-scale: 1.24;
 }
 
 html,
@@ -94,8 +94,8 @@ body {
   overscroll-behavior-y: none;
   background: var(--bg);
   min-width: 320px;
-  font-size: calc(15px * var(--text-scale));
-  line-height: 1.5;
+  font-size: calc(13.5px * var(--text-scale));
+  line-height: 1.44;
 }
 
 button,
@@ -148,19 +148,19 @@ svg {
 
 .app {
   min-height: 100dvh;
-  padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
 }
 
 .topbar {
   z-index: 40;
-  padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px;
+  padding: calc(env(safe-area-inset-top, 0px) + 7px) 14px;
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 0.5px solid transparent;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   transition: border-color 0.2s, background 0.2s;
   display: flex;
   position: sticky;
@@ -169,12 +169,12 @@ svg {
 
 .topbar-inner {
   width: 100%;
-  max-width: 1040px;
+  max-width: 960px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 .topbar.scrolled {
@@ -183,24 +183,24 @@ svg {
 
 .brand-mark {
   background: #ffffff;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border: 0.5px solid var(--line-strong);
-  border-radius: 9px;
+  border-radius: 8px;
   flex-shrink: 0;
   place-items: center;
   display: grid;
 }
 
 .avatar-btn {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--pink) 18%, var(--surface));
   color: var(--pink);
   border: 1px solid color-mix(in srgb, var(--pink) 30%, transparent);
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   display: grid;
   place-items: center;
@@ -209,8 +209,8 @@ svg {
 }
 
 .icon-circle-btn {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
   background: var(--surface);
   color: var(--ink);
@@ -222,34 +222,34 @@ svg {
 }
 
 .screen {
-  max-width: 640px;
+  max-width: 580px;
   margin: 0 auto;
-  padding: 14px 16px 28px;
+  padding: 10px 14px 22px;
 }
 
 @media (min-width: 900px) {
   .screen {
-    max-width: 1040px;
-    padding: 24px 28px 36px;
+    max-width: 960px;
+    padding: 18px 24px 28px;
   }
 
   .desktop-split {
     display: grid;
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    gap: 18px;
+    gap: 14px;
     align-items: start;
   }
 
   .desktop-grid-3 {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    gap: 12px;
   }
 
   .desktop-grid-2 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    gap: 12px;
   }
 }
 
@@ -282,30 +282,30 @@ svg {
 
 .stack {
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   display: flex;
 }
 
 .block {
-  margin-top: 22px;
+  margin-top: 16px;
 }
 
 .display {
   font-family: var(--font-display);
   margin: 0;
-  font-size: calc(30px * var(--text-scale));
+  font-size: calc(23px * var(--text-scale));
   font-weight: 800;
   letter-spacing: -0.025em;
-  line-height: 1.08;
+  line-height: 1.1;
   text-wrap: balance;
 }
 
 .h2 {
   font-family: var(--font-display);
   margin: 0;
-  font-size: calc(19px * var(--text-scale));
+  font-size: calc(16px * var(--text-scale));
   font-weight: 700;
-  letter-spacing: -0.018em;
+  letter-spacing: -0.016em;
   line-height: 1.22;
   text-wrap: balance;
 }
@@ -313,7 +313,7 @@ svg {
 .h3 {
   font-family: var(--font-display);
   margin: 0;
-  font-size: calc(15.5px * var(--text-scale));
+  font-size: calc(14px * var(--text-scale));
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.28;
@@ -321,11 +321,11 @@ svg {
 
 .section-heading {
   font-family: var(--font-display);
-  font-size: calc(18px * var(--text-scale));
+  font-size: calc(15px * var(--text-scale));
   font-weight: 700;
   letter-spacing: -0.015em;
   color: var(--ink);
-  margin: 6px 2px -4px;
+  margin: 4px 2px -2px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -334,7 +334,7 @@ svg {
 .eyebrow {
   letter-spacing: 0.02em;
   color: var(--ink-3);
-  font-size: calc(11.5px * var(--text-scale));
+  font-size: calc(10.5px * var(--text-scale));
   font-weight: 600;
 }
 
@@ -343,7 +343,7 @@ svg {
 }
 
 .small {
-  font-size: calc(13.5px * var(--text-scale));
+  font-size: calc(12.5px * var(--text-scale));
 }
 
 .tnum {
@@ -353,9 +353,9 @@ svg {
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   padding: 0;
-  font-size: calc(12px * var(--text-scale));
+  font-size: calc(11px * var(--text-scale));
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--pink);
@@ -363,24 +363,24 @@ svg {
 }
 
 .badge.tnum {
-  padding: 3px 8px;
-  border-radius: 7px;
+  padding: 2px 7px;
+  border-radius: 6px;
   background: var(--surface-2);
   color: var(--ink);
-  font-size: calc(12px * var(--text-scale));
+  font-size: calc(11px * var(--text-scale));
 }
 
 .hero-card {
   position: relative;
-  border-radius: 18px;
+  border-radius: 14px;
   overflow: hidden;
   background: #0a0c0b;
   color: #ffffff;
-  min-height: 215px;
+  min-height: 155px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 20px;
+  padding: 14px;
   box-shadow: var(--shadow-card);
 }
 
@@ -420,17 +420,17 @@ svg {
 }
 
 .btn {
-  min-height: 48px;
+  min-height: 42px;
   font-family: var(--font-display);
   transition: transform 0.14s var(--ease), opacity 0.15s ease, background 0.15s ease;
   -webkit-user-select: none;
   user-select: none;
-  border-radius: 12px;
+  border-radius: 11px;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 0 18px;
-  font-size: calc(15px * var(--text-scale));
+  gap: 7px;
+  padding: 0 14px;
+  font-size: calc(14px * var(--text-scale));
   font-weight: 600;
   display: inline-flex;
   width: 100%;
@@ -454,17 +454,17 @@ svg {
 }
 
 .btn-pill-sm {
-  min-height: 36px;
-  padding: 0 14px;
+  min-height: 32px;
+  padding: 0 12px;
   border-radius: 999px;
   background: var(--pink);
   color: var(--pink-ink);
   font-family: var(--font-display);
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -472,24 +472,24 @@ svg {
 .btn-soft {
   background: var(--surface-2);
   color: var(--ink);
-  border-radius: 11px;
-  min-height: 42px;
-  padding: 0 14px;
-  font-size: calc(13.5px * var(--text-scale));
+  border-radius: 10px;
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: calc(12.5px * var(--text-scale));
   font-weight: 600;
   transition: background 0.16s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   white-space: nowrap;
 }
 
 .card {
   background: var(--surface);
   border: 0.5px solid var(--line);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 14px;
+  padding: 12px 13px;
   box-shadow: var(--shadow-card);
   transition: background 0.2s ease, border-color 0.2s ease;
 }
@@ -497,15 +497,15 @@ svg {
 .card .card {
   background: var(--surface-2);
   border-color: transparent;
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 10px;
   box-shadow: none;
 }
 
 .ios-group {
   background: var(--surface);
   border: 0.5px solid var(--line);
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--shadow-card);
 }
@@ -515,10 +515,10 @@ svg {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 13px 16px;
+  gap: 10px;
+  padding: 10px 14px;
   text-align: left;
-  min-height: 54px;
+  min-height: 46px;
   transition: background 0.14s ease;
 }
 
@@ -533,16 +533,16 @@ svg {
 .strava-stat-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding-top: 14px;
-  margin-top: 14px;
+  padding-top: 10px;
+  margin-top: 10px;
   border-top: 0.5px solid var(--line);
 }
 
 .strava-stat-cell {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 0 10px;
+  gap: 1px;
+  padding: 0 8px;
 }
 
 .strava-stat-cell:first-child {
@@ -560,18 +560,18 @@ svg {
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
+  gap: 4px;
+  margin-bottom: 10px;
 }
 
 .input-field {
   background: var(--surface-2);
   border: 1px solid transparent;
-  border-radius: 11px;
-  padding: 11px 14px;
+  border-radius: 10px;
+  padding: 8px 12px;
   color: var(--ink);
   width: 100%;
-  min-height: 44px;
+  min-height: 39px;
   transition: border-color 0.16s ease, background 0.16s ease;
 }
 
@@ -583,16 +583,16 @@ svg {
 
 .grid-2 {
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
   display: grid;
 }
 
 .icon-tile {
   background: color-mix(in srgb, var(--c, var(--pink)) 14%, transparent);
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   color: var(--c, var(--pink));
-  border-radius: 10px;
+  border-radius: 8px;
   flex-shrink: 0;
   place-items: center;
   display: grid;
@@ -601,7 +601,7 @@ svg {
 .seg {
   grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr));
   background: var(--surface-2);
-  border-radius: 10px;
+  border-radius: 9px;
   padding: 3px;
   display: grid;
   position: relative;
@@ -612,7 +612,7 @@ svg {
   background: var(--surface);
   box-shadow: var(--shadow-pill);
   transition: transform 0.22s var(--ease);
-  border-radius: 7.5px;
+  border-radius: 6.5px;
   position: absolute;
   top: 3px;
   bottom: 3px;
@@ -621,12 +621,12 @@ svg {
 
 .seg-btn {
   z-index: 1;
-  min-height: 34px;
+  min-height: 30px;
   color: var(--ink-2);
   justify-content: center;
   align-items: center;
-  gap: 6px;
-  font-size: calc(13px * var(--text-scale));
+  gap: 5px;
+  font-size: calc(12px * var(--text-scale));
   font-weight: 600;
   transition: color 0.16s ease;
   display: flex;
@@ -647,15 +647,15 @@ svg {
   backdrop-filter: saturate(180%) blur(20px);
   border-top: 0.5px solid var(--line);
   background: color-mix(in srgb, var(--surface) 86%, transparent);
-  padding: 4px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+  padding: 3px 4px calc(5px + env(safe-area-inset-bottom, 0px));
   position: fixed;
 }
 
 .tabbar-inner {
-  max-width: 680px;
+  max-width: 640px;
   margin: 0 auto;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  height: 50px;
+  height: 46px;
   display: grid;
 }
 
@@ -665,11 +665,11 @@ svg {
   justify-content: center;
   align-items: center;
   gap: 2px;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 600;
   transition: color 0.16s ease;
   display: flex;
-  min-height: 44px;
+  min-height: 40px;
 }
 
 .tab.on {
@@ -684,7 +684,7 @@ svg {
 
 .gauge {
   width: 100%;
-  max-width: 248px;
+  max-width: 200px;
   height: auto;
   display: block;
 }
@@ -697,7 +697,7 @@ svg {
 .gauge-value {
   font-family: var(--font-display);
   margin-top: 2px;
-  font-size: 40px;
+  font-size: 32px;
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1;
@@ -705,19 +705,19 @@ svg {
 
 .pain-dots {
   grid-template-columns: repeat(11, minmax(0, 1fr));
-  gap: 4px;
+  gap: 3px;
   width: 100%;
-  margin-top: 14px;
+  margin-top: 10px;
   display: grid;
 }
 
 .pain-dot {
   aspect-ratio: 1;
-  min-height: 34px;
+  min-height: 28px;
   background: var(--surface-2);
   color: var(--ink-2);
-  border-radius: 8px;
-  font-size: 12.5px;
+  border-radius: 7px;
+  font-size: 11.5px;
   font-weight: 700;
   transition: background 0.14s ease, color 0.14s ease;
 }
@@ -729,23 +729,23 @@ svg {
 
 .pain-advice {
   background: color-mix(in srgb, var(--c) 12%, var(--surface-2));
-  border-radius: 12px;
+  border-radius: 10px;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  margin-top: 14px;
-  padding: 12px 14px;
+  margin-top: 10px;
+  padding: 9px 11px;
   font-weight: 600;
   display: flex;
 }
 
 .meta-kicker {
   color: var(--pink);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .sheet-overlay {
@@ -764,50 +764,50 @@ svg {
 @media (min-width: 640px) {
   .sheet-overlay {
     align-items: center;
-    padding: 18px;
+    padding: 16px;
   }
 }
 
 .sheet-panel {
   width: 100%;
-  max-width: 480px;
-  max-height: 88dvh;
+  max-width: 440px;
+  max-height: 86dvh;
   overflow-y: auto;
   background: var(--bg);
-  border-top-left-radius: 22px;
-  border-top-right-radius: 22px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
   border-top: 0.5px solid var(--line-strong);
-  padding: 12px 16px calc(22px + env(safe-area-inset-bottom, 0px));
+  padding: 10px 14px calc(18px + env(safe-area-inset-bottom, 0px));
   animation: rise 0.22s var(--ease);
 }
 
 @media (min-width: 640px) {
   .sheet-panel {
-    border-radius: 20px;
+    border-radius: 18px;
     border: 0.5px solid var(--line-strong);
-    padding: 18px;
+    padding: 16px;
   }
 }
 
 .sheet-handle {
-  width: 36px;
+  width: 34px;
   height: 4px;
   border-radius: 999px;
   background: var(--line-strong);
-  margin: 0 auto 14px;
+  margin: 0 auto 10px;
 }
 
 .toast {
   position: fixed;
-  top: 66px;
+  top: 56px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 95;
   background: var(--ink);
   color: var(--bg);
-  padding: 9px 16px;
+  padding: 7px 14px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
   animation: rise 0.2s var(--ease);
@@ -817,8 +817,8 @@ svg {
 .footer-note {
   color: var(--ink-3);
   border-top: 0.5px solid var(--line);
-  margin-top: 28px;
-  padding: 14px 4px 4px;
-  font-size: calc(12px * var(--text-scale));
-  line-height: 1.5;
+  margin-top: 20px;
+  padding: 12px 4px 4px;
+  font-size: calc(11px * var(--text-scale));
+  line-height: 1.45;
 }
