@@ -1132,15 +1132,12 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
             width: '100%'
           }}
         >
-          <h1 className="display" style={{ fontSize: '15px', marginTop: '4px' }}>
+          <h1 className="display" style={{ fontSize: '32px', marginTop: '4px' }}>
             Corre seguro, <span className="grad-text">Protege tus tibias</span>
           </h1>
-          <p className="small muted" style={{ marginTop: '4px', maxWidth: '200px' }}>
-            Seguimiento de carga, dolor tibial y prevención en tiempo real.
-          </p>
         </div>
       </div>
-
+      
       <div className="seg" style={{ '--n': 2, marginBottom: '14px' }}>
         <div className="seg-pill" style={{ transform: `translateX(${isRegister ? 100 : 0}%)` }} />
         <button type="button" className={`seg-btn ${!isRegister ? 'on' : ''}`} onClick={() => { setIsRegister(false); setError(null); }}>
