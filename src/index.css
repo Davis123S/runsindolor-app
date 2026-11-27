@@ -6,6 +6,7 @@
 }
 
 :root {
+  /* Apple Fitness / Strava Dark — Negro puro iOS + superficies agrupadas */
   --bg: #000000;
   --surface: #1c1c1e;
   --surface-2: #2c2c2e;
@@ -15,6 +16,7 @@
   --line: rgba(255, 255, 255, 0.09);
   --line-strong: rgba(255, 255, 255, 0.16);
 
+  /* Colores RunEase limpios y sólidos */
   --orange: #ff3b30;
   --pink: #34c759;
   --pink-ink: #041b0b;
@@ -28,6 +30,7 @@
   --shadow-bar: none;
   --shadow-pill: 0 1px 3px rgba(0, 0, 0, 0.45);
 
+  /* Tipografía nativa Apple iOS (SF Pro) + Plus Jakarta Sans */
   --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Plus Jakarta Sans", system-ui, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Plus Jakarta Sans", system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", monospace;
@@ -38,6 +41,7 @@
   color-scheme: dark;
 }
 
+/* Apple Salud / Strava Claro */
 html[data-theme="light"] {
   --bg: #f2f2f7;
   --surface: #ffffff;
@@ -151,6 +155,7 @@ svg {
   padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
 }
 
+/* Barra superior estilo Apple Salud */
 .topbar {
   z-index: 40;
   padding: calc(env(safe-area-inset-top, 0px) + 7px) 14px;
@@ -290,6 +295,7 @@ svg {
   margin-top: 16px;
 }
 
+/* Jerarquía compacta Apple Health + Strava Metrics */
 .display {
   font-family: var(--font-display);
   margin: 0;
@@ -370,6 +376,7 @@ svg {
   font-size: calc(11px * var(--text-scale));
 }
 
+/* Tarjetas Hero compactas */
 .hero-card {
   position: relative;
   border-radius: 14px;
@@ -419,6 +426,7 @@ svg {
   z-index: 2;
 }
 
+/* Botones nativos iOS / Strava compactos */
 .btn {
   min-height: 42px;
   font-family: var(--font-display);
@@ -485,6 +493,7 @@ svg {
   white-space: nowrap;
 }
 
+/* Tarjetas Apple Health compactas */
 .card {
   background: var(--surface);
   border: 0.5px solid var(--line);
@@ -502,6 +511,7 @@ svg {
   box-shadow: none;
 }
 
+/* Lista agrupada estilo Apple Salud / Ajustes iOS */
 .ios-group {
   background: var(--surface);
   border: 0.5px solid var(--line);
@@ -530,6 +540,7 @@ svg {
   background: var(--surface-2);
 }
 
+/* Tira de estadísticas Strava con divisores verticales finos */
 .strava-stat-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -598,6 +609,7 @@ svg {
   display: grid;
 }
 
+/* Control segmentado nativo iOS */
 .seg {
   grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr));
   background: var(--surface-2);
@@ -638,6 +650,7 @@ svg {
   color: var(--ink);
 }
 
+/* Barra inferior nativa iOS compacta */
 .tabbar {
   left: 0;
   right: 0;
@@ -676,6 +689,7 @@ svg {
   color: var(--pink);
 }
 
+/* Medidor clínico EVA compacto */
 .gauge-wrap {
   flex-direction: column;
   align-items: center;
@@ -748,6 +762,7 @@ svg {
   gap: 5px;
 }
 
+/* Hoja deslizable estilo iOS */
 .sheet-overlay {
   position: fixed;
   inset: 0;
@@ -821,4 +836,72 @@ svg {
   padding: 12px 4px 4px;
   font-size: calc(11px * var(--text-scale));
   line-height: 1.45;
+}
+
+/* Tamaño original amplio exclusivo para la pantalla de inicio de sesión */
+.screen.auth-screen {
+  max-width: 640px;
+  padding: 14px 16px 28px;
+}
+
+.auth-screen .stack {
+  gap: 14px;
+}
+
+.auth-screen .display {
+  font-size: calc(30px * var(--text-scale));
+  line-height: 1.08;
+}
+
+.auth-screen .small {
+  font-size: calc(13.5px * var(--text-scale));
+}
+
+.auth-screen .eyebrow {
+  font-size: calc(11.5px * var(--text-scale));
+}
+
+.auth-screen .hero-card {
+  border-radius: 18px;
+  min-height: 220px;
+  padding: 20px;
+}
+
+.auth-screen .btn {
+  min-height: 50px;
+  border-radius: 12px;
+  padding: 0 18px;
+  font-size: calc(15px * var(--text-scale));
+  gap: 8px;
+}
+
+.auth-screen .btn-soft {
+  min-height: 44px;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: calc(14px * var(--text-scale));
+}
+
+.auth-screen .card {
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.auth-screen .input-group {
+  gap: 6px;
+}
+
+.auth-screen .input-field {
+  border-radius: 12px;
+  padding: 11px 14px;
+  min-height: 46px;
+}
+
+.auth-screen .seg {
+  border-radius: 10px;
+}
+
+.auth-screen .seg-btn {
+  min-height: 36px;
+  font-size: calc(13px * var(--text-scale));
 }

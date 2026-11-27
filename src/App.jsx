@@ -20,6 +20,38 @@ const DEFAULT_WATCH_DATA = {
   avgHr: 154
 };
 
+const clampNum = (v, min, max, fallback) => {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+};
+
+const sanitizeProfile = (p) => ({
+  name: String(p?.name || 'Corredor').trim().slice(0, 120) || 'Corredor',
+  age: Math.round(clampNum(p?.age, 10, 100, 21)),
+  sex: p?.sex === 'masculino' ? 'masculino' : 'femenino',
+  weightKg: +clampNum(p?.weightKg, 25, 250, 65).toFixed(1),
+  heightCm: Math.round(clampNum(p?.heightCm, 100, 250, 170)),
+  footType: ['neutra', 'pronador', 'supinador'].includes(p?.footType) ? p.footType : 'neutra',
+  experience: ['<3m', '3-6m', '6-12m', '>12m'].includes(p?.experience) ? p.experience : '<3m',
+  weeklyKm: +clampNum(p?.weeklyKm, 0, 300, 12).toFixed(1),
+  priorInjury: p?.priorInjury === 'si' ? 'si' : 'no'
+});
+
+const sanitizeSession = (s) => {
+  const dateStr = typeof s?.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s.date)
+    ? s.date
+    : new Date().toISOString().split('T')[0];
+  return {
+    date: dateStr,
+    distanceKm: +clampNum(s?.distanceKm, 0, 200, 4.0).toFixed(2),
+    durationMin: Math.round(clampNum(s?.durationMin, 1, 600, 25)),
+    rpe: Math.round(clampNum(s?.rpe, 0, 10, 4)),
+    eva: Math.round(clampNum(s?.eva, 0, 10, 0))
+  };
+};
+
+// --- HOOK DE PERSISTENCIA LOCAL ---
 function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
     try {
@@ -41,9 +73,7 @@ function useLocalStorage(key, initialValue) {
   return [value, setValue];
 }
 
-const fmtWeight = (kg, unit) =>
-  unit === 'metric' ? `${kg} kg` : `${Math.round(kg * 2.20462)} lb`;
-
+// --- CONVERSORES DE UNIDADES ---
 const fmtDist = (km, unit) =>
   unit === 'metric' ? `${Number(km).toFixed(1)} km` : `${(Number(km) * 0.621371).toFixed(1)} mi`;
 
@@ -57,6 +87,7 @@ const fmtPace = (minPerKm, unit) => {
   return `${mins}:${secs.toString().padStart(2, '0')} ${unit === 'metric' ? '/km' : '/mi'}`;
 };
 
+// --- NAVEGACIÓN DE 6 PESTAÑAS ---
 const TABS = [
   { id: 'inicio', label: 'Panel', Icon: Home },
   { id: 'watch', label: 'Reloj', Icon: Watch },
@@ -66,6 +97,7 @@ const TABS = [
   { id: 'recuperacion', label: 'Plan 8S', Icon: HeartPulse },
 ];
 
+// --- ESCALA EVA (DOLOR) ---
 const PAIN_LEVELS = [
   { value: 0, label: 'Sin molestia', c: '#34c759', action: 'Carga óptima. Continúa con tu progresión preventiva.' },
   { value: 3, label: 'Molestia leve', c: '#ffd60a', action: 'Reduce 20% el volumen de impacto y prioriza fortalecimiento.' },
@@ -79,6 +111,7 @@ const getPainInfo = (val) =>
     Math.abs(curr.value - val) < Math.abs(prev.value - val) ? curr : prev
   );
 
+// --- ESCALA DE BORG CR-10 (RPE) ---
 const BORG_LABELS = {
   0: 'Reposo absoluto',
   1: 'Muy muy suave',
@@ -93,6 +126,7 @@ const BORG_LABELS = {
   10: 'Esfuerzo máximo'
 };
 
+// --- CUESTIONARIO DE CONOCIMIENTO PREVENTIVO (10 ÍTEMS) ---
 const QUIZ_QUESTIONS = [
   {
     q: '1. ¿Cuál es el incremento máximo recomendado en el volumen semanal de carrera para prevenir el SETM?',
@@ -348,7 +382,7 @@ const RED_FLAGS = [
   'Inflamación visible, enrojecimiento o calor local en la espinilla.',
 ];
 
-function AppIconMark({ size = 20 }) {
+function AppIconMark({ size = 28 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 128 128" fill="none" aria-hidden="true">
       <defs>
@@ -379,6 +413,7 @@ function AppIconMark({ size = 20 }) {
   );
 }
 
+// --- COMPONENTE PRINCIPAL ---
 export default function App() {
   const [usersDb, setUsersDb] = useLocalStorage('tesis_users_db', {});
   const [currentEmail, setCurrentEmail] = useLocalStorage('tesis_current_user', null);
@@ -397,6 +432,11 @@ export default function App() {
 
   const currentUser = currentEmail ? usersDb[currentEmail] : null;
 
+  const notify = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2600);
+  };
+
   const updateCurrentUser = (updater) => {
     if (!currentEmail) return;
     setUsersDb((prev) => {
@@ -405,11 +445,6 @@ export default function App() {
       const updated = typeof updater === 'function' ? updater(existing) : { ...existing, ...updater };
       return { ...prev, [currentEmail]: updated };
     });
-  };
-
-  const notify = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2600);
   };
 
   const toggleTheme = () => {
@@ -432,6 +467,7 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // --- LOGIN / REGISTRO ---
   if (!currentUser) {
     return (
       <AuthView
@@ -458,7 +494,7 @@ export default function App() {
             }
           });
           setCurrentEmail(cleanEmail);
-          notify('Cuenta creada bajo Ley 1581 de 2012');
+          notify('Cuenta local creada bajo Ley 1581 de 2012');
           return null;
         }}
         onLogin={(email, password) => {
@@ -468,7 +504,7 @@ export default function App() {
             return 'Correo o contraseña incorrectos.';
           }
           setCurrentEmail(cleanEmail);
-          notify('Sesión iniciada');
+          notify('Sesión local iniciada');
           return null;
         }}
         onDemoLogin={() => {
@@ -522,6 +558,7 @@ export default function App() {
     );
   }
 
+  // --- CÁLCULO BIOMÉDICO + ACWR ---
   const calculateBiometrics = (user) => {
     const p = user.profile;
     if (!p) return null;
@@ -594,20 +631,22 @@ export default function App() {
     };
   };
 
-  const bio = calculateBiometrics(currentUser);
+  const bio = currentUser ? calculateBiometrics(currentUser) : null;
 
   if (!currentUser.profile || editingProfile) {
     return (
       <PatientOnboarding
         initialData={currentUser.profile}
+        requireConsent={false}
         unit={unit}
         setUnit={setUnit}
         theme={theme}
         onToggleTheme={toggleTheme}
         onSave={(newProfile) => {
-          updateCurrentUser({ profile: newProfile });
+          const cleanProfile = sanitizeProfile(newProfile);
+          updateCurrentUser({ profile: cleanProfile });
           setEditingProfile(false);
-          notify('Algoritmo calibrado con tu perfil');
+          notify('Algoritmo calibrado y guardado');
         }}
         onCancel={currentUser.profile ? () => setEditingProfile(false) : null}
       />
@@ -671,6 +710,7 @@ export default function App() {
     <div className="app">
       {toast && <div className="toast">{toast}</div>}
 
+      {/* BARRA SUPERIOR ESTILO APPLE SALUD */}
       <header className={`topbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="topbar-inner">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
@@ -679,7 +719,7 @@ export default function App() {
             </div>
             <div style={{ minWidth: 0 }}>
               <div className="h3" style={{ fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                RunSinDolor
+                RunEase
               </div>
               <div className="eyebrow" style={{ fontSize: '10px', lineHeight: 1.1 }}>
                 {TABS.find((t) => t.id === tab)?.label || 'Resumen'}
@@ -687,7 +727,7 @@ export default function App() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               type="button"
               className="icon-circle-btn tap"
@@ -695,7 +735,7 @@ export default function App() {
               title={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
               aria-label="Cambiar tema"
             >
-              {theme === 'dark' ? <Sun size={15} color="#ffd60a" /> : <Moon size={15} />}
+              {theme === 'dark' ? <Sun size={16} color="#ffd60a" /> : <Moon size={16} />}
             </button>
 
             <button
@@ -716,6 +756,7 @@ export default function App() {
         </div>
       </header>
 
+      {/* HOJA DE PERFIL Y PREFERENCIAS ESTILO APPLE SALUD */}
       {showA11y && (
         <div className="sheet-overlay" onClick={() => setShowA11y(false)}>
           <div className="sheet-panel stack" onClick={(e) => e.stopPropagation()}>
@@ -731,13 +772,13 @@ export default function App() {
                 onClick={() => setShowA11y(false)}
                 aria-label="Cerrar preferencias"
               >
-                <X size={15} />
+                <X size={16} />
               </button>
             </div>
 
-            <div className="card stack" style={{ gap: '10px' }}>
+            <div className="card stack" style={{ gap: '12px' }}>
               <div>
-                <div className="eyebrow" style={{ marginBottom: '5px' }}>Apariencia</div>
+                <div className="eyebrow" style={{ marginBottom: '6px' }}>Apariencia</div>
                 <div className="seg" style={{ '--n': 2 }}>
                   <div
                     className="seg-pill"
@@ -748,20 +789,20 @@ export default function App() {
                     className={`seg-btn ${theme === 'dark' ? 'on' : ''}`}
                     onClick={() => setTheme('dark')}
                   >
-                    <Moon size={13} /> Oscuro
+                    <Moon size={14} /> Oscuro
                   </button>
                   <button
                     type="button"
                     className={`seg-btn ${theme === 'light' ? 'on' : ''}`}
                     onClick={() => setTheme('light')}
                   >
-                    <Sun size={13} /> Claro
+                    <Sun size={14} /> Claro
                   </button>
                 </div>
               </div>
 
               <div>
-                <div className="eyebrow" style={{ marginBottom: '5px' }}>Unidades de medida</div>
+                <div className="eyebrow" style={{ marginBottom: '6px' }}>Unidades de medida</div>
                 <div className="seg" style={{ '--n': 2 }}>
                   <div
                     className="seg-pill"
@@ -791,7 +832,7 @@ export default function App() {
               </div>
 
               <div>
-                <div className="eyebrow" style={{ marginBottom: '5px' }}>Tamaño de texto</div>
+                <div className="eyebrow" style={{ marginBottom: '6px' }}>Tamaño de texto</div>
                 <div className="seg" style={{ '--n': 3 }}>
                   <div
                     className="seg-pill"
@@ -826,11 +867,11 @@ export default function App() {
                   setEditingProfile(true);
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '9px', fontWeight: 600 }}>
-                  <User size={16} color="var(--pink)" />
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 600 }}>
+                  <User size={18} color="var(--pink)" />
                   Editar perfil biométrico
                 </span>
-                <ChevronRight size={16} color="var(--ink-3)" />
+                <ChevronRight size={18} color="var(--ink-3)" />
               </button>
 
               <button
@@ -841,11 +882,11 @@ export default function App() {
                   handleExportCSV();
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '9px', fontWeight: 600 }}>
-                  <Download size={16} color="var(--accent)" />
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 600 }}>
+                  <Download size={18} color="var(--accent)" />
                   Exportar historial CSV
                 </span>
-                <ChevronRight size={16} color="var(--ink-3)" />
+                <ChevronRight size={18} color="var(--ink-3)" />
               </button>
 
               <button
@@ -856,11 +897,11 @@ export default function App() {
                   setCurrentEmail(null);
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '9px', fontWeight: 600, color: 'var(--danger)' }}>
-                  <LogOut size={16} />
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 600, color: 'var(--danger)' }}>
+                  <LogOut size={18} />
                   Cerrar sesión
                 </span>
-                <ChevronRight size={16} color="var(--ink-3)" />
+                <ChevronRight size={18} color="var(--ink-3)" />
               </button>
             </div>
           </div>
@@ -930,12 +971,13 @@ export default function App() {
           unit={unit}
           onClose={() => setShowSessionModal(false)}
           onSaveSession={(session) => {
+            const clean = sanitizeSession(session);
             updateCurrentUser((u) => ({
               ...u,
-              sessions: [...u.sessions, { ...session, id: Date.now() }]
+              sessions: [...u.sessions, { ...clean, id: Date.now() }]
             }));
             setShowSessionModal(false);
-            notify('Entrenamiento registrado y gráficas actualizadas');
+            notify('Entrenamiento registrado');
           }}
         />
       )}
@@ -950,18 +992,18 @@ export default function App() {
             backdropFilter: 'blur(8px)',
             display: 'grid',
             placeItems: 'center',
-            padding: '16px'
+            padding: '18px'
           }}
           onClick={() => setShowDeleteModal(false)}
         >
           <div
             className="card stack"
-            style={{ maxWidth: '380px', width: '100%', borderColor: '#ff453a66' }}
+            style={{ maxWidth: '420px', width: '100%', borderColor: '#ff453a66' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div className="icon-tile" style={{ '--c': '#ff453a' }}>
-                <Trash2 size={17} />
+                <Trash2 size={20} />
               </div>
               <div>
                 <div className="eyebrow" style={{ color: '#ff453a' }}>Ley 1581 de 2012</div>
@@ -1005,7 +1047,7 @@ export default function App() {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
               >
-                <Icon size={18} strokeWidth={active ? 2.4 : 2} />
+                <Icon size={20} strokeWidth={active ? 2.5 : 2} />
                 <span>{label}</span>
               </button>
             );
@@ -1017,7 +1059,7 @@ export default function App() {
 }
 
 // ============================================================================
-// 0. PANTALLA DE AUTENTICACIÓN
+// 0. PANTALLA DE AUTENTICACIÓN (TAMAÑO AMPLIO ORIGINAL)
 // ============================================================================
 function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
   const [isRegister, setIsRegister] = useState(false);
@@ -1048,36 +1090,36 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
 
   return (
     <div
-      className="screen stagger"
+      className="screen auth-screen stagger"
       style={{
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 28px)'
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 18px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 40px)'
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
-        <button type="button" onClick={onToggleTheme} className="btn-soft tap" style={{ minHeight: '30px', padding: '0 10px', fontSize: '11.5px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-          {theme === 'dark' ? <><Sun size={13} color="#ffd60a" /> Tema Claro</> : <><Moon size={13} /> Tema Oscuro</>}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
+        <button type="button" onClick={onToggleTheme} className="btn-soft tap" style={{ minHeight: '36px', padding: '0 14px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          {theme === 'dark' ? <><Sun size={15} color="#ffd60a" /> Tema Claro</> : <><Moon size={15} /> Tema Oscuro</>}
         </button>
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '12px' }}>
         <span
           style={{
             display: 'inline-block',
             margin: 0,
             padding: 0,
-            fontSize: '24px',
+            fontSize: '30px',
             fontWeight: 800,
             letterSpacing: '0.06em',
             textTransform: 'uppercase',
             color: '#34c759'
           }}
         >
-          RunSinDolor
+          RunEase
         </span>
       </div>
 
-      <div className="hero-card" style={{ minHeight: '150px', marginBottom: '14px', justifyContent: 'flex-end' }}>
+      <div className="hero-card" style={{ minHeight: '220px', marginBottom: '18px', justifyContent: 'flex-end' }}>
         <img src="/assets/Inicio.jpg" alt="Running preventivo" className="hero-bg" />
         <div className="hero-overlay" />
         <div
@@ -1090,13 +1132,16 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
             width: '100%'
           }}
         >
-          <h1 className="display" style={{ fontSize: '18px', marginTop: '2px' }}>
+          <h1 className="display" style={{ fontSize: '32px', marginTop: '4px' }}>
             Corre seguro, <span className="grad-text">Protege tus tibias</span>
           </h1>
+          <p className="small muted" style={{ marginTop: '6px', maxWidth: '340px' }}>
+            Seguimiento de carga, dolor tibial y prevención en tiempo real.
+          </p>
         </div>
       </div>
 
-      <div className="seg" style={{ '--n': 2, marginBottom: '12px' }}>
+      <div className="seg" style={{ '--n': 2, marginBottom: '14px' }}>
         <div className="seg-pill" style={{ transform: `translateX(${isRegister ? 100 : 0}%)` }} />
         <button type="button" className={`seg-btn ${!isRegister ? 'on' : ''}`} onClick={() => { setIsRegister(false); setError(null); }}>
           Iniciar Sesión
@@ -1115,11 +1160,11 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
               required
               placeholder="corredor@ejemplo.com"
               className="input-field"
-              style={{ paddingLeft: '34px' }}
+              style={{ paddingLeft: '38px' }}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <Mail size={15} color="var(--ink-3)" style={{ position: 'absolute', left: '11px', top: '12px' }} />
+            <Mail size={16} color="var(--ink-3)" style={{ position: 'absolute', left: '12px', top: '15px' }} />
           </div>
         </div>
 
@@ -1131,43 +1176,43 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
               required
               placeholder="••••••••"
               className="input-field"
-              style={{ paddingLeft: '34px' }}
+              style={{ paddingLeft: '38px' }}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Lock size={15} color="var(--ink-3)" style={{ position: 'absolute', left: '11px', top: '12px' }} />
+            <Lock size={16} color="var(--ink-3)" style={{ position: 'absolute', left: '12px', top: '15px' }} />
           </div>
         </div>
 
         {isRegister && (
-          <label style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', cursor: 'pointer', padding: '8px', borderRadius: '10px', background: 'var(--surface-2)' }}>
+          <label style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer', padding: '8px', borderRadius: '12px', background: 'var(--surface-2)' }}>
             <input
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
-              style={{ marginTop: '3px', accentColor: '#34c759', width: '15px', height: '15px' }}
+              style={{ marginTop: '3px', accentColor: '#34c759', width: '16px', height: '16px' }}
             />
-            <span className="small muted" style={{ fontSize: '11.5px' }}>
+            <span className="small muted" style={{ fontSize: '12px' }}>
               Acepto el tratamiento confidencial de mis datos antropométricos y deportivos para fines preventivos y académicos conforme a la <strong>Ley 1581 de 2012</strong> (Habeas Data).
             </span>
           </label>
         )}
 
         {error && (
-          <div style={{ padding: '8px 10px', borderRadius: '10px', background: '#ff453a22', color: '#ff453a', fontSize: '12px', fontWeight: '600' }}>
+          <div style={{ padding: '10px 12px', borderRadius: '12px', background: '#ff453a22', color: '#ff453a', fontSize: '13px', fontWeight: '600' }}>
             {error}
           </div>
         )}
 
         <button type="submit" className="btn btn-primary tap">
           <span>{isRegister ? 'Registrarme y Continuar' : 'Entrar'}</span>
-          <ArrowRight size={16} />
+          <ArrowRight size={18} />
         </button>
       </form>
 
-      <div style={{ marginTop: '12px', textAlign: 'center' }}>
+      <div style={{ marginTop: '16px', textAlign: 'center' }}>
         <button type="button" onClick={onDemoLogin} className="btn btn-soft tap">
-          <Award size={15} color="var(--pink)" />
+          <Award size={17} color="var(--pink)" />
           <span>Perfil Evaluador</span>
         </button>
       </div>
@@ -1178,7 +1223,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
 // ============================================================================
 // 1. FORMULARIO BIOMÉTRICO DEL CORREDOR
 // ============================================================================
-function PatientOnboarding({ initialData, unit, setUnit, theme, onToggleTheme, onSave, onCancel }) {
+function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, onToggleTheme, onSave, onCancel }) {
   const [name, setName] = useState(initialData?.name || '');
   const [age, setAge] = useState(initialData?.age || 21);
   const [sex, setSex] = useState(initialData?.sex || 'femenino');
@@ -1188,10 +1233,12 @@ function PatientOnboarding({ initialData, unit, setUnit, theme, onToggleTheme, o
   const [experience, setExperience] = useState(initialData?.experience || '<3m');
   const [weeklyKm, setWeeklyKm] = useState(initialData?.weeklyKm || 12);
   const [priorInjury, setPriorInjury] = useState(initialData?.priorInjury || 'no');
+  const [consentChecked, setConsentChecked] = useState(!requireConsent);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
+    if (requireConsent && !consentChecked) return;
     onSave({
       name: name.trim(),
       age: Number(age),
@@ -1206,22 +1253,22 @@ function PatientOnboarding({ initialData, unit, setUnit, theme, onToggleTheme, o
   };
 
   return (
-    <div className="screen stagger" style={{ paddingTop: '16px', paddingBottom: '28px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', gap: '8px' }}>
+    <div className="screen stagger" style={{ paddingTop: '24px', paddingBottom: '40px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', gap: '8px' }}>
         <span className="badge">Variables de Ingreso</span>
         <div style={{ display: 'flex', gap: '6px' }}>
           <button
             type="button"
             className="btn-soft tap"
-            style={{ minHeight: '30px', width: '30px', padding: 0, display: 'grid', placeItems: 'center' }}
+            style={{ minHeight: '34px', width: '34px', padding: 0, display: 'grid', placeItems: 'center' }}
             onClick={onToggleTheme}
           >
-            {theme === 'dark' ? <Sun size={14} color="#ffd60a" /> : <Moon size={14} />}
+            {theme === 'dark' ? <Sun size={15} color="#ffd60a" /> : <Moon size={15} />}
           </button>
           <button
             type="button"
             className="btn-soft tap tnum"
-            style={{ minHeight: '30px', padding: '0 10px', fontSize: '11.5px' }}
+            style={{ minHeight: '34px', padding: '0 12px', fontSize: '12px' }}
             onClick={() => setUnit(unit === 'metric' ? 'imperial' : 'metric')}
           >
             {unit === 'metric' ? 'Métrico (kg/cm)' : 'Imperial (lb/in)'}
@@ -1232,7 +1279,7 @@ function PatientOnboarding({ initialData, unit, setUnit, theme, onToggleTheme, o
       <h1 className="display">
         Perfil del <span className="grad-text">corredor</span>
       </h1>
-      <p className="muted small" style={{ marginTop: '4px', marginBottom: '12px' }}>
+      <p className="muted small" style={{ marginTop: '6px', marginBottom: '18px' }}>
         Parametrización antropométrica, sociodemográfica y biomecánica para el algoritmo preventivo.
       </p>
 
@@ -1335,9 +1382,9 @@ function PatientOnboarding({ initialData, unit, setUnit, theme, onToggleTheme, o
           </div>
         </div>
 
-        <button type="submit" className="btn btn-primary tap">
+        <button type="submit" disabled={requireConsent && !consentChecked} className="btn btn-primary tap">
           <span>Guardar</span>
-          <ArrowRight size={17} />
+          <ArrowRight size={19} />
         </button>
 
         {onCancel && (
@@ -1351,7 +1398,7 @@ function PatientOnboarding({ initialData, unit, setUnit, theme, onToggleTheme, o
 }
 
 // ============================================================================
-// 2. PANEL PRINCIPAL (ESTILO APPLE SALUD + STRAVA COMPACTO)
+// 2. PANEL PRINCIPAL
 // ============================================================================
 function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab, onExportCSV, onDeleteAccount }) {
   const [pain, setPain] = useState(0);
@@ -1376,26 +1423,26 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
 
   return (
     <div className="stack">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '10px', padding: '0 2px 2px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '12px', padding: '2px 2px 4px' }}>
         <div>
           <div className="eyebrow" style={{ textTransform: 'capitalize' }}>
             {todayLabel} · {user.profile.name.split(' ')[0]}
           </div>
-          <h1 className="display" style={{ marginTop: '1px' }}>Resumen</h1>
+          <h1 className="display" style={{ marginTop: '2px' }}>Resumen</h1>
         </div>
         <button type="button" onClick={onOpenSession} className="btn-pill-sm tap">
-          <PlusCircle size={14} />
+          <PlusCircle size={16} />
           <span>Registrar</span>
         </button>
       </div>
 
       {bio.consecutivePainAlert && (
         <div className="card" style={{ borderColor: 'var(--danger)', background: 'color-mix(in srgb, var(--danger) 12%, var(--surface))' }}>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-            <AlertTriangle size={18} color="var(--danger)" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+            <AlertTriangle size={20} color="var(--danger)" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
               <div className="h3" style={{ color: 'var(--danger)' }}>Alerta temprana de dolor tibial</div>
-              <p className="small muted" style={{ marginTop: '3px' }}>
+              <p className="small muted" style={{ marginTop: '4px' }}>
                 Reportaste <strong>EVA ≥ 4 en 2 sesiones seguidas</strong>. Suspende impacto y solicita valoración profesional.
               </p>
             </div>
@@ -1460,8 +1507,8 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
             <div className="small muted tnum" style={{ marginTop: '2px' }}>
               Base semanal: {fmtDist(bio.chronicKm, unit)}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: bio.riskColor }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: bio.riskColor }}>
                 Riesgo {bio.riskLevel}
               </span>
               <span className="muted" aria-hidden="true">·</span>
@@ -1500,16 +1547,16 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
               <div className="h3">Aún no hay entrenamientos</div>
               <div className="small muted">Toca aquí para registrar tu primera carrera</div>
             </div>
-            <PlusCircle size={18} color="var(--pink)" />
+            <PlusCircle size={20} color="var(--pink)" />
           </button>
         ) : (
           user.sessions.slice(-3).reverse().map((s) => (
             <div key={s.id} className="ios-row">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div
                   style={{
-                    width: '3.5px',
-                    height: '28px',
+                    width: '4px',
+                    height: '32px',
                     borderRadius: '99px',
                     background: s.eva >= 4 ? 'var(--danger)' : 'var(--pink)',
                     flexShrink: 0
@@ -1523,7 +1570,7 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div className="tnum" style={{ fontSize: '12.5px', fontWeight: 700, color: s.eva >= 4 ? 'var(--danger)' : 'var(--pink)' }}>
+                <div className="tnum" style={{ fontSize: '13.5px', fontWeight: 700, color: s.eva >= 4 ? 'var(--danger)' : 'var(--pink)' }}>
                   EVA {s.eva}/10
                 </div>
                 <div className="small muted tnum">Borg {s.rpe}</div>
@@ -1551,13 +1598,13 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
           type="button"
           className="card tap"
           onClick={() => onGoTab('watch')}
-          style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '5px' }}
+          style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '8px' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11.5px', fontWeight: 700, color: 'var(--accent)' }}>
-              <Watch size={14} /> Reloj
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 700, color: 'var(--accent)' }}>
+              <Watch size={15} /> Reloj
             </span>
-            <ChevronRight size={14} color="var(--ink-3)" />
+            <ChevronRight size={16} color="var(--ink-3)" />
           </div>
           <div className="h2 tnum">{user.watchData.cadence} <span className="small muted" style={{ fontWeight: 500 }}>ppm</span></div>
           <div className="small muted tnum">{fmtDist(user.watchData.distanceKm, unit)} · {user.watchData.avgHr} lpm</div>
@@ -1567,13 +1614,13 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
           type="button"
           className="card tap"
           onClick={() => onGoTab('ejercicios')}
-          style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '5px' }}
+          style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '8px' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11.5px', fontWeight: 700, color: 'var(--pink)' }}>
-              <Dumbbell size={14} /> Fuerza
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 700, color: 'var(--pink)' }}>
+              <Dumbbell size={15} /> Fuerza
             </span>
-            <ChevronRight size={14} color="var(--ink-3)" />
+            <ChevronRight size={16} color="var(--ink-3)" />
           </div>
           <div className="h2 tnum">{Math.round(bio.loadFactor * 100)}% <span className="small muted" style={{ fontWeight: 500 }}>dosis</span></div>
           <div className="small muted">Plan preventivo activo</div>
@@ -1614,9 +1661,9 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
           </svg>
 
           <div className="gauge-value tnum" style={{ color: advice.c }}>
-            {pain}<span style={{ fontSize: '15px', color: 'var(--ink-3)', fontWeight: 600 }}>/10</span>
+            {pain}<span style={{ fontSize: '17px', color: 'var(--ink-3)', fontWeight: 600 }}>/10</span>
           </div>
-          <div style={{ fontWeight: '700', fontSize: '13.5px', color: advice.c }}>{advice.label}</div>
+          <div style={{ fontWeight: '700', fontSize: '14.5px', color: advice.c }}>{advice.label}</div>
 
           <div className="pain-dots">
             {Array.from({ length: 11 }, (_, idx) => (
@@ -1633,7 +1680,7 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
           </div>
 
           <div className="pain-advice" style={{ '--c': advice.c }}>
-            <AlertTriangle size={16} color={advice.c} style={{ flexShrink: 0 }} />
+            <AlertTriangle size={18} color={advice.c} style={{ flexShrink: 0 }} />
             <span className="small">{advice.action}</span>
           </div>
         </div>
@@ -1645,25 +1692,25 @@ function DashboardView({ user, bio, unit, onEditProfile, onOpenSession, onGoTab,
 
       <div className="ios-group">
         <button type="button" onClick={onEditProfile} className="ios-row">
-          <span style={{ display: 'flex', alignItems: 'center', gap: '9px', fontWeight: 600 }}>
-            <User size={16} color="var(--pink)" />
-            Perfil biométrico ({fmtWeight(user.profile.weightKg, unit)})
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 600 }}>
+            <User size={18} color="var(--pink)" />
+            Perfil biométrico
           </span>
-          <ChevronRight size={16} color="var(--ink-3)" />
+          <ChevronRight size={18} color="var(--ink-3)" />
         </button>
         <button type="button" onClick={onExportCSV} className="ios-row">
-          <span style={{ display: 'flex', alignItems: 'center', gap: '9px', fontWeight: 600 }}>
-            <Download size={16} color="var(--accent)" />
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 600 }}>
+            <Download size={18} color="var(--accent)" />
             Exportar historial CSV
           </span>
-          <ChevronRight size={16} color="var(--ink-3)" />
+          <ChevronRight size={18} color="var(--ink-3)" />
         </button>
         <button type="button" onClick={onDeleteAccount} className="ios-row">
-          <span style={{ display: 'flex', alignItems: 'center', gap: '9px', fontWeight: 600, color: 'var(--danger)' }}>
-            <Trash2 size={16} />
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 600, color: 'var(--danger)' }}>
+            <Trash2 size={18} />
             Eliminar cuenta y datos (Ley 1581)
           </span>
-          <ChevronRight size={16} color="var(--ink-3)" />
+          <ChevronRight size={18} color="var(--ink-3)" />
         </button>
       </div>
     </div>
@@ -1683,10 +1730,10 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
     <div className="card stack">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <BarChart3 size={13} color="var(--pink)" /> Monitoreo Longitudinal
+          <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <BarChart3 size={14} color="var(--pink)" /> Monitoreo Longitudinal
           </div>
-          <h2 className="h2" style={{ marginTop: '2px' }}>Gráficas de Seguimiento</h2>
+          <h2 className="h2" style={{ marginTop: '4px' }}>Gráficas de Seguimiento</h2>
         </div>
       </div>
 
@@ -1701,23 +1748,23 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
       </div>
 
       {chartTab === 0 && (
-        <div className="stack" style={{ gap: '10px' }}>
-          <div style={{ background: 'var(--surface-2)', padding: '10px', borderRadius: '11px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span className="eyebrow" style={{ fontSize: '9.5px' }}>Índice Carga Aguda/Crónica</span>
+        <div className="stack" style={{ gap: '14px' }}>
+          <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span className="eyebrow" style={{ fontSize: '10px' }}>Índice Carga Aguda/Crónica</span>
               <span className="badge tnum" style={{ color: acwrColor, background: `color-mix(in srgb, ${acwrColor} 18%, transparent)` }}>
                 ACWR {acwr} · {acwrStatus}
               </span>
             </div>
 
-            <div style={{ position: 'relative', height: '10px', borderRadius: '999px', overflow: 'hidden', display: 'flex' }}>
+            <div style={{ position: 'relative', height: '12px', borderRadius: '999px', overflow: 'hidden', display: 'flex' }}>
               <div style={{ width: '40%', background: '#32ade6' }} title="Subcarga (< 0.8)" />
               <div style={{ width: '25%', background: '#34c759' }} title="Zona segura (0.8 - 1.3)" />
               <div style={{ width: '10%', background: '#ffd60a' }} title="Precaución (1.3 - 1.5)" />
               <div style={{ width: '25%', background: '#ff453a' }} title="Riesgo elevado (> 1.5)" />
             </div>
 
-            <div style={{ position: 'relative', height: '12px', marginTop: '2px' }}>
+            <div style={{ position: 'relative', height: '14px', marginTop: '2px' }}>
               <div
                 style={{
                   position: 'absolute',
@@ -1725,15 +1772,15 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
                   transform: 'translateX(-50%)',
                   width: 0,
                   height: 0,
-                  borderLeft: '5px solid transparent',
-                  borderRight: '5px solid transparent',
-                  borderBottom: `7px solid ${acwrColor}`,
+                  borderLeft: '6px solid transparent',
+                  borderRight: '6px solid transparent',
+                  borderBottom: `8px solid ${acwrColor}`,
                   transition: 'left .4s ease'
                 }}
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9.5px', color: 'var(--ink-3)' }} className="tnum">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--ink-3)' }} className="tnum">
               <span>0.0</span>
               <span>0.8 (Segura)</span>
               <span>1.3</span>
@@ -1742,14 +1789,14 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
           </div>
 
           {recent.length === 0 ? (
-            <div className="small muted" style={{ textAlign: 'center', padding: '12px 0' }}>
+            <div className="small muted" style={{ textAlign: 'center', padding: '16px 0' }}>
               Registra tu primer entrenamiento arriba para visualizar la evolución de carga.
             </div>
           ) : (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <span className="eyebrow" style={{ fontSize: '9.5px' }}>Distancia por sesión ({unitLabel})</span>
-                <span className="small muted tnum" style={{ fontSize: '10.5px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <span className="eyebrow" style={{ fontSize: '10px' }}>Distancia por sesión ({unitLabel})</span>
+                <span className="small muted tnum" style={{ fontSize: '11px' }}>
                   Meta crónica: {fmtDist(chronicKm, unit)}/sem
                 </span>
               </div>
@@ -1758,12 +1805,12 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
                 const values = recent.map((s) => distVal(s.distanceKm, unit));
                 const maxVal = Math.max(...values, distVal(chronicKm / 3, unit) * 1.3, 1);
                 const svgW = 320;
-                const svgH = 122;
-                const padTop = 20;
-                const padBot = 22;
+                const svgH = 135;
+                const padTop = 22;
+                const padBot = 24;
                 const plotH = svgH - padTop - padBot;
                 const slotW = svgW / recent.length;
-                const barW = Math.min(24, slotW * 0.52);
+                const barW = Math.min(28, slotW * 0.55);
 
                 return (
                   <svg viewBox={`0 0 ${svgW} ${svgH}`} style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
@@ -1798,26 +1845,26 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
                             y={y}
                             width={barW}
                             height={h}
-                            rx="5"
+                            rx="6"
                             fill={barColor}
                             style={{ transition: 'height .4s ease, y .4s ease' }}
                           />
                           <text
                             x={x + barW / 2}
-                            y={y - 5}
+                            y={y - 6}
                             textAnchor="middle"
                             fill="var(--ink)"
-                            fontSize="9.5"
+                            fontSize="10"
                             fontWeight="700"
                           >
                             {v}
                           </text>
                           <text
                             x={x + barW / 2}
-                            y={svgH - 5}
+                            y={svgH - 6}
                             textAnchor="middle"
                             fill="var(--ink-3)"
-                            fontSize="9"
+                            fontSize="9.5"
                           >
                             {shortDate}
                           </text>
@@ -1835,18 +1882,18 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
       {chartTab === 1 && (
         <div>
           {recent.length === 0 ? (
-            <div className="small muted" style={{ textAlign: 'center', padding: '12px 0' }}>
+            <div className="small muted" style={{ textAlign: 'center', padding: '16px 0' }}>
               Aún no hay sesiones registradas para graficar dolor EVA y esfuerzo Borg.
             </div>
           ) : (
             <div>
               {(() => {
                 const svgW = 320;
-                const svgH = 136;
+                const svgH = 150;
                 const padL = 22;
                 const padR = 14;
-                const padTop = 16;
-                const padBot = 24;
+                const padTop = 18;
+                const padBot = 26;
                 const plotW = svgW - padL - padR;
                 const plotH = svgH - padTop - padBot;
 
@@ -1869,7 +1916,7 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
                         return (
                           <g key={tick}>
                             <line x1={padL} y1={y} x2={svgW - padR} y2={y} stroke="var(--line)" strokeWidth="1" />
-                            <text x={padL - 6} y={y + 3} textAnchor="end" fill="var(--ink-3)" fontSize="9">
+                            <text x={padL - 6} y={y + 3} textAnchor="end" fill="var(--ink-3)" fontSize="9.5">
                               {tick}
                             </text>
                           </g>
@@ -1885,7 +1932,7 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
                         strokeDasharray="4 3"
                         strokeWidth="1.2"
                       />
-                      <text x={svgW - padR} y={alertY - 4} textAnchor="end" fill="#ff453a" fontSize="8" fontWeight="700">
+                      <text x={svgW - padR} y={alertY - 4} textAnchor="end" fill="#ff453a" fontSize="8.5" fontWeight="700">
                         Alerta EVA ≥ 4
                       </text>
 
@@ -1903,7 +1950,7 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
                         <polyline
                           fill="none"
                           stroke="var(--pink)"
-                          strokeWidth="2.5"
+                          strokeWidth="2.8"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           points={evaPoints}
@@ -1917,12 +1964,12 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
                         const dotColor = s.eva >= 4 ? '#ff453a' : 'var(--pink)';
                         return (
                           <g key={s.id || i}>
-                            <circle cx={cx} cy={cyRpe} r="3" fill="#32ade6" />
-                            <circle cx={cx} cy={cyEva} r="4.2" fill={dotColor} stroke="var(--surface)" strokeWidth="1.5" />
-                            <text x={cx} y={cyEva - 7} textAnchor="middle" fill={dotColor} fontSize="9" fontWeight="800">
+                            <circle cx={cx} cy={cyRpe} r="3.2" fill="#32ade6" />
+                            <circle cx={cx} cy={cyEva} r="4.8" fill={dotColor} stroke="var(--surface)" strokeWidth="1.5" />
+                            <text x={cx} y={cyEva - 8} textAnchor="middle" fill={dotColor} fontSize="9.5" fontWeight="800">
                               {s.eva}
                             </text>
-                            <text x={cx} y={svgH - 5} textAnchor="middle" fill="var(--ink-3)" fontSize="9">
+                            <text x={cx} y={svgH - 6} textAnchor="middle" fill="var(--ink-3)" fontSize="9.5">
                               {s.date.slice(5)}
                             </text>
                           </g>
@@ -1930,13 +1977,13 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
                       })}
                     </svg>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', marginTop: '4px', fontSize: '11px' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--pink)', display: 'inline-block' }} />
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '6px', fontSize: '11.5px' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--pink)', display: 'inline-block' }} />
                         <span className="muted">Dolor EVA (0–10)</span>
                       </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#32ade6', display: 'inline-block' }} />
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#32ade6', display: 'inline-block' }} />
                         <span className="muted">Borg CR-10</span>
                       </span>
                     </div>
@@ -1990,20 +2037,20 @@ function LogSessionModal({ unit, onClose, onSaveSession }) {
         className="card"
         style={{
           width: '100%',
-          maxWidth: '580px',
+          maxWidth: '640px',
           borderBottomLeftRadius: 0,
           borderBottomRightRadius: 0,
-          padding: '18px 16px 28px'
+          padding: '22px 20px 36px'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <div>
             <span className="badge">Autoregistro de Sesión</span>
-            <h2 className="h2" style={{ marginTop: '4px' }}>Carga y Síntomas</h2>
+            <h2 className="h2" style={{ marginTop: '6px' }}>Carga y Síntomas</h2>
           </div>
-          <button type="button" onClick={onClose} className="btn-soft" style={{ width: '32px', minHeight: '32px', padding: 0, display: 'grid', placeItems: 'center' }}>
-            <X size={16} />
+          <button type="button" onClick={onClose} className="btn-soft" style={{ width: '36px', minHeight: '36px', padding: 0, display: 'grid', placeItems: 'center' }}>
+            <X size={18} />
           </button>
         </div>
 
@@ -2038,7 +2085,7 @@ function LogSessionModal({ unit, onClose, onSaveSession }) {
             max="10"
             value={rpe}
             onChange={(e) => setRpe(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#34c759', marginTop: '4px' }}
+            style={{ width: '100%', accentColor: '#34c759', marginTop: '6px' }}
           />
         </div>
 
@@ -2050,7 +2097,7 @@ function LogSessionModal({ unit, onClose, onSaveSession }) {
             max="10"
             value={eva}
             onChange={(e) => setEva(Number(e.target.value))}
-            style={{ width: '100%', accentColor: getPainInfo(eva).c, marginTop: '4px' }}
+            style={{ width: '100%', accentColor: getPainInfo(eva).c, marginTop: '6px' }}
           />
         </div>
 
@@ -2101,27 +2148,27 @@ function WatchMetricsView({ watchData, setWatchData, unit, setUnit, notify }) {
           <span className="badge">SmartWatch</span>
           <button
             className="btn-soft tap tnum"
-            style={{ minHeight: '28px', fontSize: '11px', padding: '0 9px' }}
+            style={{ minHeight: '32px', fontSize: '12px', padding: '0 10px' }}
             onClick={() => setUnit(unit === 'metric' ? 'imperial' : 'metric')}
           >
             {unit === 'metric' ? 'Ver en Imperial' : 'Ver en Métrico'}
           </button>
         </div>
 
-        <h2 className="display" style={{ marginTop: '8px', fontSize: '21px' }}>
+        <h2 className="display" style={{ marginTop: '10px', fontSize: '21px' }}>
           Métricas de Carrera
         </h2>
-        <p className="small muted" style={{ marginTop: '3px' }}>
+        <p className="small muted" style={{ marginTop: '4px' }}>
           Dispositivo: <strong>{watchData.device}</strong> ({watchData.lastSync})
         </p>
 
-        <div className="grid-2" style={{ marginTop: '12px' }}>
+        <div className="grid-2" style={{ marginTop: '16px' }}>
           <button className="btn btn-soft tap" onClick={() => handleSync('apple')} disabled={syncing}>
-            <RefreshCw size={14} />
+            <RefreshCw size={16} />
             <span>Sync Apple Watch</span>
           </button>
           <button className="btn btn-soft tap" onClick={() => handleSync('android')} disabled={syncing}>
-            <RefreshCw size={14} />
+            <RefreshCw size={16} />
             <span>Sync Android Watch</span>
           </button>
         </div>
@@ -2137,12 +2184,12 @@ function WatchMetricsView({ watchData, setWatchData, unit, setUnit, notify }) {
         <div className="eyebrow" style={{ color: highImpactAlert ? '#ff453a' : 'var(--pink)' }}>
           Feedback Biomecánico en Tiempo Real
         </div>
-        <div className="h3" style={{ marginTop: '3px' }}>
+        <div className="h3" style={{ marginTop: '4px' }}>
           {highImpactAlert
             ? 'Sobrecarga de impacto detectada'
             : 'Técnica protectora para la tibia'}
         </div>
-        <p className="small muted" style={{ marginTop: '4px' }}>
+        <p className="small muted" style={{ marginTop: '6px' }}>
           {highImpactAlert
             ? `Cadencia baja (${watchData.cadence} ppm) y contacto prolongado (${watchData.groundContactMs} ms). Incrementar un 5% la cadencia disminuye la fuerza de frenado tibial.`
             : `Cadencia óptima (${watchData.cadence} ppm) y tiempo de contacto reducido (${watchData.groundContactMs} ms).`}
@@ -2152,31 +2199,31 @@ function WatchMetricsView({ watchData, setWatchData, unit, setUnit, notify }) {
       <div className="grid-2">
         <div className="card">
           <div className="eyebrow">Distancia</div>
-          <div className="h2 tnum" style={{ marginTop: '4px', color: 'var(--pink)' }}>{fmtDist(watchData.distanceKm, unit)}</div>
+          <div className="h2 tnum" style={{ marginTop: '6px', color: 'var(--pink)' }}>{fmtDist(watchData.distanceKm, unit)}</div>
         </div>
         <div className="card">
           <div className="eyebrow">Ritmo Medio</div>
-          <div className="h2 tnum" style={{ marginTop: '4px', color: '#32ade6' }}>{fmtPace(watchData.paceMinKm, unit)}</div>
+          <div className="h2 tnum" style={{ marginTop: '6px', color: '#32ade6' }}>{fmtPace(watchData.paceMinKm, unit)}</div>
         </div>
         <div className="card">
           <div className="eyebrow">Cadencia</div>
-          <div className="h2 tnum" style={{ marginTop: '4px', color: watchData.cadence < 170 ? '#f59e0b' : 'var(--pink)' }}>
+          <div className="h2 tnum" style={{ marginTop: '6px', color: watchData.cadence < 170 ? '#f59e0b' : 'var(--pink)' }}>
             {watchData.cadence} <span className="small muted">ppm</span>
           </div>
         </div>
         <div className="card">
           <div className="eyebrow">Contacto Suelo</div>
-          <div className="h2 tnum" style={{ marginTop: '4px', color: watchData.groundContactMs > 255 ? '#ff453a' : 'var(--pink)' }}>
+          <div className="h2 tnum" style={{ marginTop: '6px', color: watchData.groundContactMs > 255 ? '#ff453a' : 'var(--pink)' }}>
             {watchData.groundContactMs} <span className="small muted">ms</span>
           </div>
         </div>
         <div className="card">
           <div className="eyebrow">Oscilación Vert.</div>
-          <div className="h2 tnum" style={{ marginTop: '4px' }}>{oscDisplay}</div>
+          <div className="h2 tnum" style={{ marginTop: '6px' }}>{oscDisplay}</div>
         </div>
         <div className="card">
           <div className="eyebrow">Frec. Cardíaca</div>
-          <div className="h2 tnum" style={{ marginTop: '4px', color: '#ff2e55' }}>
+          <div className="h2 tnum" style={{ marginTop: '6px', color: '#ff2e55' }}>
             {watchData.avgHr} <span className="small muted">lpm</span>
           </div>
         </div>
@@ -2261,9 +2308,9 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
         <img src="/assets/que-es-fisio-DTwnd5so.jpg" alt="Educación preventiva SETM" className="hero-bg" />
         <div className="hero-overlay" />
         <div className="hero-content">
-          <span className="badge" style={{ marginBottom: '6px' }}>Módulo Educativo</span>
+          <span className="badge" style={{ marginBottom: '8px' }}>Módulo Educativo</span>
           <h2 className="display" style={{ fontSize: '21px' }}>Comprende el SETM</h2>
-          <p className="small muted" style={{ marginTop: '3px' }}>
+          <p className="small muted" style={{ marginTop: '4px' }}>
             Conocimiento preventivo basado en evidencia científica para corredores principiantes.
           </p>
         </div>
@@ -2286,28 +2333,28 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
           >
             {sexGuidance.badge}
           </span>
-          <h3 className="h2" style={{ marginTop: '6px' }}>
+          <h3 className="h2" style={{ marginTop: '8px', fontSize: '18px' }}>
             {sexGuidance.title}
           </h3>
-          <p className="small muted" style={{ marginTop: '3px' }}>
+          <p className="small muted" style={{ marginTop: '4px' }}>
             {sexGuidance.summary}
           </p>
         </div>
 
-        <div className="stack" style={{ gap: '7px' }}>
+        <div className="stack" style={{ gap: '8px' }}>
           {sexGuidance.points.map((pt, idx) => (
             <div
               key={idx}
               style={{
                 background: 'var(--surface-2)',
-                padding: '9px 11px',
-                borderRadius: '11px'
+                padding: '10px 12px',
+                borderRadius: '14px'
               }}
             >
-              <div className="h3" style={{ fontSize: '12.5px', color: sexGuidance.accent }}>
+              <div className="h3" style={{ fontSize: '13.5px', color: sexGuidance.accent }}>
                 {pt.label}
               </div>
-              <div className="small muted" style={{ marginTop: '2px', fontSize: '12px' }}>
+              <div className="small muted" style={{ marginTop: '2px', fontSize: '12.5px' }}>
                 {pt.text}
               </div>
             </div>
@@ -2318,8 +2365,8 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
       <div className="grid-2">
         {STATS_FACTS.map((st, i) => (
           <div key={i} className="card">
-            <div className="h2 tnum" style={{ color: st.c, fontSize: '19px' }}>{st.num}</div>
-            <div className="small muted" style={{ marginTop: '3px' }}>{st.label}</div>
+            <div className="h2 tnum" style={{ color: st.c, fontSize: '23px' }}>{st.num}</div>
+            <div className="small muted" style={{ marginTop: '4px' }}>{st.label}</div>
           </div>
         ))}
       </div>
@@ -2336,11 +2383,11 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
       {subTab === 0 && (
         <div className="stack">
           {ANATOMY_CARDS.map(({ title, desc, c, Icon }, i) => (
-            <div key={i} className="card" style={{ display: 'flex', gap: '11px', alignItems: 'flex-start' }}>
-              <div className="icon-tile" style={{ '--c': c }}><Icon size={17} /></div>
+            <div key={i} className="card" style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+              <div className="icon-tile" style={{ '--c': c }}><Icon size={20} /></div>
               <div>
                 <div className="h3">{title}</div>
-                <p className="small muted" style={{ marginTop: '3px' }}>{desc}</p>
+                <p className="small muted" style={{ marginTop: '4px' }}>{desc}</p>
               </div>
             </div>
           ))}
@@ -2351,7 +2398,7 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
         <div className="card stack">
           <div className="h3">Reconocimiento de señales tempranas</div>
           {SYMPTOMS.map((sym, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+            <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span className="badge tnum">{i + 1}</span>
               <span className="small muted">{sym}</span>
             </div>
@@ -2367,13 +2414,13 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
               <div key={i} className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 <button
                   onClick={() => setOpenRisk(isOpen ? null : i)}
-                  style={{ width: '100%', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left' }}
+                  style={{ width: '100%', padding: '16px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left' }}
                 >
                   <span className="h3">{rf.title}</span>
-                  <ChevronDown size={16} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+                  <ChevronDown size={18} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
                 </button>
                 {isOpen && (
-                  <div className="small muted" style={{ padding: '0 14px 12px', borderTop: '1px solid var(--line)', paddingTop: '9px' }}>
+                  <div className="small muted" style={{ padding: '0 18px 16px', borderTop: '1px solid var(--line)', paddingTop: '12px' }}>
                     {rf.detail}
                   </div>
                 )}
@@ -2387,8 +2434,8 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
         <div className="stack">
           {!quizMode ? (
             <div className="card stack">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ClipboardCheck size={19} color="var(--pink)" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <ClipboardCheck size={22} color="var(--pink)" />
                 <div className="h2">Evaluación Pre / Post</div>
               </div>
               <p className="small muted">
@@ -2396,22 +2443,22 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
               </p>
 
               <div className="grid-2">
-                <div style={{ background: 'var(--surface-2)', padding: '10px', borderRadius: '11px' }}>
-                  <div className="eyebrow" style={{ fontSize: '9.5px' }}>Puntaje Pre-Test</div>
-                  <div className="h2 tnum" style={{ marginTop: '3px' }}>
+                <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: '14px' }}>
+                  <div className="eyebrow" style={{ fontSize: '10px' }}>Puntaje Pre-Test</div>
+                  <div className="h2 tnum" style={{ marginTop: '4px' }}>
                     {quizScores.pre !== null ? `${quizScores.pre}/10` : 'Pendiente'}
                   </div>
                 </div>
-                <div style={{ background: 'var(--surface-2)', padding: '10px', borderRadius: '11px' }}>
-                  <div className="eyebrow" style={{ fontSize: '9.5px' }}>Puntaje Post-Test</div>
-                  <div className="h2 tnum" style={{ marginTop: '3px', color: 'var(--pink)' }}>
+                <div style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: '14px' }}>
+                  <div className="eyebrow" style={{ fontSize: '10px' }}>Puntaje Post-Test</div>
+                  <div className="h2 tnum" style={{ marginTop: '4px', color: 'var(--pink)' }}>
                     {quizScores.post !== null ? `${quizScores.post}/10` : 'Pendiente'}
                   </div>
                 </div>
               </div>
 
               {improvement !== null && (
-                <div style={{ padding: '10px', borderRadius: '11px', background: improvement >= 30 ? '#34c7591a' : '#ffd60a1a', border: '1px solid var(--pink)' }}>
+                <div style={{ padding: '12px', borderRadius: '14px', background: improvement >= 30 ? '#34c7591a' : '#ffd60a1a', border: '1px solid var(--pink)' }}>
                   <span className="small" style={{ fontWeight: '700' }}>
                     Variación del conocimiento: {improvement >= 0 ? `+${improvement}%` : `${improvement}%`}
                     {improvement >= 30 ? ' (Meta ≥30% cumplida)' : ''}
@@ -2432,13 +2479,13 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
             <div className="card stack">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="badge">Test {quizMode === 'pre' ? 'Inicial (Pre)' : 'Final (Post)'}</span>
-                <button onClick={() => setQuizMode(null)}><X size={16} /></button>
+                <button onClick={() => setQuizMode(null)}><X size={18} /></button>
               </div>
 
               {QUIZ_QUESTIONS.map((item, qIdx) => (
-                <div key={qIdx} style={{ paddingBottom: '10px', borderBottom: '1px solid var(--line)' }}>
-                  <div className="h3" style={{ fontSize: '13px', marginBottom: '6px' }}>{item.q}</div>
-                  <div className="stack" style={{ gap: '5px' }}>
+                <div key={qIdx} style={{ paddingBottom: '12px', borderBottom: '1px solid var(--line)' }}>
+                  <div className="h3" style={{ fontSize: '14px', marginBottom: '8px' }}>{item.q}</div>
+                  <div className="stack" style={{ gap: '6px' }}>
                     {item.options.map((opt, oIdx) => {
                       const selected = answers[qIdx] === oIdx;
                       return (
@@ -2448,9 +2495,9 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
                           onClick={() => setAnswers({ ...answers, [qIdx]: oIdx })}
                           style={{
                             textAlign: 'left',
-                            padding: '8px 10px',
-                            borderRadius: '10px',
-                            fontSize: '12px',
+                            padding: '10px 12px',
+                            borderRadius: '12px',
+                            fontSize: '13px',
                             background: selected ? '#34c75922' : 'var(--surface-2)',
                             border: `1px solid ${selected ? 'var(--pink)' : 'transparent'}`,
                             color: selected ? 'var(--ink)' : 'var(--ink-2)',
@@ -2501,10 +2548,10 @@ function PreventionView({ checked, setChecked, notify }) {
         <img src="/assets/prevencion-calentamiento-CCHPQMaC.jpg" alt="Calentamiento deportivo" className="hero-bg" />
         <div className="hero-overlay" />
         <div className="hero-content">
-          <span className="badge" style={{ marginBottom: '6px' }}>Prevención Primaria</span>
+          <span className="badge" style={{ marginBottom: '8px' }}>Prevención Primaria</span>
           <h2 className="display" style={{ fontSize: '21px' }}>Hábitos y Calentamiento</h2>
-          <p className="small muted" style={{ marginTop: '3px' }}>
-            Estrategias preventivas para reducir la exposición al estrés tibial.
+          <p className="small muted" style={{ marginTop: '4px' }}>
+            Estrategias modificables para reducir la exposición al estrés tibial.
           </p>
         </div>
       </div>
@@ -2512,9 +2559,9 @@ function PreventionView({ checked, setChecked, notify }) {
       <div className="grid-2">
         {HABITS.map(({ title, desc, Icon, c }, i) => (
           <div key={i} className="card">
-            <div className="icon-tile" style={{ '--c': c, marginBottom: '8px' }}><Icon size={17} /></div>
-            <div className="h3" style={{ fontSize: '13.5px' }}>{title}</div>
-            <div className="small muted" style={{ marginTop: '3px', fontSize: '11.5px' }}>{desc}</div>
+            <div className="icon-tile" style={{ '--c': c, marginBottom: '10px' }}><Icon size={20} /></div>
+            <div className="h3" style={{ fontSize: '14.5px' }}>{title}</div>
+            <div className="small muted" style={{ marginTop: '4px', fontSize: '12.5px' }}>{desc}</div>
           </div>
         ))}
       </div>
@@ -2525,11 +2572,11 @@ function PreventionView({ checked, setChecked, notify }) {
           <span className="badge tnum">{doneMin}/{totalMin} min</span>
         </div>
 
-        <div style={{ background: 'var(--surface-2)', height: '6px', borderRadius: '4px', marginTop: '10px', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--surface-2)', height: '8px', borderRadius: '4px', marginTop: '12px', overflow: 'hidden' }}>
           <div style={{ background: 'var(--grad)', width: `${(doneMin / totalMin) * 100}%`, height: '100%', transition: 'width .4s ease' }} />
         </div>
 
-        <div className="stack" style={{ marginTop: '12px' }}>
+        <div className="stack" style={{ marginTop: '16px' }}>
           {WARMUP.map((item, idx) => {
             const isDone = checked.includes(idx);
             return (
@@ -2540,19 +2587,19 @@ function PreventionView({ checked, setChecked, notify }) {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: '12px',
                   textAlign: 'left',
-                  padding: '9px 11px',
-                  borderRadius: '11px',
+                  padding: '12px',
+                  borderRadius: '14px',
                   background: isDone ? '#34c7591a' : 'var(--surface-2)',
                   border: `1px solid ${isDone ? 'var(--pink)' : 'transparent'}`
                 }}
               >
                 <div
                   style={{
-                    width: '19px',
-                    height: '19px',
-                    borderRadius: '5px',
+                    width: '22px',
+                    height: '22px',
+                    borderRadius: '6px',
                     background: isDone ? 'var(--pink)' : 'transparent',
                     border: `2px solid ${isDone ? 'var(--pink)' : 'var(--ink-3)'}`,
                     display: 'grid',
@@ -2560,7 +2607,7 @@ function PreventionView({ checked, setChecked, notify }) {
                     flexShrink: 0
                   }}
                 >
-                  {isDone && <Check size={12} color="#000" strokeWidth={3} />}
+                  {isDone && <Check size={14} color="#000" strokeWidth={3} />}
                 </div>
                 <span className="small" style={{ flex: 1, textDecoration: isDone ? 'line-through' : 'none', color: isDone ? 'var(--ink-3)' : 'var(--ink)' }}>
                   {item.act}
@@ -2590,23 +2637,23 @@ function ExercisesView({ bio, onOpenExercise }) {
     <div className="stack">
       <div className="card">
         <span className="badge">Entrenamiento Neuromuscular</span>
-        <h2 className="display" style={{ marginTop: '6px', fontSize: '21px' }}>
+        <h2 className="display" style={{ marginTop: '8px', fontSize: '21px' }}>
           6 Ejercicios Preventivos
         </h2>
-        <p className="small muted" style={{ marginTop: '4px' }}>
+        <p className="small muted" style={{ marginTop: '6px' }}>
           Dosificación ajustada al <strong>{Math.round(bio.loadFactor * 100)}%</strong> según tu perfil de riesgo ({bio.riskLevel}).
         </p>
 
-        <div style={{ display: 'flex', gap: '5px', overflowX: 'auto', marginTop: '10px', paddingBottom: '2px' }}>
+        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', marginTop: '14px', paddingBottom: '4px' }}>
           {phases.map((ph) => (
             <button
               key={ph}
               onClick={() => setFilter(ph)}
               className="tap"
               style={{
-                padding: '6px 11px',
+                padding: '7px 13px',
                 borderRadius: '999px',
-                fontSize: '11.5px',
+                fontSize: '12px',
                 fontWeight: '700',
                 whiteSpace: 'nowrap',
                 background: filter === ph ? 'var(--pink)' : 'var(--surface-2)',
@@ -2630,18 +2677,18 @@ function ExercisesView({ bio, onOpenExercise }) {
             key={ex.id}
             className="card tap"
             onClick={() => onOpenExercise({ ...ex, doseLabel })}
-            style={{ textAlign: 'left', padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}
+            style={{ textAlign: 'left', padding: '12px', display: 'flex', alignItems: 'center', gap: '14px' }}
           >
             <img src={ex.img} alt={ex.title} style={{ width: '60px', height: '60px', borderRadius: '11px', objectFit: 'cover', flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
-              <span className="badge" style={{ marginBottom: '2px' }}>{ex.phase}</span>
+              <span className="badge" style={{ marginBottom: '3px' }}>{ex.phase}</span>
               <div className="h3" style={{ fontSize: '14px' }}>{ex.title}</div>
-              <div className="small tnum" style={{ color: 'var(--pink)', fontWeight: '700', marginTop: '2px' }}>
+              <div className="small tnum" style={{ color: 'var(--pink)', fontWeight: '700', marginTop: '3px' }}>
                 {doseLabel} · {ex.level}
               </div>
             </div>
             <div className="icon-tile">
-              <Play size={14} fill="currentColor" />
+              <Play size={16} fill="currentColor" />
             </div>
           </button>
         );
@@ -2690,66 +2737,66 @@ function ExerciseModal({ ex, onClose }) {
         className="card"
         style={{
           width: '100%',
-          maxWidth: '580px',
+          maxWidth: '640px',
           borderBottomLeftRadius: 0,
           borderBottomRightRadius: 0,
-          maxHeight: '90vh',
+          maxHeight: '92vh',
           overflowY: 'auto',
-          padding: '16px 16px 28px'
+          padding: '20px 20px 36px'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ position: 'relative', borderRadius: '14px', overflow: 'hidden', height: '150px', marginBottom: '12px' }}>
+        <div style={{ position: 'relative', borderRadius: '18px', overflow: 'hidden', height: '180px', marginBottom: '16px' }}>
           <img src={ex.img} alt={ex.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           <button
             onClick={onClose}
             style={{
               position: 'absolute',
-              top: '10px',
-              right: '10px',
-              width: '32px',
-              height: '32px',
+              top: '12px',
+              right: '12px',
+              width: '36px',
+              height: '36px',
               borderRadius: '50%',
               background: '#000000aa',
               display: 'grid',
               placeItems: 'center'
             }}
           >
-            <X size={17} color="#fff" />
+            <X size={20} color="#fff" />
           </button>
         </div>
 
         <span className="badge">{ex.phase} · {ex.doseLabel}</span>
-        <h2 className="h2" style={{ marginTop: '6px' }}>{ex.title}</h2>
+        <h2 className="h2" style={{ marginTop: '8px' }}>{ex.title}</h2>
 
-        <div className="eyebrow" style={{ marginTop: '12px', marginBottom: '8px' }}>Ejecución paso a paso</div>
+        <div className="eyebrow" style={{ marginTop: '16px', marginBottom: '10px' }}>Ejecución paso a paso</div>
         <div className="stack">
           {ex.steps.map((step, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+            <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span className="badge tnum">{i + 1}</span>
               <span className="small muted">{step}</span>
             </div>
           ))}
         </div>
 
-        <div style={{ marginTop: '12px', padding: '10px', borderRadius: '11px', background: '#34c75914', border: '1px solid #34c75933' }}>
+        <div style={{ marginTop: '14px', padding: '12px', borderRadius: '14px', background: '#34c75914', border: '1px solid #34c75933' }}>
           <span className="small" style={{ color: 'var(--pink)', fontWeight: '600' }}>Evidencia preventiva: </span>
           <span className="small muted">{ex.tip}</span>
         </div>
 
         <div
           style={{
-            marginTop: '14px',
+            marginTop: '18px',
             background: 'var(--surface-2)',
-            borderRadius: '16px',
-            padding: '12px',
+            borderRadius: '20px',
+            padding: '16px',
             display: 'flex',
             alignItems: 'center',
-            gap: '14px'
+            gap: '18px'
           }}
         >
-          <div style={{ position: 'relative', width: '78px', height: '78px', flexShrink: 0 }}>
-            <svg width="78" height="78" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+          <div style={{ position: 'relative', width: '96px', height: '96px', flexShrink: 0 }}>
+            <svg width="96" height="96" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
               <circle cx="50" cy="50" r={radius} fill="none" stroke="var(--surface)" strokeWidth="8" />
               <circle
                 cx="50"
@@ -2764,34 +2811,34 @@ function ExerciseModal({ ex, onClose }) {
                 style={{ transition: 'stroke-dashoffset .9s linear' }}
               />
             </svg>
-            <div className="tnum" style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', fontSize: '18px', fontWeight: '800' }}>
+            <div className="tnum" style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', fontSize: '22px', fontWeight: '800' }}>
               {seconds}s
             </div>
           </div>
 
           <div>
             <div className="h3">{ex.timer.label}</div>
-            <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
               <button
                 className="btn btn-primary tap"
-                style={{ minHeight: '36px', padding: '0 14px', width: 'auto' }}
+                style={{ minHeight: '42px', padding: '0 16px', width: 'auto' }}
                 onClick={() => {
                   if (seconds === 0) setSeconds(ex.timer.s);
                   setRunning(!running);
                 }}
               >
-                {running ? <Pause size={15} /> : <Play size={15} />}
+                {running ? <Pause size={18} /> : <Play size={18} />}
                 <span>{running ? 'Pausar' : 'Iniciar'}</span>
               </button>
               <button
                 className="btn btn-soft tap"
-                style={{ minHeight: '36px', width: '36px', padding: 0 }}
+                style={{ minHeight: '42px', width: '42px', padding: 0 }}
                 onClick={() => {
                   setRunning(false);
                   setSeconds(ex.timer.s);
                 }}
               >
-                <RotateCcw size={15} />
+                <RotateCcw size={18} />
               </button>
             </div>
           </div>
@@ -2824,9 +2871,9 @@ function RecoveryView({ doneTasks, setDoneTasks, notify }) {
         <img src="/assets/recuperacion-hielo-fJVnTR5m.jpg" alt="Progresión segura de running" className="hero-bg" />
         <div className="hero-overlay" />
         <div className="hero-content">
-          <span className="badge" style={{ marginBottom: '6px' }}>Progresión de Carga</span>
+          <span className="badge" style={{ marginBottom: '8px' }}>Progresión de Carga</span>
           <h2 className="display" style={{ fontSize: '21px' }}>Plan 8 Semanas</h2>
-          <p className="small muted" style={{ marginTop: '3px' }}>
+          <p className="small muted" style={{ marginTop: '4px' }}>
             Adaptación gradual del tejido óseo para corredores principiantes (18–25 años).
           </p>
         </div>
@@ -2850,7 +2897,7 @@ function RecoveryView({ doneTasks, setDoneTasks, notify }) {
               <div key={sIdx} className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 <button
                   onClick={() => setOpenStage(isOpen ? null : sIdx)}
-                  style={{ width: '100%', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left' }}
+                  style={{ width: '100%', padding: '16px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left' }}
                 >
                   <div>
                     <div className="eyebrow" style={{ color: 'var(--pink)' }}>
@@ -2858,25 +2905,25 @@ function RecoveryView({ doneTasks, setDoneTasks, notify }) {
                     </div>
                     <div className="h3" style={{ marginTop: '2px' }}>{stage.title}</div>
                   </div>
-                  <ChevronDown size={17} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .25s ease' }} />
+                  <ChevronDown size={20} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .25s ease' }} />
                 </button>
 
                 {isOpen && (
-                  <div style={{ padding: '0 14px 14px', borderTop: '1px solid var(--line)' }}>
-                    <div className="stack" style={{ marginTop: '10px' }}>
+                  <div style={{ padding: '0 18px 18px', borderTop: '1px solid var(--line)' }}>
+                    <div className="stack" style={{ marginTop: '12px' }}>
                       {stage.tasks.map((task, tIdx) => {
                         const checked = !!doneTasks[`${sIdx}-${tIdx}`];
                         return (
                           <button
                             key={tIdx}
                             onClick={() => toggleTask(sIdx, tIdx)}
-                            style={{ display: 'flex', alignItems: 'center', gap: '8px', textAlign: 'left' }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left' }}
                           >
                             <div
                               style={{
-                                width: '18px',
-                                height: '18px',
-                                borderRadius: '5px',
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '6px',
                                 background: checked ? 'var(--pink)' : 'transparent',
                                 border: `2px solid ${checked ? 'var(--pink)' : 'var(--ink-3)'}`,
                                 display: 'grid',
@@ -2884,7 +2931,7 @@ function RecoveryView({ doneTasks, setDoneTasks, notify }) {
                                 flexShrink: 0
                               }}
                             >
-                              {checked && <Check size={11} color="#000" strokeWidth={3} />}
+                              {checked && <Check size={13} color="#000" strokeWidth={3} />}
                             </div>
                             <span className="small" style={{ color: checked ? 'var(--ink-3)' : 'var(--ink-2)', textDecoration: checked ? 'line-through' : 'none' }}>
                               {task}
@@ -2903,12 +2950,12 @@ function RecoveryView({ doneTasks, setDoneTasks, notify }) {
 
       {subTab === 1 && (
         <div className="card stack" style={{ borderColor: '#ff453a66' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertTriangle size={18} color="#ff453a" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <AlertTriangle size={22} color="#ff453a" />
             <div className="h2" style={{ color: '#ff453a' }}>Criterios de Suspensión</div>
           </div>
           {RED_FLAGS.map((flag, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+            <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span className="badge" style={{ background: '#ff453a22', color: '#ff453a' }}>!</span>
               <span className="small muted">{flag}</span>
             </div>
@@ -2920,19 +2967,19 @@ function RecoveryView({ doneTasks, setDoneTasks, notify }) {
         <div className="stack">
           <div className="card">
             <div className="h3">Control de Carga Aguda/Crónica</div>
-            <p className="small muted" style={{ marginTop: '3px' }}>
+            <p className="small muted" style={{ marginTop: '4px' }}>
               Mantén tu indicador ACWR entre 0.8 y 1.3 registrando cada entrenamiento con distancia y escala de Borg.
             </p>
           </div>
           <div className="card">
             <div className="h3">Autogestión del Descanso</div>
-            <p className="small muted" style={{ marginTop: '3px' }}>
+            <p className="small muted" style={{ marginTop: '4px' }}>
               Evita correr días consecutivos durante tus primeras 6 semanas para permitir la remodelación ósea.
             </p>
           </div>
           <div className="card">
             <div className="h3">Consulta Oportuna</div>
-            <p className="small muted" style={{ marginTop: '3px' }}>
+            <p className="small muted" style={{ marginTop: '4px' }}>
               Este prototipo es preventivo: ante dolor persistente, acude a fisioterapia o medicina del deporte.
             </p>
           </div>
