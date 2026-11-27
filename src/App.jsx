@@ -1663,7 +1663,7 @@ function AuthView({
             width: '100%'
           }}
         >
-          <span className="badge" style={{ marginBottom: '6px' }}>UMB · Ingeniería Biomédica</span>
+        
           <h1 className="display" style={{ fontSize: '30px', marginTop: '2px' }}>
             Corre seguro, <span className="grad-text">protege tus tibias</span>
           </h1>
