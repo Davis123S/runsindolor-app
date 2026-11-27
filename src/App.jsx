@@ -1282,7 +1282,7 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
         Perfil del <span className="grad-text">corredor</span>
       </h1>
       <p className="muted small" style={{ marginTop: '6px', marginBottom: '18px' }}>
-        Parametrización antropométrica, sociodemográfica y biomecánica para el algoritmo preventivo.
+        Parametrización antropométrica, sociodemográfica y biomecánica del corredor.
       </p>
 
       <form onSubmit={handleSubmit} className="stack">
