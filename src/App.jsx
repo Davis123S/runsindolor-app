@@ -679,7 +679,7 @@ export default function App() {
             </div>
             <div style={{ minWidth: 0 }}>
               <div className="h3" style={{ fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                RunEase
+                RunSinDolor
               </div>
               <div className="eyebrow" style={{ fontSize: '10px', lineHeight: 1.1 }}>
                 {TABS.find((t) => t.id === tab)?.label || 'Resumen'}
