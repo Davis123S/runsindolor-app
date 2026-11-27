@@ -1102,7 +1102,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
         </button>
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+    <div style={{ textAlign: 'center', marginBottom: '12px' }}>
         <span
           style={{
             display: 'inline-block',
@@ -1110,15 +1110,14 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
             padding: 0,
             fontSize: '30px',
             fontWeight: 800,
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
+            letterSpacing: '-0.01em',
             color: '#34c759'
           }}
         >
           RunSinDolor
         </span>
       </div>
-
+      
       <div className="hero-card" style={{ minHeight: '220px', marginBottom: '18px', justifyContent: 'flex-end' }}>
         <img src="/assets/Inicio.jpg" alt="Running preventivo" className="hero-bg" />
         <div className="hero-overlay" />
