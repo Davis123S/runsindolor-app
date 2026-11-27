@@ -10,49 +10,129 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
-// UTILIDADES DE SANITIZACIÓN Y PERSISTENCIA LOCAL (LEY 1581 DE 2012)
+// TIPOS Y UTILIDADES DE SANITIZACIÓN Y PERSISTENCIA LOCAL (LEY 1581 DE 2012)
 // ============================================================================
-const clampNum = (v, min, max, fallback) => {
+type UnitSystem = 'metric' | 'imperial';
+type ThemeMode = 'dark' | 'light';
+type FontScale = 'normal' | 'large' | 'xlarge';
+type LegSide = 'izquierda' | 'derecha' | 'bilateral';
+type PainZone = 'ninguna' | 'posteromedial_difuso' | 'focal_puntual' | 'muscular_general';
+
+interface RunnerProfile {
+  name: string;
+  age: number;
+  sex: 'femenino' | 'masculino';
+  weightKg: number;
+  heightCm: number;
+  footType: 'desconocido' | 'neutra' | 'pronador' | 'supinador';
+  experience: '<3m' | '3-6m' | '6-12m' | '>12m';
+  weeklyKm: number;
+  priorInjury: 'no' | 'si';
+  cadencePpm: number;
+}
+
+interface TrainingSession {
+  id?: number;
+  date: string;
+  distanceKm: number;
+  durationMin: number;
+  rpe: number;
+  eva: number;
+  legSide: LegSide;
+  painLocation: PainZone;
+  painAtRest: boolean;
+}
+
+interface UserRecord {
+  email: string;
+  password: string;
+  consentAccepted: boolean;
+  consentDate: string;
+  profile: RunnerProfile | null;
+  sessions: TrainingSession[];
+  quizScores: { pre: number | null; post: number | null };
+  warmupChecks: number[];
+  recoveryTasks: Record<string, boolean>;
+}
+
+interface BiometricsSummary {
+  bmi: number;
+  acwr: number;
+  acwrStatus: string;
+  acwrColor: string;
+  acuteKm: number;
+  chronicKm: number;
+  consecutivePainAlert: boolean;
+  redFlagActive: boolean;
+  lastSession: TrainingSession | undefined;
+  avgRpe: number;
+  riskLevel: string;
+  riskColor: string;
+  loadFactor: number;
+  reasons: string[];
+}
+
+interface ExerciseItem {
+  id: number;
+  phase: 'Fortalecimiento' | 'Estiramiento' | 'Propiocepción';
+  title: string;
+  baseReps: number;
+  sets: number;
+  isTime?: boolean;
+  level: string;
+  img: string;
+  timer: { s: number; label: string };
+  steps: string[];
+  tip: string;
+  doseLabel?: string;
+}
+
+const cssVars = (vars: Record<string, string | number>): React.CSSProperties =>
+  vars as React.CSSProperties;
+
+const clampNum = (v: unknown, min: number, max: number, fallback: number): number => {
   const n = Number(v);
   if (!Number.isFinite(n)) return fallback;
   return Math.min(max, Math.max(min, n));
 };
 
-const PAIN_ZONE_LABELS = {
+const PAIN_ZONE_LABELS: Record<PainZone, string> = {
   ninguna: 'Sin dolor',
   posteromedial_difuso: 'Borde interno bajo de la espinilla (difuso > 5 cm)',
   focal_puntual: 'Punto óseo exacto y punzante (< 2 cm)',
   muscular_general: 'Músculo de la pantorrilla (parte posterior)'
 };
 
-const LEG_SIDE_LABELS = {
+const LEG_SIDE_LABELS: Record<LegSide, string> = {
   izquierda: 'Pierna izquierda',
   derecha: 'Pierna derecha',
   bilateral: 'Ambas piernas (bilateral)'
 };
 
-const sanitizeProfile = (p) => ({
+const sanitizeProfile = (p: Partial<RunnerProfile> | null | undefined): RunnerProfile => ({
   name: String(p?.name || 'Corredor').trim().slice(0, 120) || 'Corredor',
   age: Math.round(clampNum(p?.age, 14, 90, 21)),
   sex: p?.sex === 'masculino' ? 'masculino' : 'femenino',
   weightKg: +clampNum(p?.weightKg, 30, 220, 65).toFixed(1),
   heightCm: Math.round(clampNum(p?.heightCm, 120, 230, 170)),
-  footType: ['desconocido', 'neutra', 'pronador', 'supinador'].includes(p?.footType)
-    ? p.footType
+  footType: ['desconocido', 'neutra', 'pronador', 'supinador'].includes(String(p?.footType))
+    ? (p!.footType as RunnerProfile['footType'])
     : 'desconocido',
-  experience: ['<3m', '3-6m', '6-12m', '>12m'].includes(p?.experience) ? p.experience : '<3m',
+  experience: ['<3m', '3-6m', '6-12m', '>12m'].includes(String(p?.experience))
+    ? (p!.experience as RunnerProfile['experience'])
+    : '<3m',
   weeklyKm: +clampNum(p?.weeklyKm, 1, 200, 10).toFixed(1),
   priorInjury: p?.priorInjury === 'si' ? 'si' : 'no',
   cadencePpm: Math.round(clampNum(p?.cadencePpm, 130, 220, 164))
 });
 
-const sanitizeSession = (s) => {
+const sanitizeSession = (s: Partial<TrainingSession>): TrainingSession => {
   const dateStr = typeof s?.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s.date)
     ? s.date
     : new Date().toISOString().split('T')[0];
   const evaVal = Math.round(clampNum(s?.eva, 0, 10, 0));
-  const validZones = ['ninguna', 'posteromedial_difuso', 'focal_puntual', 'muscular_general'];
-  const validSides = ['izquierda', 'derecha', 'bilateral'];
+  const validZones: PainZone[] = ['ninguna', 'posteromedial_difuso', 'focal_puntual', 'muscular_general'];
+  const validSides: LegSide[] = ['izquierda', 'derecha', 'bilateral'];
 
   return {
     date: dateStr,
@@ -62,19 +142,19 @@ const sanitizeSession = (s) => {
     eva: evaVal,
     legSide: evaVal === 0
       ? 'izquierda'
-      : (validSides.includes(s?.legSide) ? s.legSide : 'izquierda'),
+      : (validSides.includes(s?.legSide as LegSide) ? (s.legSide as LegSide) : 'izquierda'),
     painLocation: evaVal === 0
       ? 'ninguna'
-      : (validZones.includes(s?.painLocation) ? s.painLocation : 'posteromedial_difuso'),
+      : (validZones.includes(s?.painLocation as PainZone) ? (s.painLocation as PainZone) : 'posteromedial_difuso'),
     painAtRest: evaVal > 0 ? Boolean(s?.painAtRest) : false
   };
 };
 
-function useLocalStorage(key, initialValue) {
-  const [value, setValue] = useState(() => {
+function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [value, setValue] = useState<T>(() => {
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      return item ? (JSON.parse(item) as T) : initialValue;
     } catch {
       return initialValue;
     }
@@ -94,7 +174,7 @@ function useLocalStorage(key, initialValue) {
 // ============================================================================
 // GLOSARIO INTERACTIVO EN LENGUAJE CERCANO (JÓVENES 18–25 AÑOS)
 // ============================================================================
-const GLOSARIO_DATA = {
+const GLOSARIO_DATA: Record<string, { titulo: string; resumen: string; ejemplo: string }> = {
   SETM: {
     titulo: 'SETM (Dolor en la espinilla al correr)',
     resumen: 'Irritación por sobrecarga en el borde interno y bajo de la tibia. Pasa cuando subes kilómetros o ritmo más rápido de lo que tu hueso puede adaptarse.',
@@ -132,7 +212,7 @@ const GLOSARIO_DATA = {
   }
 };
 
-function GlosarioTerm({ term, children }) {
+function GlosarioTerm({ term, children }: { term: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const info = GLOSARIO_DATA[term];
   if (!info) return <span>{children}</span>;
@@ -215,10 +295,10 @@ function GlosarioTerm({ term, children }) {
 // ============================================================================
 // CONVERSORES DE UNIDADES Y CONSTANTES CLÍNICAS / BIOMECÁNICAS
 // ============================================================================
-const fmtDist = (km, unit) =>
+const fmtDist = (km: number, unit: UnitSystem) =>
   unit === 'metric' ? `${Number(km).toFixed(1)} km` : `${(Number(km) * 0.621371).toFixed(1)} mi`;
 
-const distVal = (km, unit) =>
+const distVal = (km: number, unit: UnitSystem) =>
   unit === 'metric' ? Number(km) : +(Number(km) * 0.621371).toFixed(1);
 
 const TABS = [
@@ -228,7 +308,9 @@ const TABS = [
   { id: 'prevencion', label: 'Prevenir', Icon: ShieldCheck },
   { id: 'ejercicios', label: 'Ejercicios', Icon: Dumbbell },
   { id: 'recuperacion', label: 'Plan 8S', Icon: HeartPulse },
-];
+] as const;
+
+type TabId = (typeof TABS)[number]['id'];
 
 const PAIN_LEVELS = [
   { value: 0, label: 'Sin molestia', c: '#34c759' },
@@ -238,12 +320,12 @@ const PAIN_LEVELS = [
   { value: 10, label: 'Dolor severo', c: '#ff2e55' },
 ];
 
-const getPainInfo = (val) =>
+const getPainInfo = (val: number) =>
   PAIN_LEVELS.reduce((prev, curr) =>
     Math.abs(curr.value - val) < Math.abs(prev.value - val) ? curr : prev
   );
 
-const BORG_LABELS = {
+const BORG_LABELS: Record<number, string> = {
   0: 'Reposo absoluto',
   1: 'Muy muy suave',
   2: 'Suave (puedes hablar sin esfuerzo)',
@@ -387,7 +469,7 @@ const WARMUP = [
 // ============================================================================
 // EJERCICIOS NEUROMUSCULARES PREVENTIVOS (TRAZADOS A BECKER 2018 Y MARQUES 2025)
 // ============================================================================
-const EXERCISES = [
+const EXERCISES: ExerciseItem[] = [
   {
     id: 1,
     phase: 'Fortalecimiento',
@@ -395,7 +477,7 @@ const EXERCISES = [
     baseReps: 15,
     sets: 3,
     level: 'Esencial',
-    img: '/assets/ex1-talones-NEeXVCxD.jpg',
+    img: '/src/assets/images/ex1_eccentric_calf_raises_1794946906083.jpg',
     timer: { s: 45, label: 'Descanso entre series' },
     steps: [
       'Apoya la punta de los pies en un escalón con las rodillas ligeramente dobladas (25°–30°).',
@@ -412,7 +494,7 @@ const EXERCISES = [
     baseReps: 10,
     sets: 3,
     level: 'Esencial',
-    img: '/assets/ex2-banda-CEppt7e-.jpg',
+    img: '/src/assets/images/ex2_band_dorsiflexion_1794946906660.jpg',
     timer: { s: 5, label: 'Sostener contracción' },
     steps: [
       'Sentado o de pie descalzo, apoya toda la planta en el suelo.',
@@ -429,7 +511,7 @@ const EXERCISES = [
     baseReps: 12,
     sets: 3,
     level: 'Esencial',
-    img: '/assets/ejercicios-atleta-Sq0ze4a5.jpg',
+    img: '/src/assets/images/ex6_lateral_plyo_hops_1794946908576.jpg',
     timer: { s: 45, label: 'Descanso entre series' },
     steps: [
       'Acuéstate de lado con el cuerpo recto o usa una banda elástica sobre las rodillas.',
@@ -447,7 +529,7 @@ const EXERCISES = [
     sets: 3,
     isTime: true,
     level: 'Básico',
-    img: '/assets/ex3-estiramiento-BQlpL-mO.jpg',
+    img: '/src/assets/images/ex3_wall_soleus_stretch_1794946906267.jpg',
     timer: { s: 30, label: 'Tiempo de estiramiento' },
     steps: [
       'Ponte frente a una pared dando un paso corto hacia atrás.',
@@ -465,7 +547,7 @@ const EXERCISES = [
     sets: 2,
     isTime: true,
     level: 'Básico',
-    img: '/assets/ex4-rodillo-CCWq0QBt.jpg',
+    img: '/src/assets/images/ex4_foam_roller_calf_1794946907963.jpg',
     timer: { s: 40, label: 'Tiempo por pierna' },
     steps: [
       'Apoya la parte carnosa de la pantorrilla sobre un rodillo de espuma.',
@@ -483,7 +565,7 @@ const EXERCISES = [
     sets: 3,
     isTime: true,
     level: 'Intermedio',
-    img: '/assets/ex5-equilibrio-Dm1j_pE6.jpg',
+    img: '/src/assets/images/ex5_single_leg_balance_1794946908033.jpg',
     timer: { s: 30, label: 'Equilibrio por pie' },
     steps: [
       'Párate sobre un solo pie con la rodilla apenas flexionada (15°).',
@@ -548,8 +630,8 @@ const RED_FLAGS = [
 // ============================================================================
 // GENERADOR DE 4 ESCENARIOS SIMULADOS PARA JUICIO DE EXPERTOS (CAPÍTULO IV)
 // ============================================================================
-const buildDemoScenarios = () => {
-  const daysAgo = (n) => {
+const buildDemoScenarios = (): Record<string, UserRecord> => {
+  const daysAgo = (n: number) => {
     const d = new Date();
     d.setDate(d.getDate() - n);
     return d.toISOString().split('T')[0];
@@ -672,7 +754,7 @@ const buildDemoScenarios = () => {
   };
 };
 
-function AppIconMark({ size = 28 }) {
+function AppIconMark({ size = 28 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 128 128" fill="none" aria-hidden="true">
       <defs>
@@ -707,30 +789,30 @@ function AppIconMark({ size = 28 }) {
 // COMPONENTE PRINCIPAL
 // ============================================================================
 export default function App() {
-  const [usersDb, setUsersDb] = useLocalStorage('tesis_users_db', {});
-  const [currentEmail, setCurrentEmail] = useLocalStorage('tesis_current_user', null);
-  const [unit, setUnit] = useLocalStorage('tesis_unit_system', 'metric');
-  const [fontSize, setFontSize] = useLocalStorage('tesis_font_size', 'normal');
-  const [theme, setTheme] = useLocalStorage('tesis_theme', 'dark');
+  const [usersDb, setUsersDb] = useLocalStorage<Record<string, UserRecord>>('tesis_users_db', {});
+  const [currentEmail, setCurrentEmail] = useLocalStorage<string | null>('tesis_current_user', null);
+  const [unit, setUnit] = useLocalStorage<UnitSystem>('tesis_unit_system', 'metric');
+  const [fontSize, setFontSize] = useLocalStorage<FontScale>('tesis_font_size', 'normal');
+  const [theme, setTheme] = useLocalStorage<ThemeMode>('tesis_theme', 'dark');
 
-  const [tab, setTab] = useState('inicio');
+  const [tab, setTab] = useState<TabId>('inicio');
   const [showA11y, setShowA11y] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showClinicalReport, setShowClinicalReport] = useState(false);
-  const [activeEx, setActiveEx] = useState(null);
+  const [activeEx, setActiveEx] = useState<ExerciseItem | null>(null);
   const [scrolled, setScrolled] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const currentUser = currentEmail ? usersDb[currentEmail] : null;
 
-  const notify = (msg) => {
+  const notify = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 2600);
   };
 
-  const updateCurrentUser = (updater) => {
+  const updateCurrentUser = (updater: Partial<UserRecord> | ((u: UserRecord) => UserRecord)) => {
     if (!currentEmail) return;
     setUsersDb((prev) => {
       const existing = prev[currentEmail];
@@ -741,7 +823,7 @@ export default function App() {
   };
 
   const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
+    const next: ThemeMode = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
     notify(`Tema ${next === 'dark' ? 'Oscuro' : 'Claro'} activado`);
   };
@@ -808,14 +890,14 @@ export default function App() {
           }));
           setCurrentEmail(chosen.email);
           setTab('inicio');
-          notify(`Cargado: ${chosen.profile.name}`);
+          notify(`Cargado: ${chosen.profile?.name}`);
         }}
       />
     );
   }
 
   // --- MOTOR BIOMÉDICO DE ESTRATIFICACIÓN Y SEGURIDAD CLÍNICA ---
-  const calculateBiometrics = (user) => {
+  const calculateBiometrics = (user: UserRecord): BiometricsSummary | null => {
     const p = user.profile;
     if (!p) return null;
 
@@ -829,24 +911,24 @@ export default function App() {
     let chronicKm = Math.max(1, p.weeklyKm);
 
     if (sortedSessions.length > 0) {
-      const refDate = new Date(`${sortedSessions[sortedSessions.length - 1].date}T12:00:00`);
+      const refDate = new Date(`${sortedSessions[sortedSessions.length - 1].date}T12:00:00`).getTime();
       const msDay = 86400000;
 
       const last7 = sortedSessions.filter((s) => {
-        const d = new Date(`${s.date}T12:00:00`);
+        const d = new Date(`${s.date}T12:00:00`).getTime();
         const diffDays = (refDate - d) / msDay;
         return diffDays >= 0 && diffDays < 7;
       });
 
       const last28 = sortedSessions.filter((s) => {
-        const d = new Date(`${s.date}T12:00:00`);
+        const d = new Date(`${s.date}T12:00:00`).getTime();
         const diffDays = (refDate - d) / msDay;
         return diffDays >= 0 && diffDays < 28;
       });
 
       acuteKm = +last7.reduce((acc, s) => acc + Number(s.distanceKm || 0), 0).toFixed(1);
 
-      const earliestDate = new Date(`${sortedSessions[0].date}T12:00:00`);
+      const earliestDate = new Date(`${sortedSessions[0].date}T12:00:00`).getTime();
       const spanDays = Math.max(1, (refDate - earliestDate) / msDay + 1);
 
       if (spanDays >= 21) {
@@ -881,9 +963,9 @@ export default function App() {
     const lastTwo = sortedSessions.slice(-2);
     const lastSession = sortedSessions[sortedSessions.length - 1];
     const consecutivePainAlert = lastTwo.length === 2 && lastTwo.every((s) => s.eva >= 4);
-    const severeSinglePain = lastSession && lastSession.eva >= 6;
-    const focalBonePain = lastSession && lastSession.eva > 0 && lastSession.painLocation === 'focal_puntual';
-    const restPainAlert = lastSession && lastSession.eva > 0 && Boolean(lastSession.painAtRest);
+    const severeSinglePain = Boolean(lastSession && lastSession.eva >= 6);
+    const focalBonePain = Boolean(lastSession && lastSession.eva > 0 && lastSession.painLocation === 'focal_puntual');
+    const restPainAlert = Boolean(lastSession && lastSession.eva > 0 && lastSession.painAtRest);
 
     const redFlagActive = Boolean(
       consecutivePainAlert || severeSinglePain || focalBonePain || restPainAlert
@@ -895,7 +977,7 @@ export default function App() {
       : 0;
 
     // Estratificación heurística explicable
-    const reasons = [];
+    const reasons: string[] = [];
     let riskScore = 0;
 
     if (bmi >= 25) {
@@ -952,7 +1034,7 @@ export default function App() {
         reasons.unshift('BANDERA ROJA: Dolor en la espinilla que persiste en reposo o al caminar. Requiere valoración profesional.');
       } else if (consecutivePainAlert) {
         reasons.unshift('BANDERA ROJA: Dolor en la espinilla EVA ≥ 4 en dos entrenamientos seguidos.');
-      } else if (severeSinglePain) {
+      } else if (severeSinglePain && lastSession) {
         reasons.unshift(`BANDERA ROJA: Dolor intenso reportado (EVA ${lastSession.eva}/10).`);
       }
     } else if (riskScore >= 5.5) {
@@ -987,9 +1069,9 @@ export default function App() {
     };
   };
 
-  const bio = currentUser ? calculateBiometrics(currentUser) : null;
+  const bio = calculateBiometrics(currentUser);
 
-  if (!currentUser.profile || editingProfile) {
+  if (!currentUser.profile || editingProfile || !bio) {
     return (
       <PatientOnboarding
         initialData={currentUser.profile}
@@ -1004,13 +1086,13 @@ export default function App() {
           setEditingProfile(false);
           notify('Perfil biométrico calibrado');
         }}
-        onCancel={currentUser.profile ? () => setEditingProfile(false) : null}
+        onCancel={currentUser.profile ? () => setEditingProfile(false) : undefined}
       />
     );
   }
 
   const handleExportCSV = () => {
-    const p = currentUser.profile;
+    const p = currentUser.profile!;
     const headers = [
       'Correo', 'Nombre', 'Edad', 'Sexo', 'Peso_kg', 'Talla_cm', 'IMC',
       'Pisada', 'Experiencia_Running', 'Cadencia_ppm', 'Lesion_Previa',
@@ -1019,8 +1101,8 @@ export default function App() {
     ];
     const pre = currentUser.quizScores?.pre ?? '';
     const post = currentUser.quizScores?.post ?? '';
-    const delta = (pre !== '' && post !== '' && pre > 0)
-      ? Math.round(((post - pre) / pre) * 100)
+    const delta = (pre !== '' && post !== '' && Number(pre) > 0)
+      ? Math.round(((Number(post) - Number(pre)) / Number(pre)) * 100)
       : '';
 
     const row = [
@@ -1063,6 +1145,7 @@ export default function App() {
   };
 
   const confirmDeleteAccount = () => {
+    if (!currentEmail) return;
     setUsersDb((prev) => {
       const copy = { ...prev };
       delete copy[currentEmail];
@@ -1146,7 +1229,7 @@ export default function App() {
             <div className="card stack" style={{ gap: '12px' }}>
               <div>
                 <div className="eyebrow" style={{ marginBottom: '6px' }}>Apariencia</div>
-                <div className="seg" style={{ '--n': 2 }}>
+                <div className="seg" style={cssVars({ '--n': 2 })}>
                   <div
                     className="seg-pill"
                     style={{ transform: `translateX(${theme === 'dark' ? 0 : 100}%)` }}
@@ -1170,7 +1253,7 @@ export default function App() {
 
               <div>
                 <div className="eyebrow" style={{ marginBottom: '6px' }}>Unidades de medida</div>
-                <div className="seg" style={{ '--n': 2 }}>
+                <div className="seg" style={cssVars({ '--n': 2 })}>
                   <div
                     className="seg-pill"
                     style={{ transform: `translateX(${unit === 'metric' ? 0 : 100}%)` }}
@@ -1200,18 +1283,18 @@ export default function App() {
 
               <div>
                 <div className="eyebrow" style={{ marginBottom: '6px' }}>Tamaño de texto</div>
-                <div className="seg" style={{ '--n': 3 }}>
+                <div className="seg" style={cssVars({ '--n': 3 })}>
                   <div
                     className="seg-pill"
                     style={{
                       transform: `translateX(${fontSize === 'normal' ? 0 : fontSize === 'large' ? 100 : 200}%)`
                     }}
                   />
-                  {[
+                  {([
                     { id: 'normal', label: 'Normal' },
                     { id: 'large', label: 'Grande' },
                     { id: 'xlarge', label: 'Extra' }
-                  ].map((opt) => (
+                  ] as const).map((opt) => (
                     <button
                       type="button"
                       key={opt.id}
@@ -1322,7 +1405,7 @@ export default function App() {
             onSaveCadence={(newPpm) => {
               updateCurrentUser((u) => ({
                 ...u,
-                profile: { ...u.profile, cadencePpm: newPpm }
+                profile: u.profile ? { ...u.profile, cadencePpm: newPpm } : null
               }));
               notify(`Cadencia actualizada: ${newPpm} ppm`);
             }}
@@ -1391,7 +1474,7 @@ export default function App() {
           unit={unit}
           onClose={() => setShowClinicalReport(false)}
           onCopyText={() => {
-            const p = currentUser.profile;
+            const p = currentUser.profile!;
             const ls = bio.lastSession;
             const summary = [
               `RESUMEN PREVENTIVO RUNSINDOLOR (UMB - ING. BIOMÉDICA)`,
@@ -1427,7 +1510,7 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div className="icon-tile" style={{ '--c': '#ff453a' }}>
+              <div className="icon-tile" style={cssVars({ '--c': '#ff453a' })}>
                 <Trash2 size={20} />
               </div>
               <div>
@@ -1486,15 +1569,27 @@ export default function App() {
 // ============================================================================
 // 0. PANTALLA DE AUTENTICACIÓN + SELECTOR DE 4 ESCENARIOS PARA EVALUADORES
 // ============================================================================
-function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoScenario }) {
+function AuthView({
+  theme,
+  onToggleTheme,
+  onLogin,
+  onRegister,
+  onDemoScenario
+}: {
+  theme: ThemeMode;
+  onToggleTheme: () => void;
+  onLogin: (email: string, password: string) => string | null;
+  onRegister: (email: string, password: string, consentAccepted: boolean) => string | null;
+  onDemoScenario: (key: string) => void;
+}) {
   const [isRegister, setIsRegister] = useState(false);
   const [showDemoMenu, setShowDemoMenu] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [consent, setConsent] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!email.trim() || !password.trim()) {
@@ -1551,9 +1646,10 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoScenario })
 
       <div className="hero-card" style={{ minHeight: '210px', marginBottom: '18px', justifyContent: 'flex-end' }}>
         <img
-          src="/assets/Inicio.jpg"
+          src="/src/assets/images/hero_runner_sunrise_1794946903897.jpg"
           alt="Running preventivo"
           className="hero-bg"
+          referrerPolicy="no-referrer"
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
         <div className="hero-overlay" />
@@ -1574,7 +1670,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoScenario })
         </div>
       </div>
 
-      <div className="seg" style={{ '--n': 2, marginBottom: '14px' }}>
+      <div className="seg" style={cssVars({ '--n': 2, marginBottom: '14px' })}>
         <div className="seg-pill" style={{ transform: `translateX(${isRegister ? 100 : 0}%)` }} />
         <button type="button" className={`seg-btn ${!isRegister ? 'on' : ''}`} onClick={() => { setIsRegister(false); setError(null); }}>
           Iniciar Sesión
@@ -1632,7 +1728,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoScenario })
         )}
 
         {error && (
-          <div style={{ padding: '10px 12px', borderRadius: '12px', background: '#ff453a22', color: '#ff453a', fontSize: '13px', fontWeight: '600' }}>
+          <div style={{ padding: '10px 12px', borderRadius: '12px', background: '#ff453a22', color: '#ff453a', fontSize: '13px', fontWeight: 600 }}>
             {error}
           </div>
         )}
@@ -1719,22 +1815,41 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoScenario })
 // ============================================================================
 // 1. FORMULARIO BIOMÉTRICO DEL CORREDOR
 // ============================================================================
-function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, onToggleTheme, onSave, onCancel }) {
+function PatientOnboarding({
+  initialData,
+  requireConsent,
+  unit,
+  setUnit,
+  theme,
+  onToggleTheme,
+  onSave,
+  onCancel
+}: {
+  initialData: RunnerProfile | null;
+  requireConsent: boolean;
+  unit: UnitSystem;
+  setUnit: (u: UnitSystem) => void;
+  theme: ThemeMode;
+  onToggleTheme: () => void;
+  onSave: (data: RunnerProfile) => void;
+  onCancel?: () => void;
+}) {
   const [name, setName] = useState(initialData?.name || '');
-  const [age, setAge] = useState(initialData?.age || 21);
-  const [sex, setSex] = useState(initialData?.sex || 'femenino');
-  const [weightKg, setWeightKg] = useState(initialData?.weightKg || 65);
-  const [heightCm, setHeightCm] = useState(initialData?.heightCm || 170);
-  const [footType, setFootType] = useState(initialData?.footType || 'desconocido');
-  const [experience, setExperience] = useState(initialData?.experience || '<3m');
-  const [weeklyKm, setWeeklyKm] = useState(initialData?.weeklyKm || 10);
-  const [priorInjury, setPriorInjury] = useState(initialData?.priorInjury || 'no');
-  const [cadencePpm, setCadencePpm] = useState(initialData?.cadencePpm || 164);
+  const [age, setAge] = useState<number | string>(initialData?.age || 21);
+  const [sex, setSex] = useState<RunnerProfile['sex']>(initialData?.sex || 'femenino');
+  const [weightKg, setWeightKg] = useState<number>(initialData?.weightKg || 65);
+  const [heightCm, setHeightCm] = useState<number>(initialData?.heightCm || 170);
+  const [footType, setFootType] = useState<RunnerProfile['footType']>(initialData?.footType || 'desconocido');
+  const [experience, setExperience] = useState<RunnerProfile['experience']>(initialData?.experience || '<3m');
+  const [weeklyKm, setWeeklyKm] = useState<number>(initialData?.weeklyKm || 10);
+  const [priorInjury, setPriorInjury] = useState<RunnerProfile['priorInjury']>(initialData?.priorInjury || 'no');
+  const [cadencePpm, setCadencePpm] = useState<number>(initialData?.cadencePpm || 164);
   const [consentChecked, setConsentChecked] = useState(!requireConsent);
 
   const liveBmi = heightCm > 0 ? +(weightKg / ((heightCm / 100) ** 2)).toFixed(1) : 0;
+  const ageNum = Number(age);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     if (requireConsent && !consentChecked) return;
@@ -1768,6 +1883,7 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
             className="btn-soft tap"
             style={{ minHeight: '34px', width: '34px', padding: 0, display: 'grid', placeItems: 'center' }}
             onClick={onToggleTheme}
+            aria-label="Cambiar tema"
           >
             {theme === 'dark' ? <Sun size={15} color="#ffd60a" /> : <Moon size={15} />}
           </button>
@@ -1817,14 +1933,14 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
 
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="eyebrow">Sexo biológico</label>
-              <select className="input-field" value={sex} onChange={(e) => setSex(e.target.value)}>
+              <select className="input-field" value={sex} onChange={(e) => setSex(e.target.value as RunnerProfile['sex'])}>
                 <option value="femenino">Femenino</option>
                 <option value="masculino">Masculino</option>
               </select>
             </div>
           </div>
 
-          {(age < 18 || age > 25) && (
+          {(ageNum < 18 || ageNum > 25) && (
             <div style={{ padding: '8px 10px', borderRadius: '10px', background: '#f59e0b1f', color: '#f59e0b', fontSize: '12px' }}>
               Nota del estudio UMB: la población objetivo principal son jóvenes principiantes entre 18 y 25 años, pero puedes usar la guía igualmente.
             </div>
@@ -1876,7 +1992,7 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
           <div className="grid-2">
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="eyebrow">Tiempo corriendo</label>
-              <select className="input-field" value={experience} onChange={(e) => setExperience(e.target.value)}>
+              <select className="input-field" value={experience} onChange={(e) => setExperience(e.target.value as RunnerProfile['experience'])}>
                 <option value="<3m">Menos de 3 meses</option>
                 <option value="3-6m">3 a 6 meses</option>
                 <option value="6-12m">6 a 12 meses</option>
@@ -1907,7 +2023,7 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
           <div className="grid-2">
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="eyebrow">Tipo de pisada</label>
-              <select className="input-field" value={footType} onChange={(e) => setFootType(e.target.value)}>
+              <select className="input-field" value={footType} onChange={(e) => setFootType(e.target.value as RunnerProfile['footType'])}>
                 <option value="desconocido">No lo sé</option>
                 <option value="neutra">Neutra</option>
                 <option value="pronador">Pronadora (arco baja)</option>
@@ -1917,7 +2033,7 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
 
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="eyebrow">¿Lesión previa?</label>
-              <select className="input-field" value={priorInjury} onChange={(e) => setPriorInjury(e.target.value)}>
+              <select className="input-field" value={priorInjury} onChange={(e) => setPriorInjury(e.target.value as RunnerProfile['priorInjury'])}>
                 <option value="no">No</option>
                 <option value="si">Sí, en piernas/pies</option>
               </select>
@@ -1968,7 +2084,21 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
 // ============================================================================
 // 2. PANEL PRINCIPAL (ANILLOS ACWR + DIVULGACIÓN PROGRESIVA + GRÁFICAS SVG)
 // ============================================================================
-function DashboardView({ user, bio, unit, onOpenSession, onOpenClinicalReport, onGoTab }) {
+function DashboardView({
+  user,
+  bio,
+  unit,
+  onOpenSession,
+  onOpenClinicalReport,
+  onGoTab
+}: {
+  user: UserRecord;
+  bio: BiometricsSummary;
+  unit: UnitSystem;
+  onOpenSession: () => void;
+  onOpenClinicalReport: () => void;
+  onGoTab: (tab: TabId) => void;
+}) {
   const [showReasons, setShowReasons] = useState(false);
 
   const volumeRatio = Math.min(1, Math.max(0.08, bio.acuteKm / Math.max(1, bio.chronicKm)));
@@ -1987,12 +2117,14 @@ function DashboardView({ user, bio, unit, onOpenSession, onOpenClinicalReport, o
     month: 'short'
   });
 
+  const p = user.profile!;
+
   return (
     <div className="stack">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '12px', padding: '2px 2px 4px' }}>
         <div>
           <div className="eyebrow" style={{ textTransform: 'capitalize' }}>
-            {todayLabel} · {user.profile.name.split(' ')[0]}
+            {todayLabel} · {p.name.split(' ')[0]}
           </div>
           <h1 className="display" style={{ marginTop: '2px' }}>Resumen</h1>
         </div>
@@ -2028,7 +2160,7 @@ function DashboardView({ user, bio, unit, onOpenSession, onOpenClinicalReport, o
 
       <div className="desktop-split">
         <div className="stack">
-          {/* TARJETA PRINCIPAL DE ANILLOS ACWR */}
+          {/* TARJETA PRINCIPAL CON ANILLOS ACWR Y GLOSARIO */}
           <div className="card">
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               <div style={{ position: 'relative', width: '92px', height: '92px', flexShrink: 0 }}>
@@ -2174,8 +2306,8 @@ function DashboardView({ user, bio, unit, onOpenSession, onOpenClinicalReport, o
                 </span>
                 <ChevronRight size={16} color="var(--ink-3)" />
               </div>
-              <div className="h2 tnum">{user.profile.cadencePpm || 164} <span className="small muted" style={{ fontWeight: 500 }}>ppm</span></div>
-              <div className="small muted tnum">Meta +5%: {Math.round((user.profile.cadencePpm || 164) * 1.05)} ppm</div>
+              <div className="h2 tnum">{p.cadencePpm || 164} <span className="small muted" style={{ fontWeight: 500 }}>ppm</span></div>
+              <div className="small muted tnum">Meta +5%: {Math.round((p.cadencePpm || 164) * 1.05)} ppm</div>
             </button>
 
             <button
@@ -2200,7 +2332,7 @@ function DashboardView({ user, bio, unit, onOpenSession, onOpenClinicalReport, o
           <div className="ios-group">
             <button type="button" className="ios-row" onClick={() => onGoTab('quees')}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div className="icon-tile" style={{ '--c': '#ff9f0a' }}>
+                <div className="icon-tile" style={cssVars({ '--c': '#ff9f0a' })}>
                   <ClipboardCheck size={17} />
                 </div>
                 <div>
@@ -2284,7 +2416,21 @@ function DashboardView({ user, bio, unit, onOpenSession, onOpenClinicalReport, o
 // ============================================================================
 // COMPONENTE DE GRÁFICAS SVG: CARGA + ACWR Y TENDENCIA EVA / BORG
 // ============================================================================
-function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, unit }) {
+function TrendChartsCard({
+  sessions,
+  chronicKm,
+  acwr,
+  acwrColor,
+  acwrStatus,
+  unit
+}: {
+  sessions: TrainingSession[];
+  chronicKm: number;
+  acwr: number;
+  acwrColor: string;
+  acwrStatus: string;
+  unit: UnitSystem;
+}) {
   const [chartTab, setChartTab] = useState(0);
   const recent = sessions.slice(-7);
   const unitLabel = unit === 'metric' ? 'km' : 'mi';
@@ -2302,7 +2448,7 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
         <span className="eyebrow">Regla máx. +10 %</span>
       </div>
 
-      <div className="seg" style={{ '--n': 2 }}>
+      <div className="seg" style={cssVars({ '--n': 2 })}>
         <div className="seg-pill" style={{ transform: `translateX(${chartTab * 100}%)` }} />
         <button type="button" className={`seg-btn ${chartTab === 0 ? 'on' : ''}`} onClick={() => setChartTab(0)}>
           Carga y ACWR
@@ -2462,12 +2608,12 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
                 const plotW = svgW - padL - padR;
                 const plotH = svgH - padTop - padBot;
 
-                const getX = (i) =>
+                const getX = (i: number) =>
                   recent.length === 1
                     ? padL + plotW / 2
                     : padL + (i / (recent.length - 1)) * plotW;
 
-                const getY = (val) => padTop + plotH * (1 - val / 10);
+                const getY = (val: number) => padTop + plotH * (1 - val / 10);
 
                 const evaPoints = recent.map((s, i) => `${getX(i)},${getY(s.eva)}`).join(' ');
                 const rpePoints = recent.map((s, i) => `${getX(i)},${getY(s.rpe)}`).join(' ');
@@ -2566,8 +2712,28 @@ function TrendChartsCard({ sessions, chronicKm, acwr, acwrColor, acwrStatus, uni
 // ============================================================================
 // MAPA ANATÓMICO INTERACTIVO Y ANIMADO DE TAMIZAJE SEMIOLÓGICO DIFERENCIAL
 // ============================================================================
-function AnatomicalLegMap({ legSide, setLegSide, painLocation, setPainLocation, painAtRest, setPainAtRest }) {
-  const zones = [
+function AnatomicalLegMap({
+  legSide,
+  setLegSide,
+  painLocation,
+  setPainLocation,
+  painAtRest,
+  setPainAtRest
+}: {
+  legSide: LegSide;
+  setLegSide: (s: LegSide) => void;
+  painLocation: PainZone;
+  setPainLocation: (z: PainZone) => void;
+  painAtRest: boolean;
+  setPainAtRest: (v: boolean) => void;
+}) {
+  const zones: Array<{
+    id: PainZone;
+    shortTitle: string;
+    clinicalTag: string;
+    desc: string;
+    color: string;
+  }> = [
     {
       id: 'posteromedial_difuso',
       shortTitle: 'Borde interno difuso (> 5 cm)',
@@ -2639,18 +2805,18 @@ function AnatomicalLegMap({ legSide, setLegSide, painLocation, setPainLocation, 
         <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>
           1. Extremidad afectada
         </label>
-        <div className="seg" style={{ '--n': 3 }}>
+        <div className="seg" style={cssVars({ '--n': 3 })}>
           <div
             className="seg-pill"
             style={{
               transform: `translateX(${legSide === 'izquierda' ? 0 : legSide === 'derecha' ? 100 : 200}%)`
             }}
           />
-          {[
+          {([
             { id: 'izquierda', label: 'Izquierda' },
             { id: 'derecha', label: 'Derecha' },
             { id: 'bilateral', label: 'Ambas' }
-          ].map((opt) => (
+          ] as const).map((opt) => (
             <button
               key={opt.id}
               type="button"
@@ -2970,21 +3136,29 @@ function AnatomicalLegMap({ legSide, setLegSide, painLocation, setPainLocation, 
 // ============================================================================
 // 8. MODAL DE REGISTRO DE SESIÓN (FECHA + EVA SEMICIRCULAR + MAPA ANATÓMICO)
 // ============================================================================
-function LogSessionModal({ unit, onClose, onSaveSession }) {
+function LogSessionModal({
+  unit,
+  onClose,
+  onSaveSession
+}: {
+  unit: UnitSystem;
+  onClose: () => void;
+  onSaveSession: (session: TrainingSession) => void;
+}) {
   const todayStr = new Date().toISOString().split('T')[0];
   const [date, setDate] = useState(todayStr);
-  const [distanceInput, setDistanceInput] = useState(4.0);
-  const [durationMin, setDurationMin] = useState(25);
+  const [distanceInput, setDistanceInput] = useState<string | number>(4.0);
+  const [durationMin, setDurationMin] = useState<string | number>(25);
   const [rpe, setRpe] = useState(4);
   const [eva, setEva] = useState(0);
-  const [legSide, setLegSide] = useState('izquierda');
-  const [painLocation, setPainLocation] = useState('posteromedial_difuso');
+  const [legSide, setLegSide] = useState<LegSide>('izquierda');
+  const [painLocation, setPainLocation] = useState<PainZone>('posteromedial_difuso');
   const [painAtRest, setPainAtRest] = useState(false);
 
   const painInfo = getPainInfo(eva);
   const needleAngle = -90 + (eva / 10) * 180;
 
-  const handleSave = (e) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     const distanceKm = unit === 'metric'
       ? Number(distanceInput)
@@ -3114,7 +3288,7 @@ function LogSessionModal({ unit, onClose, onSaveSession }) {
                     key={n}
                     type="button"
                     className={`pain-dot tnum ${eva === n ? 'on' : ''}`}
-                    style={{ '--c': info.c }}
+                    style={cssVars({ '--c': info.c })}
                     onClick={() => setEva(n)}
                   >
                     {n}
@@ -3124,7 +3298,7 @@ function LogSessionModal({ unit, onClose, onSaveSession }) {
             </div>
 
             {eva >= 4 && (
-              <div className="pain-advice" style={{ '--c': '#ff453a', color: '#ff453a', fontSize: '12px' }}>
+              <div className="pain-advice" style={cssVars({ '--c': '#ff453a', color: '#ff453a', fontSize: '12px' })}>
                 <AlertTriangle size={16} />
                 <span>Dolor ≥ 4: si se repite en 2 sesiones seguidas, activará bandera roja.</span>
               </div>
@@ -3157,8 +3331,20 @@ function LogSessionModal({ unit, onClose, onSaveSession }) {
 // ============================================================================
 // 9. MODAL DE REPORTE CLÍNICO-DEPORTIVO (INTEROPERABILIDAD / CONSULTA)
 // ============================================================================
-function ClinicalReportModal({ user, bio, unit, onClose, onCopyText }) {
-  const p = user.profile;
+function ClinicalReportModal({
+  user,
+  bio,
+  unit,
+  onClose,
+  onCopyText
+}: {
+  user: UserRecord;
+  bio: BiometricsSummary;
+  unit: UnitSystem;
+  onClose: () => void;
+  onCopyText: () => void;
+}) {
+  const p = user.profile!;
   const ls = bio.lastSession;
 
   return (
@@ -3227,7 +3413,13 @@ function ClinicalReportModal({ user, bio, unit, onClose, onCopyText }) {
 // ============================================================================
 // 3. METRÓNOMO BIOMECÁNICO DE CADENCIA + TEST RÁPIDO 15S (TAB: CADENCIA)
 // ============================================================================
-function CadenceView({ cadencePpm, onSaveCadence }) {
+function CadenceView({
+  cadencePpm,
+  onSaveCadence
+}: {
+  cadencePpm: number;
+  onSaveCadence: (ppm: number) => void;
+}) {
   const [ppm, setPpm] = useState(cadencePpm || 164);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -3235,7 +3427,7 @@ function CadenceView({ cadencePpm, onSaveCadence }) {
   const [testRunning, setTestRunning] = useState(false);
   const [testSeconds, setTestSeconds] = useState(15);
   const [stepCount15s, setStepCount15s] = useState('');
-  const audioCtxRef = useRef(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   const recommendedTarget = Math.min(195, Math.round((cadencePpm || 164) * 1.05));
   const lowCadence = (cadencePpm || 164) < 170;
@@ -3243,7 +3435,7 @@ function CadenceView({ cadencePpm, onSaveCadence }) {
   const playClick = () => {
     if (muted) return;
     try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!audioCtxRef.current) audioCtxRef.current = new AudioCtx();
       const ctx = audioCtxRef.current;
       if (ctx.state === 'suspended') ctx.resume();
@@ -3501,11 +3693,20 @@ function CadenceView({ cadencePpm, onSaveCadence }) {
 // ============================================================================
 // 4. MÓDULO EDUCATIVO DIFERENCIADO POR SEXO + GUÍA RÁPIDA / TEST PRE-POST
 // ============================================================================
-function WhatIsView({ sex, quizScores, onSaveQuiz }) {
-  const [subTab, setSubTab] = useState('guia');
-  const [openRisk, setOpenRisk] = useState(0);
-  const [quizType, setQuizType] = useState('pre');
-  const [answers, setAnswers] = useState({});
+function WhatIsView({
+  sex,
+  quizScores,
+  onSaveQuiz
+}: {
+  sex: RunnerProfile['sex'];
+  quizScores: { pre: number | null; post: number | null };
+  onSaveQuiz: (type: 'pre' | 'post', score: number) => void;
+}) {
+  const [subTab, setSubTab] = useState<'guia' | 'test'>('guia');
+  const [guideTab, setGuideTab] = useState<0 | 1 | 2>(0);
+  const [openRisk, setOpenRisk] = useState<number | null>(0);
+  const [quizType, setQuizType] = useState<'pre' | 'post'>('pre');
+  const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
 
   const isFemale = sex === 'femenino';
@@ -3561,9 +3762,10 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
     <div className="stack">
       <div className="hero-card">
         <img
-          src="/assets/que-es-fisio-DTwnd5so.jpg"
+          src="/src/assets/images/que_es_fisio_anatomy_1794946904689.jpg"
           alt="Educación preventiva SETM"
           className="hero-bg"
+          referrerPolicy="no-referrer"
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
         <div className="hero-overlay" />
@@ -3579,7 +3781,7 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
       </div>
 
       {/* SEPARACIÓN CONSERVADA: GUÍA RÁPIDA VS TEST PRE/POST */}
-      <div className="seg" style={{ '--n': 2 }}>
+      <div className="seg" style={cssVars({ '--n': 2 })}>
         <div className="seg-pill" style={{ transform: `translateX(${subTab === 'guia' ? 0 : 100}%)` }} />
         <button type="button" className={`seg-btn ${subTab === 'guia' ? 'on' : ''}`} onClick={() => setSubTab('guia')}>
           <BookOpen size={14} /> Guía Rápida
@@ -3654,59 +3856,78 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
             ))}
           </div>
 
-          <div className="section-heading"><span>¿Qué pasa dentro de tu pierna?</span></div>
-          <div className="desktop-grid-3">
-            {ANATOMY_CARDS.map(({ title, desc, c, Icon }, i) => (
-              <div key={i} className="card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '6px' }}>
-                  <div className="icon-tile" style={{ '--c': c }}>
-                    <Icon size={17} />
+          <div className="seg" style={cssVars({ '--n': 3 })}>
+            <div className="seg-pill" style={{ transform: `translateX(${guideTab * 100}%)` }} />
+            {(['Anatomía', 'Síntomas', 'Riesgos'] as const).map((lbl, idx) => (
+              <button
+                key={lbl}
+                type="button"
+                className={`seg-btn ${guideTab === idx ? 'on' : ''}`}
+                onClick={() => setGuideTab(idx as 0 | 1 | 2)}
+              >
+                {lbl}
+              </button>
+            ))}
+          </div>
+
+          {guideTab === 0 && (
+            <div className="stack">
+              {ANATOMY_CARDS.map(({ title, desc, c, Icon }, i) => (
+                <div key={i} className="card" style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                  <div className="icon-tile" style={cssVars({ '--c': c })}>
+                    <Icon size={20} />
                   </div>
-                  <h3 className="h3">{title}</h3>
+                  <div>
+                    <h3 className="h3">{title}</h3>
+                    <p className="small muted" style={{ marginTop: '4px' }}>
+                      {desc} {i === 0 && <GlosarioTerm term="PERIOSTIO">Ver periostio</GlosarioTerm>}
+                    </p>
+                  </div>
                 </div>
-                <p className="small muted">{desc}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
-          <div className="section-heading"><span>Señales tempranas para frenar a tiempo</span></div>
-          <div className="card stack" style={{ gap: '8px' }}>
-            {SYMPTOMS.map((sym, i) => (
-              <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <Check size={16} color="var(--pink)" style={{ marginTop: '2px', flexShrink: 0 }} />
-                <span className="small">{sym}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="section-heading">
-            <span>Principales factores de riesgo</span>
-            <span className="eyebrow">Toca para ver detalle</span>
-          </div>
-          <div className="stack">
-            {RISK_FACTORS.map((rf, i) => {
-              const isOpen = openRisk === i;
-              return (
-                <div key={i} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                  <button
-                    type="button"
-                    onClick={() => setOpenRisk(isOpen ? null : i)}
-                    style={{ width: '100%', padding: '13px 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left', gap: '8px' }}
-                  >
-                    <span className="h3">{rf.title}</span>
-                    <ChevronDown size={18} color="var(--ink-3)" style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
-                  </button>
-                  {isOpen && (
-                    <div className="small muted" style={{ padding: '10px 15px 14px', borderTop: '0.5px solid var(--line)' }}>
-                      {rf.detail}{' '}
-                      {i === 0 && <GlosarioTerm term="ACWR">Ver ACWR</GlosarioTerm>}
-                      {i === 2 && <GlosarioTerm term="PRONACION">Ver pronación</GlosarioTerm>}
-                    </div>
-                  )}
+          {guideTab === 1 && (
+            <div className="card stack">
+              <div className="h3">Reconocimiento de señales tempranas</div>
+              {SYMPTOMS.map((sym, i) => (
+                <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <span className="badge tnum">{i + 1}</span>
+                  <span className="small muted">
+                    {sym} {i === 3 && <GlosarioTerm term="EVA">Ver EVA</GlosarioTerm>}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {guideTab === 2 && (
+            <div className="stack">
+              {RISK_FACTORS.map((rf, i) => {
+                const isOpen = openRisk === i;
+                return (
+                  <div key={i} className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                    <button
+                      type="button"
+                      onClick={() => setOpenRisk(isOpen ? null : i)}
+                      style={{ width: '100%', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left', gap: '8px' }}
+                    >
+                      <span className="h3">{rf.title}</span>
+                      <ChevronDown size={18} color="var(--ink-3)" style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+                    </button>
+                    {isOpen && (
+                      <div className="small muted" style={{ padding: '10px 16px 14px', borderTop: '0.5px solid var(--line)' }}>
+                        {rf.detail}{' '}
+                        {i === 0 && <GlosarioTerm term="ACWR">Ver ACWR</GlosarioTerm>}
+                        {i === 2 && <GlosarioTerm term="PRONACION">Ver pronación</GlosarioTerm>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       ) : (
         <div className="stack">
@@ -3717,7 +3938,7 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
               Compara lo que sabías antes (Test Inicial) y después de usar la guía (Test Final). Meta del estudio: mejora ≥ 30 %.
             </p>
 
-            <div className="seg" style={{ '--n': 2, marginTop: '12px' }}>
+            <div className="seg" style={cssVars({ '--n': 2, marginTop: '12px' })}>
               <div className="seg-pill" style={{ transform: `translateX(${quizType === 'pre' ? 0 : 100}%)` }} />
               <button
                 type="button"
@@ -3815,8 +4036,16 @@ function WhatIsView({ sex, quizScores, onSaveQuiz }) {
 // ============================================================================
 // 5. HÁBITOS Y CALENTAMIENTO DINÁMICO (TAB: PREVENIR)
 // ============================================================================
-function PreventionView({ checked, setChecked, notify }) {
-  const toggleItem = (idx) => {
+function PreventionView({
+  checked,
+  setChecked,
+  notify
+}: {
+  checked: number[];
+  setChecked: (arr: number[]) => void;
+  notify: (msg: string) => void;
+}) {
+  const toggleItem = (idx: number) => {
     const exists = checked.includes(idx);
     const next = exists ? checked.filter((i) => i !== idx) : [...checked, idx];
     setChecked(next);
@@ -3832,9 +4061,10 @@ function PreventionView({ checked, setChecked, notify }) {
     <div className="stack">
       <div className="hero-card">
         <img
-          src="/assets/prevencion-calentamiento-CCHPQMaC.jpg"
+          src="/src/assets/images/habitos_calentamiento_hero_1795049319206.jpg"
           alt="Calentamiento deportivo"
           className="hero-bg"
+          referrerPolicy="no-referrer"
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
         <div className="hero-overlay" />
@@ -3852,7 +4082,7 @@ function PreventionView({ checked, setChecked, notify }) {
       <div className="grid-2">
         {HABITS.map(({ title, desc, Icon, c }, i) => (
           <div key={i} className="card">
-            <div className="icon-tile" style={{ '--c': c, marginBottom: '8px' }}>
+            <div className="icon-tile" style={cssVars({ '--c': c, marginBottom: '8px' })}>
               <Icon size={17} />
             </div>
             <h3 className="h3">{title}</h3>
@@ -3922,8 +4152,16 @@ function PreventionView({ checked, setChecked, notify }) {
 // ============================================================================
 // 6. RUTINA NEUROMUSCULAR CALIBRADA (BLOQUEO PREVENTIVO + MINIATURAS)
 // ============================================================================
-function ExercisesView({ bio, onOpenExercise, onOpenClinicalReport }) {
-  const [phaseFilter, setPhaseFilter] = useState('Todos');
+function ExercisesView({
+  bio,
+  onOpenExercise,
+  onOpenClinicalReport
+}: {
+  bio: BiometricsSummary;
+  onOpenExercise: (ex: ExerciseItem) => void;
+  onOpenClinicalReport: () => void;
+}) {
+  const [phaseFilter, setPhaseFilter] = useState<string>('Todos');
   const phases = ['Todos', 'Fortalecimiento', 'Estiramiento', 'Propiocepción'];
 
   if (bio.redFlagActive) {
@@ -3931,7 +4169,7 @@ function ExercisesView({ bio, onOpenExercise, onOpenClinicalReport }) {
       <div className="stack">
         <div className="card stack" style={{ borderColor: 'var(--danger)', background: 'color-mix(in srgb, var(--danger) 12%, var(--surface))' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div className="icon-tile" style={{ '--c': '#ff453a' }}>
+            <div className="icon-tile" style={cssVars({ '--c': '#ff453a' })}>
               <AlertTriangle size={20} />
             </div>
             <div>
@@ -3969,7 +4207,7 @@ function ExercisesView({ bio, onOpenExercise, onOpenClinicalReport }) {
           Dosis calibrada al <strong>{Math.round(bio.loadFactor * 100)} %</strong> según tu nivel de alerta ({bio.riskLevel}). Enfocado en sóleo, arco plantar (<GlosarioTerm term="PRONACION">pronación</GlosarioTerm>) y cadera.
         </p>
 
-        <div className="seg" style={{ '--n': 4, marginTop: '12px' }}>
+        <div className="seg" style={cssVars({ '--n': 4, marginTop: '12px' })}>
           <div
             className="seg-pill"
             style={{ transform: `translateX(${phases.indexOf(phaseFilter) * 100}%)` }}
@@ -4006,6 +4244,7 @@ function ExercisesView({ bio, onOpenExercise, onOpenClinicalReport }) {
               <img
                 src={ex.img}
                 alt={ex.title}
+                referrerPolicy="no-referrer"
                 style={{ width: '60px', height: '60px', borderRadius: '11px', objectFit: 'cover', flexShrink: 0, background: 'var(--surface-2)' }}
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
@@ -4030,7 +4269,7 @@ function ExercisesView({ bio, onOpenExercise, onOpenClinicalReport }) {
 // ============================================================================
 // 10. MODAL DE EJERCICIO CON FOTO SUPERIOR Y TEMPORIZADOR CIRCULAR SVG
 // ============================================================================
-function ExerciseModal({ ex, onClose }) {
+function ExerciseModal({ ex, onClose }: { ex: ExerciseItem; onClose: () => void }) {
   const [seconds, setSeconds] = useState(ex.timer.s);
   const [running, setRunning] = useState(false);
 
@@ -4061,6 +4300,7 @@ function ExerciseModal({ ex, onClose }) {
           <img
             src={ex.img}
             alt={ex.title}
+            referrerPolicy="no-referrer"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
@@ -4173,15 +4413,23 @@ function ExerciseModal({ ex, onClose }) {
 // ============================================================================
 // 7. PLAN PROGRESIVO DE 8 SEMANAS (PORTADA + 3 SUBPESTAÑAS + ACORDEÓN)
 // ============================================================================
-function RecoveryView({ doneTasks, setDoneTasks, notify }) {
+function RecoveryView({
+  doneTasks,
+  setDoneTasks,
+  notify
+}: {
+  doneTasks: Record<string, boolean>;
+  setDoneTasks: (obj: Record<string, boolean>) => void;
+  notify: (msg: string) => void;
+}) {
   const [subTab, setSubTab] = useState(0);
-  const [openStage, setOpenStage] = useState(0);
+  const [openStage, setOpenStage] = useState<number | null>(0);
 
   const totalTasks = PREVENTION_PLAN.reduce((acc, w) => acc + w.tasks.length, 0);
   const completedCount = Object.values(doneTasks).filter(Boolean).length;
   const pct = Math.round((completedCount / totalTasks) * 100);
 
-  const toggleTask = (sIdx, tIdx) => {
+  const toggleTask = (sIdx: number, tIdx: number) => {
     const key = `${sIdx}-${tIdx}`;
     const next = { ...doneTasks, [key]: !doneTasks[key] };
     setDoneTasks(next);
@@ -4197,9 +4445,10 @@ function RecoveryView({ doneTasks, setDoneTasks, notify }) {
     <div className="stack">
       <div className="hero-card">
         <img
-          src="/assets/recuperacion-hielo-fJVnTR5m.jpg"
+          src="/src/assets/images/recuperacion_plan_trail_1794946905391.jpg"
           alt="Progresión segura de running"
           className="hero-bg"
+          referrerPolicy="no-referrer"
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
         <div className="hero-overlay" />
@@ -4220,7 +4469,7 @@ function RecoveryView({ doneTasks, setDoneTasks, notify }) {
         </div>
       </div>
 
-      <div className="seg" style={{ '--n': 3 }}>
+      <div className="seg" style={cssVars({ '--n': 3 })}>
         <div className="seg-pill" style={{ transform: `translateX(${subTab * 100}%)` }} />
         {['Plan 8 sem', 'Banderas Rojas', 'Pautas'].map((lbl, idx) => (
           <button key={lbl} type="button" className={`seg-btn ${subTab === idx ? 'on' : ''}`} onClick={() => setSubTab(idx)}>
