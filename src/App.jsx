@@ -1117,7 +1117,7 @@ function AuthView({ theme, onToggleTheme, onLogin, onRegister, onDemoLogin }) {
           RunSinDolor
         </span>
       </div>
-      
+
       <div className="hero-card" style={{ minHeight: '220px', marginBottom: '18px', justifyContent: 'flex-end' }}>
         <img src="/assets/Inicio.jpg" alt="Running preventivo" className="hero-bg" />
         <div className="hero-overlay" />
@@ -1249,7 +1249,13 @@ function PatientOnboarding({ initialData, requireConsent, unit, setUnit, theme, 
   };
 
   return (
-    <div className="screen stagger" style={{ paddingTop: '24px', paddingBottom: '40px' }}>
+    <div
+      className="screen stagger"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 14px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 14px)'
+      }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', gap: '8px' }}>
         <span className="badge">Variables de Ingreso</span>
         <div style={{ display: 'flex', gap: '6px' }}>
